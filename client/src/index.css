@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Leaflet CSS для карт */
+@import 'leaflet/dist/leaflet.css';
+
 /* Дополнительные стили */
 .line-clamp-2 {
   display: -webkit-box;

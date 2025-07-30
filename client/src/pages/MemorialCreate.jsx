@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { newMemorialService, uploadService } from '../services/api.js';
 import { useAuth } from '../context/AuthContext';
 import ImageUpload from '../components/ImageUpload';
+import LocationPicker from '../components/LocationPicker';
 
 const MemorialCreate = () => {
   const navigate = useNavigate();
@@ -18,7 +19,9 @@ const MemorialCreate = () => {
     profileImage: null,
     cemetery: '',
     customSlug: '',
-    isPrivate: false
+    isPrivate: false,
+    coordinates: null,
+    address: ''
   });
 
   const handleChange = (e) => {
@@ -67,6 +70,19 @@ const MemorialCreate = () => {
     }));
   };
 
+  // Обработчик изменения местоположения
+  const handleLocationChange = (locationData) => {
+    setFormData(prev => ({
+      ...prev,
+      coordinates: {
+        lat: locationData.lat,
+        lng: locationData.lng
+      },
+      address: locationData.address || prev.address,
+      coordinatesMethod: locationData.method
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -97,7 +113,14 @@ const MemorialCreate = () => {
         customSlug: formData.customSlug || null,
         isPrivate: formData.isPrivate,
         location: {
-          cemetery: formData.cemetery
+          cemetery: formData.cemetery,
+          address: formData.address,
+          coordinates: formData.coordinates ? {
+            lat: formData.coordinates.lat,
+            lng: formData.coordinates.lng
+          } : undefined,
+          coordinatesMethod: formData.coordinatesMethod,
+          coordinatesSetAt: formData.coordinates ? new Date() : undefined
         }
       };
       
@@ -243,6 +266,12 @@ const MemorialCreate = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
+
+            {/* Местоположение захоронения */}
+            <LocationPicker
+              onLocationChange={handleLocationChange}
+              cemetery={formData.cemetery}
+            />
 
             {/* Фото */}
             <ImageUpload

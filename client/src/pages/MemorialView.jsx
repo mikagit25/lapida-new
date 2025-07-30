@@ -7,6 +7,7 @@ import ShareBlock from '../components/ShareBlock';
 import CommentSection from '../components/CommentSection';
 import EditableBiography from '../components/EditableBiography';
 import EditableEpitaph from '../components/EditableEpitaph';
+import EditableLocation from '../components/EditableLocation';
 
 const MemorialView = () => {
   const { shareUrl, slug } = useParams();
@@ -213,6 +214,9 @@ const MemorialView = () => {
             <div className="sticky top-8 space-y-6">
               {/* Блок поделиться */}
               <ShareBlock memorial={memorial} />
+
+              {/* Местоположение захоронения */}
+              <EditableLocation memorial={memorial} onUpdate={setMemorial} />
 
               {/* Статистика */}
               <div className="bg-white rounded-lg shadow-sm p-6">

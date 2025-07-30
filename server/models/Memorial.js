@@ -125,13 +125,32 @@ const memorialSchema = new mongoose.Schema({
       trim: true
     },
     coordinates: {
-      lat: Number,
-      lng: Number
+      lat: {
+        type: Number,
+        min: [-90, 'Широта должна быть между -90 и 90'],
+        max: [90, 'Широта должна быть между -90 и 90']
+      },
+      lng: {
+        type: Number,
+        min: [-180, 'Долгота должна быть между -180 и 180'],
+        max: [180, 'Долгота должна быть между -180 и 180']
+      }
+    },
+    // Дополнительная информация о местоположении
+    address: {
+      type: String,
+      trim: true
+    },
+    // Время установки координат
+    coordinatesSetAt: {
+      type: Date
+    },
+    // Метод установки координат (manual, gps)
+    coordinatesMethod: {
+      type: String,
+      enum: ['manual', 'gps', 'address'],
+      default: 'manual'
     }
-  },
-  biography: {
-    type: String,
-    maxlength: [5000, 'Биография не должна превышать 5000 символов']
   },
   tributes: [{
     author: {
