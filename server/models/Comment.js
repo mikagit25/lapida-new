@@ -30,6 +30,13 @@ const commentSchema = new mongoose.Schema({
     required: true
   },
   
+  // Секция мемориала (общие, эпитафия, биография и т.д.)
+  section: {
+    type: String,
+    enum: ['general', 'epitaph', 'biography', 'photo'],
+    default: 'general'
+  },
+  
   // Опциональное фото к комментарию
   photo: {
     type: String, // URL изображения
@@ -53,6 +60,7 @@ const commentSchema = new mongoose.Schema({
 
 // Индексы
 commentSchema.index({ memorial: 1, createdAt: -1 });
+commentSchema.index({ memorial: 1, section: 1, createdAt: -1 });
 commentSchema.index({ author: 1, createdAt: -1 });
 commentSchema.index({ isApproved: 1 });
 

@@ -9,21 +9,26 @@ const router = express.Router();
 // Получить комментарии для мемориала
 router.get('/memorial/:memorialId', async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, section } = req.query;
     
-    const comments = await Comment.find({ 
+    // Создаем фильтр
+    const filter = { 
       memorial: req.params.memorialId, 
       isApproved: true 
-    })
+    };
+    
+    // Добавляем фильтр по секции, если указан
+    if (section) {
+      filter.section = section;
+    }
+    
+    const comments = await Comment.find(filter)
       .populate('author', 'name')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
     
-    const total = await Comment.countDocuments({ 
-      memorial: req.params.memorialId, 
-      isApproved: true 
-    });
+    const total = await Comment.countDocuments(filter);
     
     res.json({
       comments,
@@ -39,7 +44,7 @@ router.get('/memorial/:memorialId', async (req, res) => {
 // Добавить комментарий (опциональная авторизация - анонимные комментарии разрешены)
 router.post('/', optionalAuthMiddleware, async (req, res) => {
   try {
-    const { text, memorial, authorName, photo } = req.body;
+    const { text, memorial, authorName, photo, section = 'general' } = req.body;
     
     // Проверить, что мемориал существует
     const memorialDoc = await Memorial.findById(memorial);
@@ -58,6 +63,7 @@ router.post('/', optionalAuthMiddleware, async (req, res) => {
       author: req.user ? req.user.id : null,
       authorName: req.user ? null : authorName, // Имя только для анонимных комментариев
       photo,
+      section,
       ipAddress: req.ip
     });
     

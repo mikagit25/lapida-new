@@ -27,7 +27,7 @@ const MemorialView = () => {
       const memorialData = await newMemorialService.getByShareUrl(shareUrl);
       setMemorial(memorialData);
       
-      // Загружаем комментарии
+      // Загружаем все комментарии (без фильтрации по секции)
       const commentsData = await commentService.getByMemorial(memorialData._id);
       // Проверяем, что сервер вернул - объект с comments или массив
       const commentsArray = commentsData.comments || commentsData;
@@ -126,10 +126,6 @@ const MemorialView = () => {
               <p className="text-xl text-gray-600 mb-4">
                 {memorial.lifespan}
               </p>
-              <EditableEpitaph 
-                memorial={memorial} 
-                onUpdate={setMemorial}
-              />
             </div>
           </div>
         </div>
@@ -139,6 +135,26 @@ const MemorialView = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Основной контент */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Эпитафия */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Эпитафия</h2>
+              <EditableEpitaph 
+                memorial={memorial} 
+                onUpdate={setMemorial}
+              />
+              
+              {/* Комментарии к эпитафии */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Комментарии к эпитафии</h3>
+                <CommentSection
+                  memorialId={memorial._id}
+                  comments={comments.filter(comment => comment.section === 'epitaph')}
+                  onNewComment={handleNewComment}
+                  section="epitaph"
+                />
+              </div>
+            </div>
+
             {/* Биография */}
             <EditableBiography 
               memorial={memorial} 
@@ -168,8 +184,9 @@ const MemorialView = () => {
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Воспоминания и соболезнования</h2>
               <CommentSection
                 memorialId={memorial._id}
-                comments={comments}
+                comments={comments.filter(comment => !comment.section || comment.section === 'general')}
                 onNewComment={handleNewComment}
+                section="general"
               />
             </div>
           </div>
