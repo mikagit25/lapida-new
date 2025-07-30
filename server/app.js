@@ -30,7 +30,7 @@ const connectDB = async () => {
 
 // Маршруты
 app.get('/', (req, res) => {
-  res.json({ message: 'Lapida One API запущен' });
+  res.json({ message: 'Lapida API запущен' });
 });
 
 // Маршруты API

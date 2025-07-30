@@ -1,7 +1,7 @@
 {
   "name": "lapida-server",
   "version": "1.0.0",
-  "description": "Backend API для цифровой платформы мемориалов Lapida One",
+  "description": "Backend API для цифровой платформы мемориалов Lapida",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",

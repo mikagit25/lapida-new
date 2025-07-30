@@ -1,5 +1,5 @@
-# Запуск полного стека Lapida One
-Write-Host "🚀 Запуск Lapida One..." -ForegroundColor Green
+# Запуск полного стека Lapida
+Write-Host "🚀 Запуск Lapida..." -ForegroundColor Green
 
 # Устанавливаем базовую директорию
 $projectRoot = "d:\Mikalai\lapida-new"
