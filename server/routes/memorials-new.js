@@ -50,8 +50,35 @@ router.get('/share/:shareUrl', async (req, res) => {
       return res.status(404).json({ message: 'Мемориал не найден' });
     }
     
-    // Увеличить счетчик просмотров
-    await memorial.incrementViews();
+    // Увеличиваем счетчик просмотров
+    memorial.viewCount = (memorial.viewCount || 0) + 1;
+    await memorial.save();
+    
+    res.json(memorial);
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка при получении мемориала', error: error.message });
+  }
+});
+
+// Получить мемориал по customSlug (красивая ссылка)
+router.get('/slug/:slug', async (req, res) => {
+  try {
+    const memorial = await Memorial.findOne({ customSlug: req.params.slug })
+      .populate('createdBy', 'name')
+      .populate('allowedUsers', 'name email');
+    
+    if (!memorial) {
+      return res.status(404).json({ message: 'Мемориал не найден' });
+    }
+    
+    // Проверка приватности
+    if (memorial.isPrivate) {
+      return res.status(403).json({ message: 'Мемориал недоступен' });
+    }
+    
+    // Увеличиваем счетчик просмотров
+    memorial.viewCount = (memorial.viewCount || 0) + 1;
+    await memorial.save();
     
     res.json(memorial);
   } catch (error) {

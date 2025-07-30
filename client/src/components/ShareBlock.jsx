@@ -1,14 +1,35 @@
 import React, { useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 
 const ShareBlock = ({ memorial }) => {
   const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const shareUrl = `${window.location.origin}/memorial/${memorial.shareUrl}`;
+  // Создаем красивый URL из имени мемориала
+  const createSlugFromName = (name) => {
+    return name
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '') // убираем специальные символы
+      .replace(/\s+/g, '-') // заменяем пробелы на дефисы
+      .trim();
+  };
+
+  // Используем либо custom slug, либо создаем из имени
+  const memorialSlug = memorial.customSlug || createSlugFromName(memorial.fullName);
+  
+  // Для разработки используем localhost, но показываем как будет выглядеть на продакшене
+  const isDevelopment = window.location.hostname === 'localhost';
+  const shareUrl = isDevelopment 
+    ? `${window.location.origin}/memorial/${memorial.shareUrl}` // для разработки используем старый формат
+    : `https://lapida.one/${memorialSlug}`; // для продакшена новый формат
+
+  const displayUrl = `lapida.one/${memorialSlug}`; // всегда показываем красивый URL
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      // Копируем полный URL для функциональности
+      const urlToCopy = isDevelopment ? shareUrl : `https://${displayUrl}`;
+      await navigator.clipboard.writeText(urlToCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -18,7 +39,8 @@ const ShareBlock = ({ memorial }) => {
 
   const shareOnSocialMedia = (platform) => {
     const text = `В память о ${memorial.fullName}`;
-    const encodedUrl = encodeURIComponent(shareUrl);
+    const urlToShare = isDevelopment ? shareUrl : `https://${displayUrl}`;
+    const encodedUrl = encodeURIComponent(urlToShare);
     const encodedText = encodeURIComponent(text);
 
     const urls = {
@@ -44,9 +66,10 @@ const ShareBlock = ({ memorial }) => {
         <div className="flex">
           <input
             type="text"
-            value={shareUrl}
+            value={displayUrl}
             readOnly
             className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 text-sm"
+            title={shareUrl} // показываем полный URL в tooltip
           />
           <button
             onClick={copyToClipboard}
@@ -76,12 +99,12 @@ const ShareBlock = ({ memorial }) => {
         {showQR && (
           <div className="mt-3 text-center">
             <div className="inline-block p-4 bg-white border border-gray-200 rounded-lg">
-              {/* Заглушка для QR кода - здесь позже можно добавить библиотеку для генерации QR */}
-              <div className="w-32 h-32 bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-500 text-xs">
-                QR код
-                <br />
-                (будет добавлен позже)
-              </div>
+              <QRCodeSVG 
+                value={isDevelopment ? shareUrl : `https://${displayUrl}`}
+                size={128}
+                level="M"
+                includeMargin={true}
+              />
             </div>
             <p className="text-xs text-gray-500 mt-2">
               Сканируйте для быстрого доступа к мемориалу

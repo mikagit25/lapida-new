@@ -168,6 +168,12 @@ export const newMemorialService = {
     return response.data;
   },
 
+  // Получение мемориала по customSlug (красивая ссылка)
+  getBySlug: async (slug) => {
+    const response = await api.get(`/memorials/slug/${slug}`);
+    return response.data;
+  },
+
   // Получение мемориалов пользователя
   getMy: async (params = {}) => {
     const response = await api.get('/memorials/my', { params });

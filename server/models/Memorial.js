@@ -96,6 +96,20 @@ const memorialSchema = new mongoose.Schema({
     type: String,
     unique: true
   },
+  customSlug: {
+    type: String,
+    unique: true,
+    sparse: true, // позволяет null значения с уникальностью
+    trim: true,
+    lowercase: true,
+    validate: {
+      validator: function(value) {
+        if (!value) return true; // пустое значение разрешено
+        return /^[a-z0-9-]+$/.test(value); // только буквы, цифры и дефисы
+      },
+      message: 'Slug может содержать только строчные буквы, цифры и дефисы'
+    }
+  },
   location: {
     cemetery: {
       type: String,
@@ -224,6 +238,7 @@ memorialSchema.index({ firstName: 'text', lastName: 'text', biography: 'text' })
 memorialSchema.index({ createdBy: 1, createdAt: -1 });
 memorialSchema.index({ isPrivate: 1 });
 memorialSchema.index({ shareUrl: 1 });
+memorialSchema.index({ customSlug: 1 });
 
 // Метод для увеличения просмотров
 memorialSchema.methods.incrementViews = function() {

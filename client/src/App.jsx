@@ -383,6 +383,8 @@ const AppRoutes = () => (
         </PrivateRoute>
       } 
     />
+    {/* Красивые URL для мемориалов - должен быть последним */}
+    <Route path="/:slug" element={<MemorialView />} />
   </Routes>
 );
 

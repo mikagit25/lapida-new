@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { newMemorialService, commentService } from '../services/api';
 import Gallery from '../components/Gallery';
 import LifeTimeline from '../components/LifeTimeline';
@@ -9,7 +9,8 @@ import EditableBiography from '../components/EditableBiography';
 import EditableEpitaph from '../components/EditableEpitaph';
 
 const MemorialView = () => {
-  const { shareUrl } = useParams();
+  const { shareUrl, slug } = useParams();
+  const location = useLocation();
   const [memorial, setMemorial] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,14 +18,30 @@ const MemorialView = () => {
 
   useEffect(() => {
     loadMemorial();
-  }, [shareUrl]);
+  }, [shareUrl, slug]);
 
   const loadMemorial = async () => {
     try {
       setLoading(true);
-      console.log('MemorialView - shareUrl from useParams:', shareUrl);
-      console.log('MemorialView - shareUrl type:', typeof shareUrl);
-      const memorialData = await newMemorialService.getByShareUrl(shareUrl);
+      
+      // Определяем тип URL по пути
+      const isSlugRoute = location.pathname.startsWith('/memorial/') === false && location.pathname !== '/';
+      const isMemorialRoute = location.pathname.startsWith('/memorial/');
+      
+      let memorialData;
+      
+      if (isSlugRoute && slug) {
+        // Загружаем по красивому URL (slug)
+        console.log('MemorialView - loading by slug:', slug);
+        memorialData = await newMemorialService.getBySlug(slug);
+      } else if (isMemorialRoute && shareUrl) {
+        // Загружаем по старому формату (shareUrl)
+        console.log('MemorialView - loading by shareUrl:', shareUrl);
+        memorialData = await newMemorialService.getByShareUrl(shareUrl);
+      } else {
+        throw new Error('Неверный формат URL');
+      }
+      
       setMemorial(memorialData);
       
       // Загружаем все комментарии (без фильтрации по секции)
