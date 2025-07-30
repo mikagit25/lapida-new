@@ -55,8 +55,9 @@ const LifeTimeline = ({ memorialId }) => {
 
   const loadStats = async () => {
     try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002/api';
       // Пока используем fetch для статистики, так как эндпоинт может отличаться
-      const response = await fetch(`http://localhost:5002/api/timeline/timeline/stats?memorialId=${memorialId}`);
+      const response = await fetch(`${API_BASE_URL}/timeline/timeline/stats?memorialId=${memorialId}`);
       if (response.ok) {
         const data = await response.json();
         setStats(data);

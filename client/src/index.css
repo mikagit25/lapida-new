@@ -1,9 +1,9 @@
+/* Leaflet CSS для карт */
+@import 'leaflet/dist/leaflet.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Leaflet CSS для карт */
-@import 'leaflet/dist/leaflet.css';
 
 /* Дополнительные стили */
 .line-clamp-2 {

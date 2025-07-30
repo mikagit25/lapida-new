@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002/api';
+
 const PhotoComments = ({ memorialId, photoUrl, isVisible, onClose }) => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -28,7 +30,7 @@ const PhotoComments = ({ memorialId, photoUrl, isVisible, onClose }) => {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:5002/api/photo-comments/memorial/${memorialId}/photo?photoUrl=${encodeURIComponent(photoUrl)}`
+        `${API_BASE_URL}/photo-comments/memorial/${memorialId}/photo?photoUrl=${encodeURIComponent(photoUrl)}`
       );
       
       if (response.ok) {
@@ -59,7 +61,7 @@ const PhotoComments = ({ memorialId, photoUrl, isVisible, onClose }) => {
         hasToken: !!token
       });
       
-      const response = await fetch(`http://localhost:5002/api/photo-comments/memorial/${memorialId}/photo/comment`, {
+      const response = await fetch(`${API_BASE_URL}/photo-comments/memorial/${memorialId}/photo/comment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +96,7 @@ const PhotoComments = ({ memorialId, photoUrl, isVisible, onClose }) => {
 
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5002/api/photo-comments/comment/${commentId}`, {
+      const response = await fetch(`${API_BASE_URL}/photo-comments/comment/${commentId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
