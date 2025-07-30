@@ -310,5 +310,32 @@ export const uploadService = {
   }
 };
 
+// Сервис пользователя и статистики
+export const userService = {
+  // Получение статистики пользователя
+  getStats: async () => {
+    const response = await api.get('/users/me/stats');
+    return response.data;
+  },
+
+  // Получение мемориалов пользователя
+  getMyMemorials: async (params = {}) => {
+    const response = await api.get('/users/me/memorials', { params });
+    return response.data;
+  },
+
+  // Получение комментариев пользователя
+  getMyComments: async (params = {}) => {
+    const response = await api.get('/users/me/comments', { params });
+    return response.data;
+  },
+
+  // Обновление настроек пользователя
+  updateSettings: async (settings) => {
+    const response = await api.put('/users/me/settings', settings);
+    return response.data;
+  }
+};
+
 // Общий экспорт
 export default api;

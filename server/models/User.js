@@ -51,7 +51,50 @@ const userSchema = new mongoose.Schema({
   },
   verificationToken: String,
   resetPasswordToken: String,
-  resetPasswordExpires: Date
+  resetPasswordExpires: Date,
+  
+  // Поля для личного кабинета и статистики
+  statistics: {
+    memorialsCreated: {
+      type: Number,
+      default: 0
+    },
+    flowersLeft: {
+      type: Number,
+      default: 0
+    },
+    commentsLeft: {
+      type: Number,
+      default: 0
+    },
+    lastActivity: Date
+  },
+  
+  // Настройки пользователя
+  settings: {
+    emailNotifications: {
+      type: Boolean,
+      default: true
+    },
+    privacyLevel: {
+      type: String,
+      enum: ['public', 'friends', 'private'],
+      default: 'public'
+    },
+    theme: {
+      type: String,
+      enum: ['light', 'dark', 'auto'],
+      default: 'light'
+    },
+    language: {
+      type: String,
+      default: 'ru'
+    }
+  },
+  
+  // Информация о последнем посещении
+  lastLogin: Date,
+  ipAddress: String
 }, {
   timestamps: true
 });

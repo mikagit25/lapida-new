@@ -152,7 +152,7 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.updateProfile(userData);
       dispatch({
         type: 'UPDATE_USER',
-        payload: response.user,
+        payload: response.user || response, // Поддержка разных форматов ответа
       });
       return response;
     } catch (error) {

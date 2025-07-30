@@ -37,6 +37,12 @@ const commentSchema = new mongoose.Schema({
     default: 'general'
   },
   
+  // Тип комментария (цветок или обычный комментарий)
+  isFlower: {
+    type: Boolean,
+    default: false
+  },
+  
   // Опциональное фото к комментарию
   photo: {
     type: String, // URL изображения

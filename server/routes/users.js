@@ -1,6 +1,8 @@
 const express = require('express');
 const User = require('../models/User');
 const Memorial = require('../models/Memorial');
+const Comment = require('../models/Comment');
+const PhotoComment = require('../models/PhotoComment');
 const { auth, adminAuth } = require('../middleware/auth');
 
 const router = express.Router();
@@ -146,7 +148,7 @@ router.delete('/:id', adminAuth, async (req, res) => {
     }
 
     // Удаление или передача мемориалов
-    await Memorial.deleteMany({ creator: user._id });
+    await Memorial.deleteMany({ createdBy: user._id });
 
     await User.findByIdAndDelete(req.params.id);
 
@@ -192,6 +194,156 @@ router.get('/admin/stats', adminAuth, async (req, res) => {
   } catch (error) {
     console.error('Ошибка получения статистики:', error);
     res.status(500).json({ message: 'Ошибка сервера при получении статистики' });
+  }
+});
+
+// Получение статистики текущего пользователя
+router.get('/me/stats', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Количество созданных мемориалов
+    const memorialsCreated = await Memorial.countDocuments({ createdBy: userId });
+
+    // Количество оставленных цветов (по комментариям)
+    const flowersLeft = await Comment.countDocuments({ 
+      author: userId,
+      isFlower: true 
+    });
+
+    // Количество оставленных комментариев (включая фото комментарии)
+    const regularComments = await Comment.countDocuments({ 
+      author: userId,
+      isFlower: { $ne: true }
+    });
+    const photoComments = await PhotoComment.countDocuments({ author: userId });
+    const commentsLeft = regularComments + photoComments;
+
+    // Обновляем статистику в профиле пользователя
+    await User.findByIdAndUpdate(userId, {
+      'statistics.memorialsCreated': memorialsCreated,
+      'statistics.flowersLeft': flowersLeft,
+      'statistics.commentsLeft': commentsLeft,
+      'statistics.lastActivity': new Date()
+    });
+
+    res.json({
+      memorialsCreated,
+      flowersLeft,
+      commentsLeft,
+      lastActivity: new Date()
+    });
+  } catch (error) {
+    console.error('Ошибка получения статистики пользователя:', error);
+    res.status(500).json({ message: 'Ошибка сервера при получении статистики' });
+  }
+});
+
+// Получение мемориалов пользователя
+router.get('/me/memorials', auth, async (req, res) => {
+  try {
+    console.log('User requesting memorials:', req.user?.name, req.user?.id);
+    const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const memorials = await Memorial.find({ createdBy: userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('createdBy', 'name photo');
+
+    const total = await Memorial.countDocuments({ createdBy: userId });
+
+    console.log(`Found ${memorials.length} memorials for user ${userId}, total: ${total}`);
+
+    res.json({
+      memorials,
+      pagination: {
+        current: page,
+        total: Math.ceil(total / limit),
+        count: total
+      }
+    });
+  } catch (error) {
+    console.error('Ошибка получения мемориалов пользователя:', error);
+    res.status(500).json({ message: 'Ошибка сервера при получении мемориалов' });
+  }
+});
+
+// Получение комментариев пользователя
+router.get('/me/comments', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Получаем обычные комментарии
+    const regularComments = await Comment.find({ author: userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('memorial', 'firstName lastName photo')
+      .populate('author', 'name photo');
+
+    // Получаем фото комментарии
+    const photoComments = await PhotoComment.find({ author: userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('memorial', 'firstName lastName photo')
+      .populate('author', 'name photo');
+
+    // Объединяем и сортируем по дате
+    const allComments = [...regularComments.map(c => ({...c.toObject(), type: 'regular'})), 
+                        ...photoComments.map(c => ({...c.toObject(), type: 'photo'}))];
+    
+    allComments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    const paginatedComments = allComments.slice(skip, skip + limit);
+
+    const totalRegular = await Comment.countDocuments({ author: userId });
+    const totalPhoto = await PhotoComment.countDocuments({ author: userId });
+    const total = totalRegular + totalPhoto;
+
+    res.json({
+      comments: paginatedComments,
+      pagination: {
+        current: page,
+        total: Math.ceil(total / limit),
+        count: total
+      }
+    });
+  } catch (error) {
+    console.error('Ошибка получения комментариев пользователя:', error);
+    res.status(500).json({ message: 'Ошибка сервера при получении комментариев' });
+  }
+});
+
+// Обновление настроек пользователя
+router.put('/me/settings', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { emailNotifications, privacyLevel, theme, language } = req.body;
+
+    const updateData = {};
+    if (emailNotifications !== undefined) updateData['settings.emailNotifications'] = emailNotifications;
+    if (privacyLevel !== undefined) updateData['settings.privacyLevel'] = privacyLevel;
+    if (theme !== undefined) updateData['settings.theme'] = theme;
+    if (language !== undefined) updateData['settings.language'] = language;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    res.json(user);
+  } catch (error) {
+    console.error('Ошибка обновления настроек:', error);
+    res.status(500).json({ message: 'Ошибка сервера при обновлении настроек' });
   }
 });
 
