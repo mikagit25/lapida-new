@@ -35,6 +35,9 @@ app.use(express.urlencoded({ extended: true }));
 // Статическая раздача загруженных файлов
 app.use('/upload', express.static(path.join(__dirname, 'upload')));
 
+// Статическая раздача frontend файлов
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Подключение к базе данных MongoDB
 const connectDB = async () => {
   try {
@@ -66,9 +69,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Что-то пошло не так!' });
 });
 
-// 404 обработчик
-app.use('*', (req, res) => {
-  res.status(404).json({ message: 'Маршрут не найден' });
+// React Router - для всех не-API маршрутов возвращаем index.html
+app.get('*', (req, res) => {
+  // Если это API запрос - отправляем 404
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ message: 'API маршрут не найден' });
+  }
+  // Для всех остальных - отправляем React приложение
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 const PORT = process.env.PORT || 5002;

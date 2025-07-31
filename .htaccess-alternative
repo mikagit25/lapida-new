@@ -1,0 +1,36 @@
+# Альтернативный .htaccess для проблемных хостингов
+
+# Принудительные MIME типы
+<FilesMatch "\.css$">
+    ForceType text/css
+</FilesMatch>
+
+<FilesMatch "\.js$">
+    ForceType application/javascript
+</FilesMatch>
+
+<FilesMatch "\.mjs$">
+    ForceType application/javascript
+</FilesMatch>
+
+# Отключаем обработку assets как HTML
+<LocationMatch "^/assets/">
+    SetHandler default-handler
+</LocationMatch>
+
+# React Router
+RewriteEngine On
+RewriteBase /
+
+# Не обрабатывать статические файлы
+RewriteCond %{REQUEST_FILENAME} \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ [NC]
+RewriteRule . - [L]
+
+# Не обрабатывать папку assets
+RewriteCond %{REQUEST_URI} ^/assets/ [NC]
+RewriteRule . - [L]
+
+# React роутинг
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]

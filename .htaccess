@@ -1,5 +1,11 @@
 RewriteEngine On
 
+# Правильные MIME типы
+AddType text/css .css
+AddType application/javascript .js
+AddType application/javascript .mjs
+AddType text/javascript .js
+
 # Handle Angular and React Router
 RewriteBase /
 RewriteRule ^index\.html$ - [L]

@@ -1,0 +1,16 @@
+# Простой .htaccess для исправления MIME проблем
+AddType text/css .css
+AddType application/javascript .js
+AddType application/javascript .mjs
+
+# Отключаем обработку assets папки
+<Location "/assets">
+    SetHandler default-handler
+</Location>
+
+# React Router - только для НЕ статических файлов
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ [NC]
+RewriteRule ^(.*)$ /index.html [L]
