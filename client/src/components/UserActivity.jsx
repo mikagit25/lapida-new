@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { userService } from '../services/api';
 
@@ -128,7 +128,7 @@ const UserActivity = () => {
                       {comment.photo && (
                         <div className="mt-2">
                           <img
-                            src={comment.photo}
+                            src={fixImageUrl(comment.photo)}
                             alt="Фото к комментарию"
                             className="w-32 h-32 object-cover rounded-md border border-gray-200"
                           />
@@ -150,7 +150,7 @@ const UserActivity = () => {
                     {comment.memorial?.photo && (
                       <div className="ml-4 flex-shrink-0">
                         <img
-                          src={comment.memorial.photo}
+                          src={fixImageUrl(comment.memorial.photo)}
                           alt={`${comment.memorial.firstName} ${comment.memorial.lastName}`}
                           className="w-16 h-16 object-cover rounded-md border border-gray-200"
                         />

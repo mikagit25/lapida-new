@@ -13,40 +13,21 @@ export const getMemorialUrl = (memorial) => {
 };
 
 export const getMemorialShareUrl = (memorial) => {
-  const currentHost = window.location.hostname;
-  const isDevelopment = currentHost === 'localhost';
-  const isProduction = currentHost === 'lapida.one';
-  
+  // Всегда используем lapida.one
+  const base = 'https://lapida.one';
   if (memorial.customSlug) {
-    if (isDevelopment) {
-      // В разработке используем публичный адрес для QR и профиля
-      return `https://lapida.one/${memorial.customSlug}`;
-    } else {
-      // На любом хостинге используем lapida.one
-      return `https://lapida.one/${memorial.customSlug}`;
-    }
+    return `${base}/${memorial.customSlug}`;
   } else {
-    // Фоллбэк на старый формат если нет customSlug
-    if (isDevelopment) {
-      // В разработке используем публичный адрес для QR и профиля
-      return `https://lapida.one/memorial/${memorial.shareUrl || memorial._id}`;
-    } else {
-      // На любом хостинге используем lapida.one
-      return `https://lapida.one/memorial/${memorial.shareUrl || memorial._id}`;
-    }
+    return `${base}/memorial/${memorial.shareUrl || memorial._id}`;
   }
 };
 
 export const getMemorialDisplayUrl = (memorial) => {
-  const currentHost = window.location.hostname;
-  const isDevelopment = currentHost === 'localhost';
-  const isProduction = currentHost === 'lapida.one';
-  
+  // Для отображения всегда используем lapida.one
+  const base = 'https://lapida.one';
   if (memorial.customSlug) {
-    // Всегда показываем публичный адрес для профиля
-    return `lapida.one/${memorial.customSlug}`;
+    return `${base}/${memorial.customSlug}`;
   } else {
-    // Фоллбэк на старый формат если нет customSlug
-    return `lapida.one/memorial/${memorial.shareUrl || memorial._id}`;
+    return `${base}/memorial/${memorial.shareUrl || memorial._id}`;
   }
 };

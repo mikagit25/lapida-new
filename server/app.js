@@ -4,38 +4,46 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
+const PORT = process.env.PORT || process.env.npm_config_port || process.env.npm_package_config_port || (process.env.NODE_ENV === 'production' ? 80 : 5005);
 const app = express();
 
-// Middleware
+// 1. CORS
 app.use(cors({
-  origin: [
-    'http://localhost:5173', 
-    'http://localhost:5180', 
-    'http://localhost:5181', 
-    'http://localhost:5182', 
-    'http://localhost:5183', 
-    'http://localhost:5184', 
-    'http://localhost:5174', 
-    'http://localhost:5175', 
-    'http://localhost:5176', 
-    'http://localhost:5177', 
-    'http://localhost:5178', 
-    'http://localhost:5179', 
-    'http://localhost:3000',
-    'https://lapida.one',
-    'https://www.lapida.one',
-    'http://lapida.one',
-    'http://www.lapida.one'
-  ],
+  origin: true, // разрешить любые origins
   credentials: true
 }));
+
+// Уникальный healthcheck для универсального поиска API
+app.get('/api/health', (req, res) => {
+  res.json({ app: 'lapida', status: 'ok' });
+});
+
+
+// ====== КЛАССИЧЕСКИЙ ПОРЯДОК MIDDLEWARE ======
+// 1. CORS
+app.use(cors({
+  origin: true, // разрешить любые origins
+  credentials: true
+}));
+
+// 2. JSON и формы
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Статическая раздача загруженных файлов
+// 3. Логирование
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next();
+});
+
+// 4. СТАТИКА (upload и public)
+
+// Отдача статики для пользовательской галереи и мемориалов
+app.use('/upload/gallery', express.static(path.join(__dirname, 'upload/gallery')));
+app.use('/upload/memorials', express.static(path.join(__dirname, 'upload/memorials')));
+// Общий доступ ко всем upload (гарантированно работает для /upload/graves/...)
 app.use('/upload', express.static(path.join(__dirname, 'upload')));
 
-// Статическая раздача frontend файлов
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Подключение к базе данных MongoDB
@@ -54,32 +62,55 @@ app.get('/', (req, res) => {
   res.json({ message: 'Lapida API запущен' });
 });
 
+// Health check endpoint для автоматического обнаружения сервера
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+
 // Маршруты API
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/memorials', require('./routes/memorials-new'));
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/users', require('./routes/users'));
-app.use('/api/upload', require('./routes/upload'));
+app.use('/api/upload', require('./routes/uploadClean'));
 app.use('/api/photo-comments', require('./routes/photoComments'));
+app.use('/api/photo-comments-simple', require('./routes/photoCommentsSimple'));
 app.use('/api/timeline', require('./routes/timeline'));
+app.use('/api/virtual', require('./routes/virtual'));
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/gallery-recovery', require('./routes/galleryRecovery'));
 
-// Обработка ошибок
+
+
+// Глобальный обработчик ошибок (после всех роутов и статики)
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Что-то пошло не так!' });
-});
-
-// React Router - для всех не-API маршрутов возвращаем index.html
-app.get('*', (req, res) => {
-  // Если это API запрос - отправляем 404
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ message: 'API маршрут не найден' });
+  console.error('Express error:', err);
+  // Если ошибка связана с раздачей статики — логируем путь
+  if (req && req.originalUrl && req.originalUrl.startsWith('/api/upload')) {
+    console.error('Static file error (api/upload):', req.originalUrl, err.message);
   }
-  // Для всех остальных - отправляем React приложение
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  if (req && req.originalUrl && req.originalUrl.startsWith('/upload')) {
+    console.error('Static file error (upload):', req.originalUrl, err.message);
+  }
+  res.status(500).json({
+    message: 'Internal Server Error',
+    error: err.message,
+    stack: err.stack
+  });
 });
 
-const PORT = process.env.PORT || 5002;
+
+// 404 обработчик
+app.use('*', (req, res) => {
+  res.status(404).json({ message: 'Маршрут не найден' });
+});
+
 
 // Запуск сервера
 const startServer = async () => {

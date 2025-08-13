@@ -1,0 +1,7 @@
+node_modules/
+dist/
+client/dist/
+server/public/assets/
+server/public/
+*.min.js
+*.bundle.js

@@ -96,20 +96,21 @@ const memorialSchema = new mongoose.Schema({
     type: String,
     unique: true
   },
+  
+  // Кастомный slug для красивых URL
   customSlug: {
     type: String,
     unique: true,
-    sparse: true, // позволяет null значения с уникальностью
-    trim: true,
-    lowercase: true,
+    sparse: true, // позволяет null значения
     validate: {
-      validator: function(value) {
-        if (!value) return true; // пустое значение разрешено
-        return /^[a-z0-9-]+$/.test(value); // только буквы, цифры и дефисы
+      validator: function(v) {
+        // Проверяем, что slug содержит только допустимые символы
+        return !v || /^[a-z0-9-]+$/.test(v);
       },
       message: 'Slug может содержать только строчные буквы, цифры и дефисы'
     }
   },
+  
   location: {
     cemetery: {
       type: String,
@@ -125,32 +126,28 @@ const memorialSchema = new mongoose.Schema({
       trim: true
     },
     coordinates: {
-      lat: {
-        type: Number,
-        min: [-90, 'Широта должна быть между -90 и 90'],
-        max: [90, 'Широта должна быть между -90 и 90']
+      lat: Number,
+      lng: Number
+    },
+    gravePhotos: [{
+      url: {
+        type: String,
+        required: true
       },
-      lng: {
-        type: Number,
-        min: [-180, 'Долгота должна быть между -180 и 180'],
-        max: [180, 'Долгота должна быть между -180 и 180']
+      uploadedAt: {
+        type: Date,
+        default: Date.now
+      },
+      description: {
+        type: String,
+        trim: true,
+        maxlength: [200, 'Описание не должно превышать 200 символов']
       }
-    },
-    // Дополнительная информация о местоположении
-    address: {
-      type: String,
-      trim: true
-    },
-    // Время установки координат
-    coordinatesSetAt: {
-      type: Date
-    },
-    // Метод установки координат (manual, gps)
-    coordinatesMethod: {
-      type: String,
-      enum: ['manual', 'gps', 'address'],
-      default: 'manual'
-    }
+    }]
+  },
+  biography: {
+    type: String,
+    maxlength: [5000, 'Биография не должна превышать 5000 символов']
   },
   tributes: [{
     author: {
@@ -209,6 +206,30 @@ const memorialSchema = new mongoose.Schema({
     ref: 'User'
   }],
   
+  // Пользователи с правом редактирования
+  editorsUsers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  
+  // Фоновое изображение шапки
+  headerBackground: {
+    type: String,
+    default: null
+  },
+  
+  // Фоновое изображение за аватаром
+  avatarBackground: {
+    type: String,
+    default: null
+  },
+  
+  // Фоновое изображение всей страницы
+  pageBackground: {
+    type: String,
+    default: null
+  },
+  
   // Статистика
   viewCount: {
     type: Number,
@@ -219,12 +240,57 @@ const memorialSchema = new mongoose.Schema({
 });
 
 // Генерация уникальной ссылки для шэринга (согласно ТЗ)
-memorialSchema.pre('save', function(next) {
+memorialSchema.pre('save', async function(next) {
+  // Генерируем shareUrl если его нет
   if (!this.shareUrl) {
     const firstName = this.firstName.toLowerCase().replace(/[^a-zа-я0-9]/gi, '');
     const lastName = this.lastName.toLowerCase().replace(/[^a-zа-я0-9]/gi, '');
     this.shareUrl = `${firstName}-${lastName}-${Date.now()}`;
   }
+  
+  // Генерируем customSlug если его нет, но только для новых мемориалов
+  if (this.isNew && !this.customSlug) {
+    // Функция транслитерации
+    const transliterate = (text) => {
+      const cyrillicToLatin = {
+        'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
+        'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+        'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+        'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch',
+        'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
+        ' ': '-'
+      };
+      
+      return text
+        .toLowerCase()
+        .split('')
+        .map(char => cyrillicToLatin[char] || char)
+        .join('')
+        .replace(/[^\w\s-]/g, '') // удаляем остальные спецсимволы
+        .replace(/\s+/g, '-') // заменяем пробелы на дефисы
+        .replace(/-+/g, '-') // удаляем множественные дефисы
+        .replace(/^-+|-+$/g, ''); // убираем дефисы в начале и конце
+    };
+
+    const baseSlug = transliterate(`${this.firstName} ${this.lastName}`);
+    
+    // Если slug пустой после обработки, используем shareUrl
+    if (!baseSlug || baseSlug === '-' || baseSlug === '') {
+      this.customSlug = this.shareUrl || `memorial-${Date.now()}`;
+    } else {
+      // Проверяем уникальность slug'а
+      let slug = baseSlug;
+      let counter = 1;
+      
+      while (await this.constructor.findOne({ customSlug: slug })) {
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+      }
+      
+      this.customSlug = slug;
+    }
+  }
+  
   next();
 });
 
@@ -256,8 +322,7 @@ memorialSchema.virtual('lifespan').get(function() {
 memorialSchema.index({ firstName: 'text', lastName: 'text', biography: 'text' });
 memorialSchema.index({ createdBy: 1, createdAt: -1 });
 memorialSchema.index({ isPrivate: 1 });
-memorialSchema.index({ shareUrl: 1 });
-memorialSchema.index({ customSlug: 1 });
+ memorialSchema.index({ shareUrl: 1, customSlug: 1 });
 
 // Метод для увеличения просмотров
 memorialSchema.methods.incrementViews = function() {

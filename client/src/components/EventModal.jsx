@@ -43,50 +43,34 @@ const EventModal = ({
 
     try {
       const formDataToSend = new FormData();
-
-      // Добавляем текстовые поля
       formDataToSend.append('title', formData.title);
-      
-      // Добавляем только заполненные поля
-      if (formData.description) {
-        formDataToSend.append('description', formData.description);
-      }
-      
+      if (formData.description) formDataToSend.append('description', formData.description);
       if (formData.date) {
         formDataToSend.append('date', formData.date);
-        // Автоматически генерируем dateDisplay на основе даты
         const dateObj = new Date(formData.date);
-        const dateDisplay = dateObj.toLocaleDateString('ru-RU', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        });
+        const dateDisplay = dateObj.toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
         formDataToSend.append('dateDisplay', dateDisplay);
       }
-      
       formDataToSend.append('eventType', formData.eventType);
-      
-      if (formData.location) {
-        formDataToSend.append('location', formData.location);
-      }
-      
+      if (formData.location) formDataToSend.append('location', formData.location);
       formDataToSend.append('memorialId', memorialId);
-
-      // Добавляем фотографии
-      formData.photos.forEach((photo) => {
-        formDataToSend.append('photos', photo);
-      });
+      formData.photos.forEach((photo) => { formDataToSend.append('photos', photo); });
 
       if (isEditing) {
         await timelineService.update(event._id, formDataToSend);
       } else {
         await timelineService.create(memorialId, formDataToSend);
       }
-
       onSave();
     } catch (error) {
       console.error('Ошибка сохранения события:', error);
-      setError(error.response?.data?.message || 'Ошибка сохранения события');
+      if (error.response?.status === 401) {
+        setError('Ошибка авторизации. Пожалуйста, войдите в систему повторно.');
+        // Можно добавить автоматический выход или редирект на страницу входа:
+        // window.location.href = '/login';
+      } else {
+        setError(error.response?.data?.message || 'Ошибка сохранения события');
+      }
     } finally {
       setLoading(false);
     }
@@ -130,13 +114,14 @@ const EventModal = ({
             {/* Дата */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Дата события
+                Дата события *
               </label>
               <input
                 type="date"
                 name="date"
                 value={formData.date}
                 onChange={handleInputChange}
+                required
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -226,7 +211,7 @@ const EventModal = ({
             </button>
             <button
               type="submit"
-              disabled={loading || !formData.title || formData.title.trim() === ''}
+              disabled={loading || !formData.title || !formData.date}
               className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               {loading ? 'Сохранение...' : (isEditing ? 'Сохранить' : 'Добавить')}

@@ -22,6 +22,14 @@ const authReducer = (state, action) => {
         isLoading: action.payload,
       };
     case 'LOGIN_SUCCESS':
+      // Сохраняем пользователя и токен в localStorage
+      if (action.payload.token) {
+        localStorage.setItem('authToken', action.payload.token);
+        localStorage.setItem('token', action.payload.token);
+      }
+      if (action.payload.user) {
+        localStorage.setItem('user', JSON.stringify(action.payload.user));
+      }
       return {
         ...state,
         user: action.payload.user,
@@ -31,6 +39,8 @@ const authReducer = (state, action) => {
         error: null,
       };
     case 'LOGOUT':
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
       return {
         ...initialState,
         isLoading: false,
@@ -71,8 +81,8 @@ export const AuthProvider = ({ children }) => {
 
       if (token && user) {
         try {
-          // Проверяем действительность токена
-          await authService.verifyToken();
+          // Проверяем действительность токена только если он есть
+          const response = await authService.verifyToken();
           dispatch({
             type: 'LOGIN_SUCCESS',
             payload: {
@@ -84,7 +94,7 @@ export const AuthProvider = ({ children }) => {
           // Токен недействителен
           localStorage.removeItem('authToken');
           localStorage.removeItem('user');
-          dispatch({ type: 'LOGOUT' });
+          dispatch({ type: 'SET_LOADING', payload: false });
         }
       } else {
         dispatch({ type: 'SET_LOADING', payload: false });
@@ -150,9 +160,11 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (userData) => {
     try {
       const response = await authService.updateProfile(userData);
+      // Сохраняем пользователя в localStorage
+      localStorage.setItem('user', JSON.stringify(response.user));
       dispatch({
         type: 'UPDATE_USER',
-        payload: response.user || response, // Поддержка разных форматов ответа
+        payload: response.user,
       });
       return response;
     } catch (error) {
@@ -170,6 +182,16 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: 'CLEAR_ERROR' });
   };
 
+  // Обновление данных пользователя в состоянии
+  const updateUser = (userData) => {
+    // Сохраняем пользователя в localStorage
+    localStorage.setItem('user', JSON.stringify(userData));
+    dispatch({
+      type: 'UPDATE_USER',
+      payload: userData,
+    });
+  };
+
   // Значения контекста
   const value = {
     ...state,
@@ -177,6 +199,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateProfile,
+    updateUser,
     clearError,
   };
 

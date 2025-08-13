@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { commentService } from '../services/api';
 
-const CommentSection = ({ memorialId, comments, onNewComment, section = 'general' }) => {
+const CommentSection = ({ memorialId, comments, onNewComment }) => {
   const { isAuthenticated, user } = useAuth();
   const [newComment, setNewComment] = useState('');
   const [authorName, setAuthorName] = useState('');
@@ -18,8 +18,7 @@ const CommentSection = ({ memorialId, comments, onNewComment, section = 'general
       const commentData = {
         memorial: memorialId,
         text: newComment,
-        authorName: isAuthenticated ? null : (authorName || 'Аноним'),
-        section: section
+        authorName: isAuthenticated ? null : (authorName || 'Аноним')
       };
 
       const createdComment = await commentService.create(commentData);
@@ -52,25 +51,6 @@ const CommentSection = ({ memorialId, comments, onNewComment, section = 'general
     return comment.authorName || 'Аноним';
   };
 
-  const getSectionText = () => {
-    switch(section) {
-      case 'epitaph':
-        return {
-          buttonText: 'Оставить комментарий к эпитафии',
-          placeholderText: 'Поделитесь мыслями об эпитафии...',
-          emptyText: 'Пока нет комментариев к эпитафии. Будьте первым, кто поделится мыслями.'
-        };
-      default:
-        return {
-          buttonText: 'Оставить воспоминание',
-          placeholderText: 'Поделитесь воспоминанием или выразите соболезнования...',
-          emptyText: 'Пока нет воспоминаний. Будьте первым, кто поделится.'
-        };
-    }
-  };
-
-  const sectionTexts = getSectionText();
-
   const getAuthorInitial = (comment) => {
     const name = getAuthorName(comment);
     return name.charAt(0).toUpperCase();
@@ -88,7 +68,7 @@ const CommentSection = ({ memorialId, comments, onNewComment, section = 'general
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            {sectionTexts.buttonText}
+            Оставить воспоминание
           </button>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -109,12 +89,12 @@ const CommentSection = ({ memorialId, comments, onNewComment, section = 'general
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {section === 'epitaph' ? 'Ваш комментарий к эпитафии' : 'Ваше воспоминание или соболезнование'}
+                Ваше воспоминание или соболезнование
               </label>
               <textarea
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder={sectionTexts.placeholderText}
+                placeholder="Поделитесь воспоминанием или выразите соболезнования..."
                 rows={4}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
@@ -149,7 +129,7 @@ const CommentSection = ({ memorialId, comments, onNewComment, section = 'general
       <div className="space-y-4">
         {(!comments || comments.length === 0) ? (
           <div className="text-center py-8">
-            <p className="text-gray-500">{sectionTexts.emptyText}</p>
+            <p className="text-gray-500">Пока нет воспоминаний. Будьте первым, кто поделится.</p>
           </div>
         ) : (
           Array.isArray(comments) && comments.map((comment) => (

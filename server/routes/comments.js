@@ -6,30 +6,29 @@ const optionalAuthMiddleware = require('../middleware/optionalAuthMiddleware');
 
 const router = express.Router();
 
+// Добавляем логирование всех запросов к роуту
+router.use((req, res, next) => {
+  console.log(`[Comments Route] ${req.method} ${req.originalUrl}`, req.body);
+  next();
+});
+
 // Получить комментарии для мемориала
 router.get('/memorial/:memorialId', async (req, res) => {
   try {
-    const { page = 1, limit = 10, section } = req.query;
-    
-    // Создаем фильтр
-    const filter = { 
-      memorial: req.params.memorialId, 
-      isApproved: true 
+    const { page = 1, limit = 10, type } = req.query;
+    const filter = {
+      memorial: req.params.memorialId,
+      isApproved: true
     };
-    
-    // Добавляем фильтр по секции, если указан
-    if (section) {
-      filter.section = section;
+    if (type) {
+      filter.type = type;
     }
-    
     const comments = await Comment.find(filter)
       .populate('author', 'name')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
-    
     const total = await Comment.countDocuments(filter);
-    
     res.json({
       comments,
       currentPage: page,
@@ -44,7 +43,7 @@ router.get('/memorial/:memorialId', async (req, res) => {
 // Добавить комментарий (опциональная авторизация - анонимные комментарии разрешены)
 router.post('/', optionalAuthMiddleware, async (req, res) => {
   try {
-    const { text, memorial, authorName, photo, section = 'general' } = req.body;
+    const { text, memorial, authorName, photo, type } = req.body;
     
     // Проверить, что мемориал существует
     const memorialDoc = await Memorial.findById(memorial);
@@ -63,7 +62,7 @@ router.post('/', optionalAuthMiddleware, async (req, res) => {
       author: req.user ? req.user.id : null,
       authorName: req.user ? null : authorName, // Имя только для анонимных комментариев
       photo,
-      section,
+      type: type || 'general', // Устанавливаем тип комментария
       ipAddress: req.ip
     });
     

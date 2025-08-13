@@ -41,7 +41,7 @@ const timelineEventSchema = new mongoose.Schema({
   }],
   eventType: {
     type: String,
-    enum: ['birth', 'childhood', 'education', 'career', 'family', 'achievement', 'travel', 'hobby', 'health', 'life', 'other'],
+    enum: ['birth', 'education', 'career', 'family', 'achievement', 'travel', 'health', 'hobby', 'life', 'other'],
     default: 'other'
   },
   location: {
@@ -61,11 +61,11 @@ const timelineEventSchema = new mongoose.Schema({
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false
   },
   authorName: {
     type: String,
-    required: true
+    required: false
   },
   createdAt: {
     type: Date,

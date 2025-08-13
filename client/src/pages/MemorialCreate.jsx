@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { newMemorialService, uploadService } from '../services/api.js';
 import { useAuth } from '../context/AuthContext';
 import ImageUpload from '../components/ImageUpload';
-import LocationPicker from '../components/LocationPicker';
 
 const MemorialCreate = () => {
   const navigate = useNavigate();
@@ -19,9 +18,7 @@ const MemorialCreate = () => {
     profileImage: null,
     cemetery: '',
     customSlug: '',
-    isPrivate: false,
-    coordinates: null,
-    address: ''
+    isPrivate: false
   });
 
   const handleChange = (e) => {
@@ -32,54 +29,10 @@ const MemorialCreate = () => {
     }));
   };
 
-  // Функция для создания slug из имени
-  const createSlugFromName = (firstName, lastName) => {
-    const fullName = `${firstName} ${lastName}`;
-    return fullName
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, '') // убираем специальные символы
-      .replace(/\s+/g, '-') // заменяем пробелы на дефисы
-      .trim();
-  };
-
-  // Автоматическое обновление slug при изменении имени
-  const handleNameChange = (e) => {
-    const { name, value } = e.target;
-    const newFormData = { ...formData, [name]: value };
-    
-    // Обновляем slug только если он пустой или совпадает с автогенерированным
-    if (name === 'firstName' || name === 'lastName') {
-      const autoSlug = createSlugFromName(
-        name === 'firstName' ? value : formData.firstName,
-        name === 'lastName' ? value : formData.lastName
-      );
-      
-      // Обновляем slug только если пользователь не вводил его вручную
-      if (!formData.customSlug || formData.customSlug === createSlugFromName(formData.firstName, formData.lastName)) {
-        newFormData.customSlug = autoSlug;
-      }
-    }
-    
-    setFormData(newFormData);
-  };
-
   const handleImageChange = (file) => {
     setFormData(prev => ({
       ...prev,
       profileImage: file
-    }));
-  };
-
-  // Обработчик изменения местоположения
-  const handleLocationChange = (locationData) => {
-    setFormData(prev => ({
-      ...prev,
-      coordinates: {
-        lat: locationData.lat,
-        lng: locationData.lng
-      },
-      address: locationData.address || prev.address,
-      coordinatesMethod: locationData.method
     }));
   };
 
@@ -110,28 +63,15 @@ const MemorialCreate = () => {
         biography: formData.biography,
         epitaph: formData.epitaph,
         profileImage: profileImagePath,
-        customSlug: formData.customSlug || null,
+        customSlug: formData.customSlug,
         isPrivate: formData.isPrivate,
         location: {
-          cemetery: formData.cemetery,
-          address: formData.address,
-          coordinates: formData.coordinates ? {
-            lat: formData.coordinates.lat,
-            lng: formData.coordinates.lng
-          } : undefined,
-          coordinatesMethod: formData.coordinatesMethod,
-          coordinatesSetAt: formData.coordinates ? new Date() : undefined
+          cemetery: formData.cemetery
         }
       };
       
       const memorial = await newMemorialService.create(memorialData);
-      
-      // Перенаправляем на новый красивый URL, если slug есть, иначе на старый формат
-      if (memorial.customSlug) {
-        navigate(`/${memorial.customSlug}`);
-      } else {
-        navigate(`/memorial/${memorial.shareUrl}`);
-      }
+      navigate(memorial.customSlug ? `/${memorial.customSlug}` : `/memorial/${memorial.shareUrl}`);
     } catch (error) {
       console.error('Ошибка создания мемориала:', error);
       alert('Ошибка при создании мемориала');
@@ -169,7 +109,7 @@ const MemorialCreate = () => {
                   id="firstName"
                   name="firstName"
                   value={formData.firstName}
-                  onChange={handleNameChange}
+                  onChange={handleChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                 />
@@ -184,37 +124,11 @@ const MemorialCreate = () => {
                   id="lastName"
                   name="lastName"
                   value={formData.lastName}
-                  onChange={handleNameChange}
+                  onChange={handleChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
-            </div>
-
-            {/* URL для мемориала */}
-            <div>
-              <label htmlFor="customSlug" className="block text-sm font-medium text-gray-700 mb-2">
-                Адрес мемориала (необязательно)
-              </label>
-              <div className="flex items-center">
-                <span className="text-gray-500 bg-gray-50 px-3 py-2 border border-r-0 border-gray-300 rounded-l-md">
-                  lapida.one/
-                </span>
-                <input
-                  type="text"
-                  id="customSlug"
-                  name="customSlug"
-                  value={formData.customSlug}
-                  onChange={handleChange}
-                  placeholder="иван-петров"
-                  pattern="[a-z0-9-]+"
-                  title="Только строчные буквы, цифры и дефисы"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-r-md focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Создайте красивую ссылку для мемориала. Оставьте пустым для автоматического создания.
-              </p>
             </div>
 
             {/* Даты */}
@@ -267,11 +181,30 @@ const MemorialCreate = () => {
               />
             </div>
 
-            {/* Местоположение захоронения */}
-            <LocationPicker
-              onLocationChange={handleLocationChange}
-              cemetery={formData.cemetery}
-            />
+            {/* Пользовательский URL */}
+            <div>
+              <label htmlFor="customSlug" className="block text-sm font-medium text-gray-700 mb-2">
+                Пользовательский URL
+              </label>
+              <div className="flex">
+                <span className="inline-flex items-center px-3 py-2 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                  lapida.one/
+                </span>
+                <input
+                  type="text"
+                  id="customSlug"
+                  name="customSlug"
+                  value={formData.customSlug}
+                  onChange={handleChange}
+                  placeholder="ivan-petrov"
+                  pattern="^[a-z0-9-]+$"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-r-md focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                Оставьте пустым для автоматического создания. Используйте только строчные буквы, цифры и дефисы.
+              </p>
+            </div>
 
             {/* Фото */}
             <ImageUpload

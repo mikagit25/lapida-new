@@ -30,17 +30,11 @@ const commentSchema = new mongoose.Schema({
     required: true
   },
   
-  // Секция мемориала (общие, эпитафия, биография и т.д.)
-  section: {
+  // Тип комментария (general, epitaph, timeline, etc.)
+  type: {
     type: String,
-    enum: ['general', 'epitaph', 'biography', 'photo'],
+    enum: ['general', 'epitaph', 'timeline', 'gallery'],
     default: 'general'
-  },
-  
-  // Тип комментария (цветок или обычный комментарий)
-  isFlower: {
-    type: Boolean,
-    default: false
   },
   
   // Опциональное фото к комментарию
@@ -66,7 +60,7 @@ const commentSchema = new mongoose.Schema({
 
 // Индексы
 commentSchema.index({ memorial: 1, createdAt: -1 });
-commentSchema.index({ memorial: 1, section: 1, createdAt: -1 });
+commentSchema.index({ memorial: 1, type: 1, createdAt: -1 });
 commentSchema.index({ author: 1, createdAt: -1 });
 commentSchema.index({ isApproved: 1 });
 

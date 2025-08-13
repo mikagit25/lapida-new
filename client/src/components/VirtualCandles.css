@@ -1,0 +1,105 @@
+/* Анимация мерцания свечей */
+@keyframes candleFlicker {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  25% {
+    opacity: 0.8;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+  75% {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+}
+
+.candle-glow {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+}
+
+.candle-container {
+  position: relative;
+}
+
+.candle-container::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: -1;
+  animation: candleGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes candleGlow {
+  0% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+/* Улучшенная анимация появления */
+.candle-appear {
+  animation: candleAppear 0.5s ease-out forwards;
+}
+
+@keyframes candleAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Стили для модальных окон */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  animation: modalAppear 0.3s ease-out forwards;
+}
+
+@keyframes modalAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Градиентные кнопки */
+.gradient-button {
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  transition: all 0.3s ease;
+}
+
+.gradient-button:hover {
+  background: linear-gradient(135deg, #d97706 0%, #dc2626 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+}
+
+.gradient-button:disabled {
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+  transform: none;
+  box-shadow: none;
+}

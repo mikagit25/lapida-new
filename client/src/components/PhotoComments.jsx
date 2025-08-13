@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002/api';
-
 const PhotoComments = ({ memorialId, photoUrl, isVisible, onClose }) => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -20,8 +18,13 @@ const PhotoComments = ({ memorialId, photoUrl, isVisible, onClose }) => {
   });
 
   useEffect(() => {
-    if (isVisible && photoUrl) {
+    if (isVisible) {
       console.log('Loading comments for:', { memorialId, photoUrl });
+      if (!memorialId || !photoUrl) {
+        setError('Не передан memorialId или photoUrl');
+        setComments([]);
+        return;
+      }
       loadComments();
     }
   }, [isVisible, photoUrl, memorialId]);
@@ -30,7 +33,7 @@ const PhotoComments = ({ memorialId, photoUrl, isVisible, onClose }) => {
     try {
       setLoading(true);
       const response = await fetch(
-        `${API_BASE_URL}/photo-comments/memorial/${memorialId}/photo?photoUrl=${encodeURIComponent(photoUrl)}`
+        `/api/photo-comments/memorial/${memorialId}/photo?photoUrl=${encodeURIComponent(photoUrl)}`
       );
       
       if (response.ok) {
@@ -61,7 +64,7 @@ const PhotoComments = ({ memorialId, photoUrl, isVisible, onClose }) => {
         hasToken: !!token
       });
       
-      const response = await fetch(`${API_BASE_URL}/photo-comments/memorial/${memorialId}/photo/comment`, {
+      const response = await fetch(`/api/photo-comments/memorial/${memorialId}/photo/comment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -96,7 +99,7 @@ const PhotoComments = ({ memorialId, photoUrl, isVisible, onClose }) => {
 
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`${API_BASE_URL}/photo-comments/comment/${commentId}`, {
+      const response = await fetch(`/api/photo-comments/comment/${commentId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -126,6 +129,7 @@ const PhotoComments = ({ memorialId, photoUrl, isVisible, onClose }) => {
 
   if (!isVisible) return null;
 
+  // Fallback: если ошибка загрузки, показываем блок комментариев с сообщением
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden">
@@ -150,6 +154,11 @@ const PhotoComments = ({ memorialId, photoUrl, isVisible, onClose }) => {
               <div className="text-center py-4">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
                 <p className="mt-2 text-gray-600">Загрузка комментариев...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-8 text-red-500">
+                <p>Ошибка загрузки комментариев: {error}</p>
+                <p className="text-sm mt-1">Комментарии временно недоступны.</p>
               </div>
             ) : comments.length === 0 ? (
               <div className="text-center py-8 text-gray-500">

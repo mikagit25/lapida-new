@@ -78,7 +78,7 @@ const ImageUpload = ({ currentImage, onImageChange, label = "Фото профи
         {previewImage ? (
           <div className="relative">
             <img
-              src={previewImage}
+              src={fixImageUrl(previewImage)}
               alt="Preview"
               className="w-full h-48 object-cover rounded-lg"
             />

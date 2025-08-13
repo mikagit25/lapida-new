@@ -164,7 +164,7 @@ const Memorials = () => {
                   </div>
                   
                   <Link
-                    to={`/memorial/${memorial.shareUrl}`}
+                    to={memorial.customSlug ? `/${memorial.customSlug}` : `/memorial/${memorial.shareUrl}`}
                     className="w-full bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 inline-block"
                     onClick={() => console.log('Memorials - clicking memorial with shareUrl:', memorial.shareUrl)}
                   >

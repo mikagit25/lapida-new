@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import TimelinePhotoModal from './TimelinePhotoModal';
+import GalleryImage from './GalleryImage';
+import { fixImageUrl } from '../utils/imageUrl';
+import { getApiBaseUrl } from '../config/api';
 
 const TimelineEvent = ({ 
   event, 
@@ -10,22 +13,12 @@ const TimelineEvent = ({
   isAuthenticated, 
   user, 
   onEdit, 
-  onDelete,
-  memorialId
+  onDelete 
 }) => {
-  const [photoModalOpen, setPhotoModalOpen] = useState(false);
-  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
-  
   const canEdit = isAuthenticated && user && (user.id === event.author || user.role === 'admin');
 
-  const handlePhotoClick = (photoIndex) => {
-    setSelectedPhotoIndex(photoIndex);
-    setPhotoModalOpen(true);
-  };
-
-  const handlePhotoNavigate = (newIndex) => {
-    setSelectedPhotoIndex(newIndex);
-  };
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [selectedPhotoDescription, setSelectedPhotoDescription] = useState('');
 
   return (
     <div className="relative flex items-start space-x-4">
@@ -88,35 +81,53 @@ const TimelineEvent = ({
           )}
 
           {/* Фотографии */}
-          {event.photos && event.photos.length > 0 && (
+          {Array.isArray(event.photos) && event.photos.filter(photo => {
+            // Фильтруем только валидные фото
+            if (!photo) return false;
+            if (typeof photo === 'string') return !!photo.trim();
+            if (typeof photo === 'object') return !!(photo.filename || photo.url || photo.path);
+            return false;
+          }).length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
-              {event.photos.map((photo, photoIndex) => (
-                <div key={photoIndex} className="aspect-square rounded-lg overflow-hidden bg-gray-100 relative group">
-                  <img
-                    src={photo.url || photo}
-                    alt={photo.caption || `Фото ${photoIndex + 1}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-200 cursor-pointer"
-                    onClick={() => handlePhotoClick(photoIndex)}
-                    onError={(e) => {
-                      console.error('Ошибка загрузки фото:', photo.url || photo);
-                      e.target.style.display = 'none';
-                    }}
-                  />
-                  {/* Иконка комментариев */}
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="bg-black bg-opacity-50 text-white p-1 rounded-full text-xs">
-                      💬
-                    </button>
+              {event.photos.filter(photo => {
+                if (!photo) return false;
+                if (typeof photo === 'string') return !!photo.trim();
+                if (typeof photo === 'object') return !!(photo.filename || photo.url || photo.path);
+                return false;
+              }).map((photo, photoIndex) => {
+                let photoUrl = '';
+                let description = '';
+                if (typeof photo === 'string') {
+                  photoUrl = photo;
+                } else if (photo && typeof photo === 'object') {
+                  photoUrl = photo.filename || photo.url || photo.path || '';
+                  description = photo.description || '';
+                }
+                if (!photoUrl) return null;
+                return (
+                  <div key={photoIndex} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                    <GalleryImage
+                      photo={{ url: photoUrl }}
+                      index={photoIndex}
+                      description={description}
+                      onClick={() => {
+                        setSelectedPhoto({ url: photoUrl });
+                        setSelectedPhotoDescription(description);
+                      }}
+                    />
                   </div>
-                  {/* Подпись к фото */}
-                  {photo.caption && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2">
-                      <p className="text-white text-xs">{photo.caption}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
+          )}
+
+          {/* Модальное окно для увеличения фото таймлайна */}
+          {selectedPhoto && (
+            <TimelinePhotoModal
+              photo={selectedPhoto}
+              description={selectedPhotoDescription}
+              onClose={() => setSelectedPhoto(null)}
+            />
           )}
 
           {/* Метаданные */}
@@ -132,19 +143,6 @@ const TimelineEvent = ({
           </div>
         </div>
       </div>
-
-      {/* Модальное окно для просмотра фотографий */}
-      {event.photos && event.photos.length > 0 && (
-        <TimelinePhotoModal
-          photo={event.photos[selectedPhotoIndex]}
-          memorialId={memorialId}
-          isOpen={photoModalOpen}
-          onClose={() => setPhotoModalOpen(false)}
-          allPhotos={event.photos}
-          currentIndex={selectedPhotoIndex}
-          onNavigate={handlePhotoNavigate}
-        />
-      )}
     </div>
   );
 };

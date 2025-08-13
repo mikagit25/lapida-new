@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { userService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -39,13 +39,11 @@ const UserSettings = () => {
     setSuccess('');
 
     try {
-      const updatedUser = await userService.updateSettings(settings);
-      // Обновляем пользователя в контексте
-      updateProfile(updatedUser);
+      await userService.updateSettings(settings);
       setSuccess('Настройки успешно сохранены');
     } catch (error) {
       console.error('Error updating settings:', error);
-      setError(error.response?.data?.message || 'Ошибка при сохранении настроек');
+      setError('Ошибка при сохранении настроек');
     } finally {
       setLoading(false);
     }
@@ -55,6 +53,7 @@ const UserSettings = () => {
     <div className="bg-white shadow rounded-lg">
       <div className="px-6 py-4 border-b border-gray-200">
         <h2 className="text-xl font-semibold text-gray-900">Настройки</h2>
+        <p className="text-sm text-gray-600">Управление вашими предпочтениями и приватностью</p>
       </div>
 
       <div className="px-6 py-6">
@@ -122,7 +121,7 @@ const UserSettings = () => {
               >
                 <option value="light">Светлая</option>
                 <option value="dark">Темная</option>
-                <option value="auto">Автоматически (по системе)</option>
+                <option value="auto">Автоматическая</option>
               </select>
             </div>
           </div>
@@ -141,13 +140,12 @@ const UserSettings = () => {
               >
                 <option value="ru">Русский</option>
                 <option value="en">English</option>
-                <option value="be">Беларуская</option>
+                <option value="uk">Українська</option>
               </select>
             </div>
           </div>
 
-          {/* Кнопки */}
-          <div className="flex justify-end space-x-3">
+          <div className="pt-6 border-t border-gray-200">
             <button
               type="submit"
               disabled={loading}

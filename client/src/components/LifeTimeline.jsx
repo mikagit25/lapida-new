@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { timelineService } from '../services/api';
 import TimelineEvent from './TimelineEvent';
 import EventModal from './EventModal';
 import TimelineStats from './TimelineStats';
+import { getApiBaseUrl } from '../config/api';
 
 const LifeTimeline = ({ memorialId }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [debugInfo, setDebugInfo] = useState(null);
   const [filter, setFilter] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [stats, setStats] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { user, isAuthenticated } = useAuth();
 
   // Типы событий
@@ -38,16 +40,28 @@ const LifeTimeline = ({ memorialId }) => {
   const loadEvents = async () => {
     try {
       setLoading(true);
-      const params = {
+      const params = new URLSearchParams({
+        memorialId,
         ...(filter !== 'all' && { eventType: filter }),
         ...(selectedYear !== 'all' && { year: selectedYear })
-      };
+      });
 
-      const data = await timelineService.getByMemorial(memorialId, params);
-      setEvents(data);
+      const API_BASE_URL = await getApiBaseUrl();
+      const response = await fetch(`${API_BASE_URL}/timeline/timeline?${params}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setEvents(Array.isArray(data) ? data : (data.events || []));
+        setDebugInfo(null);
+      } else {
+        let text = await response.text();
+        setError('Ошибка загрузки событий');
+        setDebugInfo(`HTTP ${response.status}: ${text}`);
+      }
     } catch (error) {
       console.error('Ошибка загрузки событий:', error);
       setError('Ошибка загрузки событий');
+      setDebugInfo(error?.message || String(error));
     } finally {
       setLoading(false);
     }
@@ -55,8 +69,7 @@ const LifeTimeline = ({ memorialId }) => {
 
   const loadStats = async () => {
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002/api';
-      // Пока используем fetch для статистики, так как эндпоинт может отличаться
+      const API_BASE_URL = await getApiBaseUrl();
       const response = await fetch(`${API_BASE_URL}/timeline/timeline/stats?memorialId=${memorialId}`);
       if (response.ok) {
         const data = await response.json();
@@ -101,9 +114,21 @@ const LifeTimeline = ({ memorialId }) => {
 
   const handleDeleteEvent = async (eventId) => {
     try {
-      await timelineService.delete(eventId);
-      await loadEvents();
-      await loadStats();
+      const token = localStorage.getItem('authToken');
+      const API_BASE_URL = await getApiBaseUrl();
+      const response = await fetch(`${API_BASE_URL}/timeline/timeline/${eventId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        await loadEvents();
+        await loadStats();
+      } else {
+        alert('Ошибка при удалении события');
+      }
     } catch (error) {
       console.error('Ошибка удаления события:', error);
       alert('Ошибка при удалении события');
@@ -122,6 +147,9 @@ const LifeTimeline = ({ memorialId }) => {
     return (
       <div className="text-center py-8">
         <div className="text-red-500 text-lg mb-2">❌ {error}</div>
+        {debugInfo && (
+          <pre className="text-xs text-gray-500 bg-gray-100 rounded p-2 overflow-x-auto max-w-xl mx-auto mt-2">{debugInfo}</pre>
+        )}
         <button
           onClick={loadEvents}
           className="text-blue-500 hover:text-blue-700"
@@ -133,13 +161,10 @@ const LifeTimeline = ({ memorialId }) => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      {/* Заголовок и кнопка добавления */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">
-          📅 Лента жизни
-        </h2>
-        {isAuthenticated && (
+    <div className="space-y-6">
+      {/* Кнопка добавления */}
+      {isAuthenticated && (
+        <div className="flex justify-end">
           <button
             onClick={() => setShowAddForm(true)}
             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center space-x-2"
@@ -147,8 +172,8 @@ const LifeTimeline = ({ memorialId }) => {
             <span>+</span>
             <span>Добавить событие</span>
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Статистика */}
       <TimelineStats 
@@ -218,30 +243,78 @@ const LifeTimeline = ({ memorialId }) => {
           )}
         </div>
       ) : (
-        <div className="relative">
-          {/* Вертикальная линия */}
-          <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          {/* Заголовок с возможностью сворачивания */}
+          <div 
+            className="flex items-center justify-between cursor-pointer mb-6"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            <div className="flex items-center">
+              <h3 className="text-lg font-semibold text-gray-900">
+                📅 Лента жизни
+              </h3>
+              {events.length > 0 && (
+                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {events.length}
+                </span>
+              )}
+            </div>
+            
+            {events.length > 3 && (
+              <div className="flex items-center space-x-2 text-gray-600">
+                <span className="text-sm">
+                  {isExpanded ? 'Скрыть' : `Показать еще ${events.length - 3}`}
+                </span>
+                <svg 
+                  className={`w-5 h-5 transform transition-transform duration-200 ${
+                    isExpanded ? 'rotate-180' : ''
+                  }`}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M19 9l-7 7-7-7" 
+                  />
+                </svg>
+              </div>
+            )}
+          </div>
 
-          <div className="space-y-8">
-            {events.map((event, index) => (
-              <TimelineEvent
-                key={event._id}
-                event={event}
-                index={index}
-                memorialId={memorialId}
-                getEventIcon={getEventIcon}
-                getEventTypeLabel={getEventTypeLabel}
-                formatDate={formatDate}
-                isAuthenticated={isAuthenticated}
-                user={user}
-                onEdit={setEditingEvent}
-                onDelete={() => {
-                  if (window.confirm('Удалить это событие?')) {
-                    handleDeleteEvent(event._id);
-                  }
-                }}
-              />
-            ))}
+          {/* Краткая информация в свернутом состоянии */}
+          {!isExpanded && events.length > 3 && (
+            <div className="mb-4 text-sm text-gray-600">
+              Показано {Math.min(3, events.length)} из {events.length} событий
+            </div>
+          )}
+
+          <div className="relative">
+            {/* Вертикальная линия */}
+            <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+
+            <div className="space-y-8">
+              {(isExpanded ? events : events.slice(0, 3)).map((event, index) => (
+                <TimelineEvent
+                  key={event._id}
+                  event={event}
+                  index={index}
+                  getEventIcon={getEventIcon}
+                  getEventTypeLabel={getEventTypeLabel}
+                  formatDate={formatDate}
+                  isAuthenticated={isAuthenticated}
+                  user={user}
+                  onEdit={setEditingEvent}
+                  onDelete={() => {
+                    if (window.confirm('Удалить это событие?')) {
+                      handleDeleteEvent(event._id);
+                    }
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
       )}

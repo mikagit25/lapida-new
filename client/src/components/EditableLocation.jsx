@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { newMemorialService } from '../services/api';
 import LocationPicker from './LocationPicker';
+import GravePhotoGallery from './GravePhotoGallery';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -28,14 +29,6 @@ const EditableLocation = ({ memorial, onUpdate }) => {
 
   // Проверяем права на редактирование
   const canEdit = user && (memorial.createdBy === user.id || memorial.createdBy._id === user.id || memorial.createdBy.toString() === user.id);
-  
-  // Отладочная информация
-  console.log('EditableLocation debug:', {
-    user: user,
-    userId: user?.id,
-    memorialCreatedBy: memorial.createdBy,
-    canEdit: canEdit
-  });
 
   const handleLocationChange = (newLocationData) => {
     setLocationData(prev => ({
@@ -173,12 +166,22 @@ const EditableLocation = ({ memorial, onUpdate }) => {
             />
           </div>
 
-          {/* Карта для выбора координат */}
-          <LocationPicker
-            initialCoordinates={locationData.coordinates ? [locationData.coordinates.lat, locationData.coordinates.lng] : null}
-            onLocationChange={handleLocationChange}
-            cemetery={locationData.cemetery}
-          />
+          {/* Карта и фото в сетке */}
+          <div className="space-y-6">
+            {/* Галерея фото захоронения */}
+            <div>
+              <GravePhotoGallery memorial={memorial} onUpdate={onUpdate} />
+            </div>
+
+            {/* Карта для выбора координат */}
+            <div>
+              <LocationPicker
+                initialCoordinates={locationData.coordinates ? [locationData.coordinates.lat, locationData.coordinates.lng] : null}
+                onLocationChange={handleLocationChange}
+                cemetery={locationData.cemetery}
+              />
+            </div>
+          </div>
 
           {/* Кнопки */}
           <div className="flex space-x-3 pt-4">
@@ -251,61 +254,74 @@ const EditableLocation = ({ memorial, onUpdate }) => {
             </div>
           )}
 
-          {/* Карта в режиме просмотра */}
+          {/* Карта и фото в режиме просмотра */}
           {memorial.location.coordinates && memorial.location.coordinates.lat && memorial.location.coordinates.lng && (
             <div className="mt-4">
-              <span className="text-gray-600 block text-sm mb-2">Местоположение на карте</span>
-              <div className="h-48 border border-gray-300 rounded-md overflow-hidden">
-                <MapContainer
-                  center={[memorial.location.coordinates.lat, memorial.location.coordinates.lng]}
-                  zoom={16}
-                  style={{ height: '100%', width: '100%' }}
-                >
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-                  <Marker position={[memorial.location.coordinates.lat, memorial.location.coordinates.lng]}>
-                    <Popup>
-                      <div className="text-center">
-                        <strong>{memorial.location.cemetery}</strong>
-                        {memorial.location.section && <br />}
-                        {memorial.location.section && `Секция: ${memorial.location.section}`}
-                        {memorial.location.plot && <br />}
-                        {memorial.location.plot && `Участок: ${memorial.location.plot}`}
-                      </div>
-                    </Popup>
-                  </Marker>
-                </MapContainer>
+              {/* Карта */}
+              <div className="mb-6">
+                <span className="text-gray-600 block text-sm mb-2">Местоположение на карте</span>
+                <div className="h-48 border border-gray-300 rounded-md overflow-hidden">
+                  <MapContainer
+                    center={[memorial.location.coordinates.lat, memorial.location.coordinates.lng]}
+                    zoom={16}
+                    style={{ height: '100%', width: '100%' }}
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    />
+                    <Marker position={[memorial.location.coordinates.lat, memorial.location.coordinates.lng]}>
+                      <Popup>
+                        <div className="text-center">
+                          <strong>{memorial.location.cemetery}</strong>
+                          {memorial.location.section && <br />}
+                          {memorial.location.section && `Секция: ${memorial.location.section}`}
+                          {memorial.location.plot && <br />}
+                          {memorial.location.plot && `Участок: ${memorial.location.plot}`}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  </MapContainer>
+                </div>
+                
+                {/* Координаты */}
+                <div className="mt-2 text-xs text-gray-500 text-center">
+                  Координаты: {memorial.location.coordinates.lat.toFixed(6)}, {memorial.location.coordinates.lng.toFixed(6)}
+                  {memorial.location.coordinatesMethod && (
+                    <span className="ml-2">
+                      ({memorial.location.coordinatesMethod === 'gps' ? 'GPS' : 
+                        memorial.location.coordinatesMethod === 'address' ? 'По адресу' : 'Вручную'})
+                    </span>
+                  )}
+                  {memorial.location.coordinatesSetAt && (
+                    <span className="block">
+                      Установлено: {new Date(memorial.location.coordinatesSetAt).toLocaleDateString('ru-RU')}
+                    </span>
+                  )}
+                </div>
               </div>
-              
-              {/* Координаты */}
-              <div className="mt-2 text-xs text-gray-500 text-center">
-                Координаты: {memorial.location.coordinates.lat.toFixed(6)}, {memorial.location.coordinates.lng.toFixed(6)}
-                {memorial.location.coordinatesMethod && (
-                  <span className="ml-2">
-                    ({memorial.location.coordinatesMethod === 'gps' ? 'GPS' : 
-                      memorial.location.coordinatesMethod === 'address' ? 'По адресу' : 'Вручную'})
-                  </span>
-                )}
-                {memorial.location.coordinatesSetAt && (
-                  <span className="block">
-                    Установлено: {new Date(memorial.location.coordinatesSetAt).toLocaleDateString('ru-RU')}
-                  </span>
-                )}
+
+              {/* Галерея фото захоронения */}
+              <div>
+                <GravePhotoGallery memorial={memorial} onUpdate={onUpdate} />
               </div>
             </div>
           )}
 
-          {/* Если координат нет, показываем сообщение */}
+          {/* Если координат нет, показываем сообщение и фото */}
           {!memorial.location.coordinates?.lat && (
-            <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-md text-center">
-              <p className="text-gray-600 text-sm">
-                <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Точные координаты местоположения не указаны
-              </p>
+            <div className="mt-4">
+              <div className="p-3 bg-gray-50 border border-gray-200 rounded-md text-center mb-6">
+                <p className="text-gray-600 text-sm">
+                  <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Точные координаты местоположения не указаны
+                </p>
+              </div>
+              
+              {/* Галерея фото захоронения */}
+              <GravePhotoGallery memorial={memorial} onUpdate={onUpdate} />
             </div>
           )}
         </div>

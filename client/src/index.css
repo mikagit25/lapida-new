@@ -1,4 +1,3 @@
-/* Leaflet CSS для карт */
 @import 'leaflet/dist/leaflet.css';
 
 @tailwind base;

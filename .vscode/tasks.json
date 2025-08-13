@@ -1,0 +1,60 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Server",
+			"type": "shell",
+			"command": "node app.js",
+			"group": "build",
+			"isBackground": true,
+			"options": {
+				"cwd": "d:\\Mikalai\\lapida-new\\server"
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Start Client",
+			"type": "shell",
+			"command": "cd client && npm run dev",
+			"group": "build", 
+			"isBackground": true,
+			"options": {
+				"cwd": "d:\\Mikalai\\lapida-new"
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Start Full Project",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"start-both.ps1"
+			],
+			"group": "build",
+			"options": {
+				"cwd": "d:\\Mikalai\\lapida-new"
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new"
+			}
+		}
+	]
+}

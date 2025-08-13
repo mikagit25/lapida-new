@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест URL системы Lapida.one</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .url-test {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .success { color: #28a745; }
+        .info { color: #17a2b8; }
+        .warning { color: #ffc107; }
+        h1 { color: #333; text-align: center; }
+        h2 { color: #555; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Тест URL системы Lapida.one</h1>
+        
+        <div class="test-section">
+            <h2>Информация о текущем окружении</h2>
+            <div class="url-test">
+                <strong>Текущий хост:</strong> <span id="currentHost"></span><br>
+                <strong>Текущий порт:</strong> <span id="currentPort"></span><br>
+                <strong>Протокол:</strong> <span id="currentProtocol"></span><br>
+                <strong>Полный URL:</strong> <span id="fullUrl"></span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Тестовые URL для мемориалов</h2>
+            <div id="urlTests"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Проверка доступности мемориалов</h2>
+            <div id="memorialTests"></div>
+            <button onclick="testMemorials()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Проверить доступность мемориалов
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Отображаем информацию о текущем окружении
+        document.getElementById('currentHost').textContent = window.location.hostname;
+        document.getElementById('currentPort').textContent = window.location.port || '(по умолчанию)';
+        document.getElementById('currentProtocol').textContent = window.location.protocol;
+        document.getElementById('fullUrl').textContent = window.location.href;
+
+        // Тестовые данные мемориалов
+        const testMemorials = [
+            {
+                fullName: 'test test',
+                shareUrl: 'test-test-1753888346336',
+                customSlug: 'test-test'
+            },
+            {
+                fullName: 'ерк цке',
+                shareUrl: 'ерк-цке-1753879618554',
+                customSlug: 'erk-tske'
+            },
+            {
+                fullName: 'test5 test5',
+                shareUrl: 'test5-test5-1754227690887',
+                customSlug: 'test5-test5'
+            }
+        ];
+
+        // Функции для генерации URL (копия из utils/memorialUrl.js)
+        const getMemorialUrl = (memorial) => {
+            if (memorial.customSlug) {
+                return `/${memorial.customSlug}`;
+            }
+            return `/memorial/${memorial.shareUrl || memorial._id}`;
+        };
+
+        const getMemorialShareUrl = (memorial) => {
+            const currentHost = window.location.hostname;
+            const isDevelopment = currentHost === 'localhost';
+            const isProduction = currentHost === 'lapida.one';
+            
+            if (memorial.customSlug && (isProduction || import.meta?.env?.PROD)) {
+                return `https://lapida.one/${memorial.customSlug}`;
+            } else if (memorial.customSlug && !isDevelopment) {
+                return `${window.location.origin}/${memorial.customSlug}`;
+            } else {
+                return `${window.location.origin}/memorial/${memorial.shareUrl || memorial._id}`;
+            }
+        };
+
+        const getMemorialDisplayUrl = (memorial) => {
+            const currentHost = window.location.hostname;
+            const isDevelopment = currentHost === 'localhost';
+            const isProduction = currentHost === 'lapida.one';
+            
+            if (memorial.customSlug && (isProduction || import.meta?.env?.PROD)) {
+                return `lapida.one/${memorial.customSlug}`;
+            } else if (memorial.customSlug && !isDevelopment) {
+                return `${currentHost}/${memorial.customSlug}`;
+            } else {
+                return `${window.location.origin}/memorial/${memorial.shareUrl || memorial._id}`;
+            }
+        };
+
+        // Генерируем тесты URL
+        const urlTestsContainer = document.getElementById('urlTests');
+        testMemorials.forEach((memorial, index) => {
+            const div = document.createElement('div');
+            div.className = 'url-test';
+            
+            const routerUrl = getMemorialUrl(memorial);
+            const shareUrl = getMemorialShareUrl(memorial);
+            const displayUrl = getMemorialDisplayUrl(memorial);
+            
+            div.innerHTML = `
+                <strong>Мемориал ${index + 1}: ${memorial.fullName}</strong><br>
+                <span class="info">Router URL:</span> ${routerUrl}<br>
+                <span class="info">Share URL:</span> ${shareUrl}<br>
+                <span class="info">Display URL:</span> ${displayUrl}<br>
+                <a href="${routerUrl}" target="_blank" style="color: #007bff;">→ Открыть мемориал</a>
+            `;
+            
+            urlTestsContainer.appendChild(div);
+        });
+
+        // Функция тестирования доступности мемориалов
+        async function testMemorials() {
+            const testContainer = document.getElementById('memorialTests');
+            testContainer.innerHTML = '<p>Тестируем доступность мемориалов...</p>';
+            
+            const results = [];
+            
+            for (const memorial of testMemorials) {
+                const routerUrl = getMemorialUrl(memorial);
+                const fullUrl = `${window.location.origin}${routerUrl}`;
+                
+                try {
+                    const response = await fetch(fullUrl);
+                    const status = response.ok ? 'success' : 'warning';
+                    const statusText = response.ok ? '✅ Доступен' : `⚠️ ${response.status} ${response.statusText}`;
+                    
+                    results.push({
+                        memorial: memorial.fullName,
+                        url: routerUrl,
+                        status: status,
+                        statusText: statusText
+                    });
+                } catch (error) {
+                    results.push({
+                        memorial: memorial.fullName,
+                        url: routerUrl,
+                        status: 'error',
+                        statusText: `❌ Ошибка: ${error.message}`
+                    });
+                }
+            }
+            
+            // Отображаем результаты
+            testContainer.innerHTML = results.map(result => `
+                <div class="url-test">
+                    <strong>${result.memorial}</strong><br>
+                    <span class="info">URL:</span> ${result.url}<br>
+                    <span class="${result.status}">${result.statusText}</span>
+                </div>
+            `).join('');
+        }
+
+        console.log('🎯 Тест страница загружена');
+        console.log('🌐 Текущее окружение:', {
+            host: window.location.hostname,
+            port: window.location.port,
+            protocol: window.location.protocol,
+            isDevelopment: window.location.hostname === 'localhost',
+            isProduction: window.location.hostname === 'lapida.one'
+        });
+    </script>
+</body>
+</html>

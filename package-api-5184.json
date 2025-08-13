@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "start-api-5184": "set PORT=5184&& node server/app.js"
+  }
+}

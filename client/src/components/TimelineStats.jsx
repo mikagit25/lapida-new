@@ -6,7 +6,7 @@ const TimelineStats = ({ stats, getEventTypeLabel, eventTypes }) => {
   return (
     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
-        📊 Статистика жизни
+        📊 Статистика ленты жизни
       </h3>
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">

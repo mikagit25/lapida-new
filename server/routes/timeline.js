@@ -42,16 +42,28 @@ const upload = multer({
 });
 
 // Получение событий временной линии мемориала (альтернативный путь)
+
+// Алиас для совместимости: /api/timeline → /api/timeline/timeline
+router.get('/', async (req, res, next) => {
+  // Просто проксируем на /timeline
+  req.url = '/timeline' + (req.url === '/' ? '' : req.url);
+  next();
+});
+
+// Основная реализация /timeline
 router.get('/timeline', async (req, res) => {
   try {
+    console.log('Timeline API called', req.query);
     const { memorialId, eventType, year, limit = 50, offset = 0 } = req.query;
 
     if (!memorialId) {
+      console.log('No memorialId');
       return res.status(400).json({ message: 'memorialId обязателен' });
     }
 
     // Проверяем существование мемориала
     const memorial = await Memorial.findById(memorialId);
+    console.log('Memorial found:', !!memorial);
     if (!memorial) {
       return res.status(404).json({ message: 'Мемориал не найден' });
     }
@@ -72,11 +84,13 @@ router.get('/timeline', async (req, res) => {
       filter.date = { $gte: startOfYear, $lte: endOfYear };
     }
 
+    console.log('Timeline filter:', filter);
     const events = await TimelineEvent.find(filter)
       .populate('author', 'name avatar')
       .sort({ date: 1 })
       .limit(parseInt(limit))
       .skip(parseInt(offset));
+    console.log('Events found:', events.length);
 
     // Вычисляем возраст для каждого события
     const eventsWithAge = events.map(event => {
@@ -89,7 +103,9 @@ router.get('/timeline', async (req, res) => {
       return eventObj;
     });
 
-    res.json(eventsWithAge);
+    // Возвращаем всегда массив (как в рабочей версии)
+    console.log('Returning events:', eventsWithAge.length);
+    res.json(Array.isArray(eventsWithAge) ? eventsWithAge : []);
   } catch (error) {
     console.error('Ошибка получения событий timeline:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
@@ -134,8 +150,21 @@ router.get('/memorial/:memorialId/timeline', async (req, res) => {
     const eventsWithAge = events.map(event => {
       const eventObj = event.toObject();
       if (memorial.birthDate) {
-        eventObj.ageAtEvent = event.calculateAge(memorial.birthDate);
-        eventObj.formattedAge = event.formattedAge;
+        const calculatedAge = event.calculateAge(memorial.birthDate);
+        if (calculatedAge !== null) {
+          eventObj.ageAtEvent = calculatedAge;
+          // Пересчитываем форматированный возраст
+          const years = Math.floor(calculatedAge);
+          const months = Math.floor((calculatedAge - years) * 12);
+          
+          if (years === 0) {
+            eventObj.formattedAge = months === 1 ? '1 месяц' : `${months} месяцев`;
+          } else if (months === 0) {
+            eventObj.formattedAge = years === 1 ? '1 год' : `${years} лет`;
+          } else {
+            eventObj.formattedAge = `${years} лет ${months} месяцев`;
+          }
+        }
       }
       return eventObj;
     });
@@ -171,7 +200,8 @@ router.post('/memorial/:memorialId/timeline', auth, upload.array('photos', 5), a
     const photos = [];
     if (req.files && req.files.length > 0) {
       req.files.forEach(file => {
-        const photoUrl = `http://localhost:${process.env.PORT || 5002}/upload/timeline/${file.filename}`;
+        // Сохраняем только относительный путь
+        const photoUrl = `/upload/timeline/${file.filename}`;
         photos.push({
           url: photoUrl,
           caption: '', // Можно добавить caption из запроса

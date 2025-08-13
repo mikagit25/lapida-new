@@ -1,0 +1,146 @@
+/* Анимация покачивания цветов */
+@keyframes flowerSway {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(-2deg) scale(1.02);
+  }
+  50% {
+    transform: rotate(0deg) scale(1.05);
+  }
+  75% {
+    transform: rotate(2deg) scale(1.02);
+  }
+}
+
+@keyframes flowerBounce {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.1);
+  }
+}
+
+@keyframes petalFloat {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-5px) rotate(5deg);
+  }
+}
+
+.flower-glow {
+  box-shadow: 0 0 15px rgba(236, 72, 153, 0.3);
+}
+
+.flower-container {
+  position: relative;
+}
+
+.flower-container::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: -1;
+  animation: flowerGlow 4s ease-in-out infinite alternate;
+}
+
+@keyframes flowerGlow {
+  0% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+/* Специальные анимации для разных типов цветов */
+.flower-rose {
+  animation: flowerSway 3s ease-in-out infinite;
+}
+
+.flower-tulip {
+  animation: flowerBounce 2.5s ease-in-out infinite;
+}
+
+.flower-sunflower {
+  animation: flowerSway 4s ease-in-out infinite;
+}
+
+.flower-lily {
+  animation: petalFloat 3.5s ease-in-out infinite;
+}
+
+.flower-bouquet {
+  animation: flowerBounce 3s ease-in-out infinite;
+}
+
+.flower-wreath {
+  animation: flowerSway 2s ease-in-out infinite;
+}
+
+/* Модальные окна */
+.flowers-modal {
+  backdrop-filter: blur(4px);
+}
+
+.flower-gallery-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.flower-gallery-item:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Горизонтальная прокрутка цветов */
+.flowers-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(236, 72, 153, 0.3) transparent;
+}
+
+.flowers-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.flowers-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+
+.flowers-scroll::-webkit-scrollbar-thumb {
+  background: rgba(236, 72, 153, 0.3);
+  border-radius: 3px;
+}
+
+.flowers-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(236, 72, 153, 0.5);
+}
+
+/* Эффекты при наведении на цветы */
+.flower-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.flower-comment {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.flower-item:hover .flower-comment {
+  max-height: 100px;
+}

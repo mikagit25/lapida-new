@@ -2,6 +2,56 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
+  // Галерея пользователя: пути вида /upload/gallery/имя_файла.jpg (как в мемориалах)
+  gallery: {
+    type: [String],
+    default: []
+  },
+  firstName: {
+    type: String,
+    trim: true,
+    maxlength: [50, 'Имя не должно превышать 50 символов'],
+    default: null
+  },
+  lastName: {
+    type: String,
+    trim: true,
+    maxlength: [50, 'Фамилия не должна превышать 50 символов'],
+    default: null
+  },
+  middleName: {
+    type: String,
+    trim: true,
+    maxlength: [50, 'Отчество не должно превышать 50 символов'],
+    default: null
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female', 'other', ''],
+    default: ''
+  },
+  dateOfBirth: {
+    type: String, // Можно заменить на Date, если нужно хранить как дату
+    default: null
+  },
+  country: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Страна не должна превышать 100 символов'],
+    default: null
+  },
+  city: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Город не должен превышать 100 символов'],
+    default: null
+  },
+  address: {
+    type: String,
+    trim: true,
+    maxlength: [200, 'Адрес не должен превышать 200 символов'],
+    default: null
+  },
   name: {
     type: String,
     required: [true, 'Имя обязательно'],
@@ -40,6 +90,31 @@ const userSchema = new mongoose.Schema({
     default: null,
     maxlength: [500, 'Биография не должна превышать 500 символов']
   },
+  biography: {
+    type: String,
+    default: null,
+    maxlength: [2000, 'Биография не должна превышать 2000 символов']
+  },
+  interests: {
+    type: String,
+    default: null,
+    maxlength: [1000, 'Интересы не должны превышать 1000 символов']
+  },
+  profession: {
+    type: String,
+    default: null,
+    maxlength: [200, 'Профессия не должна превышать 200 символов']
+  },
+  education: {
+    type: String,
+    default: null,
+    maxlength: [1000, 'Образование не должно превышать 1000 символов']
+  },
+  achievements: {
+    type: String,
+    default: null,
+    maxlength: [1000, 'Достижения не должны превышать 1000 символов']
+  },
   role: {
     type: String,
     enum: ['user', 'admin'],
@@ -52,49 +127,18 @@ const userSchema = new mongoose.Schema({
   verificationToken: String,
   resetPasswordToken: String,
   resetPasswordExpires: Date,
-  
-  // Поля для личного кабинета и статистики
-  statistics: {
-    memorialsCreated: {
-      type: Number,
-      default: 0
-    },
-    flowersLeft: {
-      type: Number,
-      default: 0
-    },
-    commentsLeft: {
-      type: Number,
-      default: 0
-    },
-    lastActivity: Date
-  },
-  
-  // Настройки пользователя
-  settings: {
-    emailNotifications: {
-      type: Boolean,
-      default: true
-    },
-    privacyLevel: {
-      type: String,
-      enum: ['public', 'friends', 'private'],
-      default: 'public'
-    },
-    theme: {
-      type: String,
-      enum: ['light', 'dark', 'auto'],
-      default: 'light'
-    },
-    language: {
-      type: String,
-      default: 'ru'
+  preferences: {
+    type: Object,
+    default: {
+      emailNotifications: true,
+      pushNotifications: true,
+      publicProfile: true,
+      showEmail: false,
+      showPhone: false,
+      language: 'ru',
+      theme: 'light'
     }
-  },
-  
-  // Информация о последнем посещении
-  lastLogin: Date,
-  ipAddress: String
+  }
 }, {
   timestamps: true
 });
