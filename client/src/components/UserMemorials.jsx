@@ -46,7 +46,7 @@ const UserMemorials = () => {
     }
 
     try {
-      await memorialService.delete(memorialId);
+      await memorialService.removeMemorial(memorialId);
       await fetchMemorials(); // Перезагружаем список
     } catch (error) {
       console.error('Error deleting memorial:', error);
@@ -231,12 +231,6 @@ const UserMemorials = () => {
                       className="bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm hover:bg-blue-200 transition-colors text-center"
                     >
                       Просмотр
-                    </Link>
-                    <Link
-                      to={`/edit-memorial/${memorial._id}`}
-                      className="bg-gray-100 text-gray-700 px-3 py-1 rounded-md text-sm hover:bg-gray-200 transition-colors text-center"
-                    >
-                      Редактировать
                     </Link>
                     
                     {/* Кнопки изменения статуса */}
