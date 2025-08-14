@@ -30,6 +30,7 @@ const GalleryImage = ({ photo, index, description, onClick }) => {
     return () => { isMounted = false; };
   }, [photo]);
 
+  if (!src) return null;
   return (
     <img
       src={src}

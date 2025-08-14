@@ -1,5 +1,6 @@
-import axios from 'axios';
+
 import { findWorkingApiUrl, API_BASE_URL } from '../config/api-universal';
+import axios from 'axios';
 
 // Асинхронно определяем рабочий API URL
 let apiInstance = null;
@@ -325,10 +326,11 @@ const uploadService = {
   },
   // Загрузка одного файла
   uploadSingle: async (file) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    const response = await api.post('/upload/single', formData);
-    return response.data;
+  const apiInstance = await getApi();
+  const formData = new FormData();
+  formData.append('image', file);
+  const response = await apiInstance.post('/upload/single', formData);
+  return response.data;
   },
 
   // Загрузка нескольких файлов

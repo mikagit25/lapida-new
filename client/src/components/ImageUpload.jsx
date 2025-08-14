@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { fixImageUrl } from '../utils/imageUrl';
 
 const ImageUpload = ({ currentImage, onImageChange, label = "Фото профиля" }) => {
   const [previewImage, setPreviewImage] = useState(currentImage || null);

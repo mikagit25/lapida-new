@@ -17,6 +17,7 @@ function ImageWithAsyncUrl({ image, alt, className }) {
     return () => { isMounted = false; };
   }, [image]);
   if (!imgUrl) return null;
+  if (imgUrl === '') return null;
   return (
     <img src={imgUrl} alt={alt} className={className} onError={() => console.error('Ошибка загрузки изображения:', imgUrl)} />
   );
@@ -29,6 +30,12 @@ const Gallery = ({ memorialId, images, onImagesUpdate, canEdit = false, currentP
   const handleDeleteImage = async (imgUrl) => {
     if (!window.confirm('Удалить это фото?')) return;
     try {
+      // Проверяем, что фото есть в галерее
+      const exists = galleryImages.some(img => (typeof img === 'string' ? img : img.url) === imgUrl);
+      if (!exists) {
+        alert('Фото не найдено в галерее');
+        return;
+      }
       let token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
       if (!token && document.cookie) {
         const match = document.cookie.match(/(?:^|; )token=([^;]*)/);
@@ -63,21 +70,7 @@ const Gallery = ({ memorialId, images, onImagesUpdate, canEdit = false, currentP
   const [commentsPhotoUrl, setCommentsPhotoUrl] = useState('');
 
   React.useEffect(() => {
-    if ((!images || images.length === 0) && memorialId) {
-      fetch(`/api/gallery-recovery/memorials/${memorialId}/images`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data.images) && data.images.length > 0) {
-            setRecoveredImages(data.images);
-            setGalleryImages(data.images);
-          }
-        })
-        .catch(err => {
-          console.error('Ошибка восстановления галереи:', err);
-        });
-    } else {
-      setGalleryImages(images && images.length > 0 ? images : []);
-    }
+  setGalleryImages(images && images.length > 0 ? images : []);
   }, [images, memorialId]);
 
   const openLightbox = (index) => {

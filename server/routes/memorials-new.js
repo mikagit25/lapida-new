@@ -215,10 +215,11 @@ router.post('/', authMiddleware, async (req, res) => {
       epitaph,
       profileImage,
       location,
-      galleryImages = [],
       timeline = [],
       isPrivate = false
     } = req.body;
+    // galleryImages всегда пустой массив при создании
+    const galleryImages = Array.isArray(req.body.galleryImages) ? req.body.galleryImages : [];
     // Валидация обязательных полей
     if (!firstName || !lastName || !birthDate || !deathDate || !location?.cemetery) {
       return res.status(400).json({ 
@@ -263,6 +264,9 @@ router.put('/:id', authMiddleware, async (req, res) => {
     if (!memorial) {
       return res.status(404).json({ message: 'Мемориал не найден' });
     }
+    const allowedUpdates = [
+      'firstName', 'lastName', 'birthDate', 'deathDate', 'biography', 'epitaph', 'profileImage', 'galleryImages', 'timeline', 'isPrivate', 'location'
+    ];
     allowedUpdates.forEach(field => {
       if (req.body[field] !== undefined) {
         if (field === 'birthDate' || field === 'deathDate') {
