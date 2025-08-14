@@ -76,13 +76,17 @@ const Profile = () => {
         <div className="bg-white shadow rounded-lg mb-6">
           <div className="px-6 py-4">
             <div className="flex items-center space-x-4">
-              {user.photo && (
-                <AsyncProfileImage
-                  url={user.photo}
-                  alt="Фото профиля"
-                  className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-                />
-              )}
+              <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200 flex items-center justify-center bg-gray-100">
+                {user.avatar ? (
+                  <AsyncProfileImage
+                    url={user.avatar}
+                    alt="Аватар"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-gray-400 text-3xl">👤</span>
+                )}
+              </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">{user.name || 'Пользователь'}</h1>
                 <p className="text-gray-600">{user.email}</p>
@@ -172,15 +176,16 @@ const Profile = () => {
                         </div>
                       )}
                     </div>
-                    {/* Галерея пользователя (теперь Gallery.jsx, как в мемориалах) */}
-                    <Gallery
-                      images={user.gallery}
-                      canEdit={true}
-                      currentProfileImage={user.photo}
-                      userMode={true}
-                      onImagesUpdate={imgs => { user.gallery = imgs; }}
-                      onProfileImageChange={() => window.location.reload()}
-                    />
+                    {/* Новый раздел галереи пользователя */}
+                    <div className="bg-white rounded-lg shadow p-6 mb-6">
+                      <h2 className="text-lg font-semibold text-gray-900 mb-4">Галерея пользователя</h2>
+                      <Gallery
+                        images={user.gallery}
+                        canEdit={true}
+                        currentProfileImage={user.photo}
+                        userMode={true}
+                      />
+                    </div>
                   </div>
                   <div>
                     <div className="bg-gray-50 rounded-lg p-6">

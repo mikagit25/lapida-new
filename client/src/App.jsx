@@ -21,17 +21,28 @@ function AsyncImage({ url, alt, className, onError }) {
   React.useEffect(() => {
     let isMounted = true;
     (async () => {
+      if (!url) {
+        if (isMounted) setImgUrl('');
+        return;
+      }
       const fixed = await fixImageUrl(url);
       if (isMounted) setImgUrl(fixed);
     })();
     return () => { isMounted = false; };
   }, [url]);
+  if (!imgUrl) return null;
   return <img src={imgUrl} alt={alt} className={className} onError={onError} />;
 }
 
 // Навигация с аутентификацией
 const Navigation = () => {
   const { user, isAuthenticated, logout } = useAuth();
+
+  useEffect(() => {
+    if (user?.avatar) {
+      console.log('user.avatar:', user.avatar);
+    }
+  }, [user]);
 
   return (
     <nav className="bg-white shadow-lg">
@@ -75,6 +86,20 @@ const Navigation = () => {
             {isAuthenticated ? (
               <>
                 <NotificationBell />
+                {/* Аватар возле имени (асинхронный компонент) */}
+                {user?.avatar ? (
+                  <AsyncImage
+                    url={user.avatar}
+                    alt="Avatar"
+                    className="w-8 h-8 rounded-full object-cover border border-gray-300"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
                 <span className="text-gray-700">Привет, {user?.name}</span>
                 <Link to="/profile" className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
                   Профиль

@@ -89,6 +89,26 @@ const upload = multer({ storage });
 
 // Загрузка аватара
 router.post('/me/avatar', auth, upload.single('avatar'), async (req, res) => {
+// Удаление аватара
+router.delete('/me/avatar', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user || !user.avatar) {
+      return res.status(404).json({ message: 'Аватар не найден' });
+    }
+    // Путь к файлу аватара
+    const filePath = path.join(__dirname, '../public', user.avatar);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+    user.avatar = null;
+    await user.save();
+    res.json({ message: 'Аватар удалён', user });
+  } catch (error) {
+    console.error('Ошибка удаления аватара:', error);
+    res.status(500).json({ message: 'Ошибка сервера при удалении аватара' });
+  }
+});
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'Файл не загружен' });

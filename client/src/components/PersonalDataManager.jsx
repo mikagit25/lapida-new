@@ -1,3 +1,21 @@
+// Асинхронный компонент для аватара/превью
+function AsyncAvatarImage({ url, alt, className }) {
+  const [imgUrl, setImgUrl] = React.useState('');
+  React.useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      if (!url) {
+        if (isMounted) setImgUrl('');
+        return;
+      }
+      const fixed = await fixImageUrl(url);
+      if (isMounted) setImgUrl(fixed);
+    })();
+    return () => { isMounted = false; };
+  }, [url]);
+  if (!imgUrl) return null;
+  return <img src={imgUrl} alt={alt} className={className} />;
+}
 import React, { useState, useEffect } from 'react';
 import { userService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -61,6 +79,7 @@ const PersonalDataManager = () => {
       });
 
       setAvatarPreview(user.avatar ? user.avatar : '');
+      console.log('PersonalDataManager user.avatar:', user.avatar);
     }
   }, [user]);
 
@@ -71,7 +90,13 @@ const PersonalDataManager = () => {
     setSuccess('');
 
     try {
-      await updateProfile(profileData);
+      // Объединяем все поля профиля и биографии в один объект
+      const allProfileData = {
+        ...profileData,
+        ...biographyData
+      };
+      const response = await updateProfile(allProfileData);
+      updateUser(response.user);
       setSuccess('Профиль успешно обновлен');
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -130,10 +155,11 @@ const PersonalDataManager = () => {
       const formData = new FormData();
       formData.append('avatar', avatarFile);
 
-      const response = await userService.uploadAvatar(formData);
-      updateUser(response.user);
-      setSuccess('Аватар успешно обновлен');
-      setAvatarFile(null);
+  const response = await userService.uploadAvatar(formData);
+  updateUser(response.user);
+  setAvatarPreview(response.user.avatar || '');
+  setSuccess('Аватар успешно обновлен');
+  setAvatarFile(null);
     } catch (error) {
       console.error('Error uploading avatar:', error);
       setError(error.response?.data?.message || 'Ошибка при загрузке аватара');
@@ -149,13 +175,22 @@ const PersonalDataManager = () => {
 
     try {
       const response = await userService.deleteAvatar();
-      updateUser(response.data.user);
+      if (response && response.user) {
+        updateUser(response.user);
+      }
       setAvatarPreview('');
       setAvatarFile(null);
       setSuccess('Аватар удален');
     } catch (error) {
-      console.error('Error deleting avatar:', error);
-      setError(error.response?.data?.message || 'Ошибка при удалении аватара');
+      if (error.response?.status === 404) {
+        // Аватар не найден — просто сбросить preview
+        setAvatarPreview('');
+        setAvatarFile(null);
+        setSuccess('Аватар уже удалён');
+      } else {
+        console.error('Error deleting avatar:', error);
+        setError(error.response?.data?.message || 'Ошибка при удалении аватара');
+      }
     } finally {
       setLoading(false);
     }
@@ -441,21 +476,21 @@ const PersonalDataManager = () => {
           <div className="space-y-6">
             <div className="flex items-center space-x-6">
               <div className="flex-shrink-0">
-                <div className="w-32 h-32 rounded-full bg-gray-200 overflow-hidden">
-                  {avatarPreview ? (
-                    <img
-                      src={fixImageUrl(avatarPreview)}
-                      alt="Avatar"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
+                  <div className="w-32 h-32 rounded-full bg-gray-200 overflow-hidden">
+                    {(avatarPreview || user.avatar) ? (
+                      <AsyncAvatarImage
+                        url={avatarPreview || user.avatar}
+                        alt="Avatar"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
               </div>
 
               <div className="flex-1">
@@ -485,7 +520,7 @@ const PersonalDataManager = () => {
                     </button>
                   )}
 
-                  {avatarPreview && (
+                  {(avatarPreview || user.avatar) && (
                     <button
                       onClick={deleteAvatar}
                       disabled={loading}

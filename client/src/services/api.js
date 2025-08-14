@@ -314,6 +314,12 @@ const timelineService = {
 
 // Сервис загрузки файлов
 const uploadService = {
+  // Удаление аватара пользователя
+  removeAvatar: async () => {
+    const api = await getApi();
+    const response = await api.delete('/users/me/avatar');
+    return response.data;
+  },
   // Загрузка фото в галерею пользователя
   uploadUserGallery: async (formData) => {
     const api = await getApi();
@@ -321,6 +327,14 @@ const uploadService = {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+    });
+    return response.data;
+  },
+  // Удаление фото из галереи пользователя
+  removeUserGallery: async (imageUrl) => {
+    const api = await getApi();
+    const response = await api.delete('/users/me/gallery', {
+      data: { imageUrl }
     });
     return response.data;
   },

@@ -180,7 +180,13 @@ router.get('/profile', auth, async (req, res) => {
 // Обновление профиля
 router.put('/profile', auth, upload.single('photo'), async (req, res) => {
   try {
-    const { name, email, phone, bio } = req.body;
+    // Собираем все возможные поля профиля
+    const {
+      name, email, phone, bio,
+      firstName, lastName, middleName,
+      gender, dateOfBirth, country, city, address,
+      biography, interests, profession, education, achievements
+    } = req.body;
     const updates = {};
 
     if (name) updates.name = name;
@@ -199,6 +205,19 @@ router.put('/profile', auth, upload.single('photo'), async (req, res) => {
     }
     if (phone !== undefined) updates.phone = phone;
     if (bio !== undefined) updates.bio = bio;
+    if (firstName !== undefined) updates.firstName = firstName;
+    if (lastName !== undefined) updates.lastName = lastName;
+    if (middleName !== undefined) updates.middleName = middleName;
+    if (gender !== undefined) updates.gender = gender;
+    if (dateOfBirth !== undefined) updates.dateOfBirth = dateOfBirth;
+    if (country !== undefined) updates.country = country;
+    if (city !== undefined) updates.city = city;
+    if (address !== undefined) updates.address = address;
+    if (biography !== undefined) updates.biography = biography;
+    if (interests !== undefined) updates.interests = interests;
+    if (profession !== undefined) updates.profession = profession;
+    if (education !== undefined) updates.education = education;
+    if (achievements !== undefined) updates.achievements = achievements;
 
     // Если загружен новый файл фото
     if (req.file) {
@@ -220,18 +239,11 @@ router.put('/profile', auth, upload.single('photo'), async (req, res) => {
       { new: true, runValidators: true }
     );
 
+    // Получаем полный объект пользователя после обновления
+    const fullUser = await User.findById(user._id);
     res.json({
       message: 'Профиль успешно обновлен',
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        bio: user.bio,
-        photo: user.photo,
-        role: user.role,
-        createdAt: user.createdAt
-      }
+      user: fullUser.toJSON()
     });
   } catch (error) {
     console.error('Ошибка обновления профиля:', error);

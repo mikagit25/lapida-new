@@ -30,29 +30,36 @@ const Gallery = ({ memorialId, images, onImagesUpdate, canEdit = false, currentP
   const handleDeleteImage = async (imgUrl) => {
     if (!window.confirm('Удалить это фото?')) return;
     try {
-      // Проверяем, что фото есть в галерее
       const exists = galleryImages.some(img => (typeof img === 'string' ? img : img.url) === imgUrl);
       if (!exists) {
         alert('Фото не найдено в галерее');
         return;
       }
-      let token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
-      if (!token && document.cookie) {
-        const match = document.cookie.match(/(?:^|; )token=([^;]*)/);
-        if (match) token = match[1];
+      let updatedImages;
+      if (userMode) {
+        // Для профиля пользователя
+        const response = await uploadService.removeUserGallery(imgUrl);
+        updatedImages = response.images || [];
+      } else {
+        // Для мемориала
+        let token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+        if (!token && document.cookie) {
+          const match = document.cookie.match(/(?:^|; )token=([^;]*)/);
+          if (match) token = match[1];
+        }
+        const res = await fetch(`/api/memorials/${memorialId}/gallery`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({ photoUrl: imgUrl })
+        });
+        const result = await res.json();
+        console.log('Удаление файла результат:', result);
+        if (!res.ok) throw new Error(result.message || 'Ошибка удаления');
+        updatedImages = galleryImages.filter(img => (typeof img === 'string' ? img : img.url) !== imgUrl);
       }
-      const res = await fetch(`/api/memorials/${memorialId}/gallery`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({ photoUrl: imgUrl })
-      });
-      const result = await res.json();
-      console.log('Удаление файла результат:', result);
-      if (!res.ok) throw new Error(result.message || 'Ошибка удаления');
-      const updatedImages = galleryImages.filter(img => (typeof img === 'string' ? img : img.url) !== imgUrl);
       if (onImagesUpdate) onImagesUpdate(updatedImages);
       setGalleryImages(updatedImages);
     } catch (e) {
@@ -78,20 +85,36 @@ const Gallery = ({ memorialId, images, onImagesUpdate, canEdit = false, currentP
     const img = galleryImages[index];
     if (typeof img === 'string') {
       setSelectedImage({ url: img, caption: '' });
+    } else if (img && typeof img === 'object') {
+      setSelectedImage({ url: img.url, caption: img.caption || '' });
     } else {
-      setSelectedImage(img);
+      setSelectedImage({ url: '', caption: '' });
     }
   };
   const closeLightbox = () => setSelectedImage(null);
   const nextImage = () => {
     const nextIndex = (lightboxIndex + 1) % galleryImages.length;
     setLightboxIndex(nextIndex);
-    setSelectedImage(galleryImages[nextIndex]);
+    const img = galleryImages[nextIndex];
+    if (typeof img === 'string') {
+      setSelectedImage({ url: img, caption: '' });
+    } else if (img && typeof img === 'object') {
+      setSelectedImage({ url: img.url, caption: img.caption || '' });
+    } else {
+      setSelectedImage({ url: '', caption: '' });
+    }
   };
   const prevImage = () => {
     const prevIndex = (lightboxIndex - 1 + galleryImages.length) % galleryImages.length;
     setLightboxIndex(prevIndex);
-    setSelectedImage(galleryImages[prevIndex]);
+    const img = galleryImages[prevIndex];
+    if (typeof img === 'string') {
+      setSelectedImage({ url: img, caption: '' });
+    } else if (img && typeof img === 'object') {
+      setSelectedImage({ url: img.url, caption: img.caption || '' });
+    } else {
+      setSelectedImage({ url: '', caption: '' });
+    }
   };
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') closeLightbox();
@@ -103,19 +126,26 @@ const Gallery = ({ memorialId, images, onImagesUpdate, canEdit = false, currentP
     setUploading(true);
     try {
       let response;
-      if (memorialId && !userMode) {
-        // Получаем токен
+      if (userMode) {
+        // Для профиля пользователя
+        const formData = new FormData();
+        Array.from(files).forEach(file => {
+          formData.append('images', file);
+        });
+        response = await uploadService.uploadUserGallery(formData);
+        if (onImagesUpdate) onImagesUpdate(response.images);
+        setGalleryImages(response.images || []);
+      } else if (memorialId) {
+        // Для мемориала
         let token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
         if (!token && document.cookie) {
           const match = document.cookie.match(/(?:^|; )token=([^;]*)/);
           if (match) token = match[1];
         }
-        // Формируем FormData
         const formData = new FormData();
         Array.from(files).forEach(file => {
           formData.append('photos', file);
         });
-        // Отправляем запрос
         const res = await fetch(`/api/memorials/${memorialId}/gallery`, {
           method: 'POST',
           body: formData,
@@ -134,11 +164,6 @@ const Gallery = ({ memorialId, images, onImagesUpdate, canEdit = false, currentP
         response = await res.json();
         if (onImagesUpdate) onImagesUpdate(response.galleryImages || response.images || response.fileUrls);
         setGalleryImages(response.galleryImages || response.images || response.fileUrls || []);
-      } else {
-        // Для профиля пользователя — как было
-        response = await uploadService.uploadMultiple(Array.from(files));
-        if (onImagesUpdate) onImagesUpdate(response.fileUrls);
-        setGalleryImages(response.fileUrls || []);
       }
     } catch (e) {
       alert('Ошибка загрузки');
