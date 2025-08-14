@@ -365,6 +365,7 @@ const App = () => {
               <Route path="/create-memorial" element={<PrivateRoute><MemorialCreate /></PrivateRoute>} />
               <Route path="/companies" element={<Companies />} />
               <Route path="/companies/:id" element={<CompanyPage />} />
+              <Route path="/companies/:id/cabinet" element={<CompanyCabinet />} />
               <Route path="/business" element={<Business />} />
               <Route path="/register-company" element={<RegisterCompany />} />
               <Route path="/company-cabinet/:id" element={<CompanyCabinet />} />
