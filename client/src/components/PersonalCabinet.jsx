@@ -180,9 +180,14 @@ const PersonalCabinet = () => {
                   </div>
                   <div className="ml-4">
                     <h3 className="text-sm font-medium text-gray-900">Создать мемориал</h3>
-                    <p className="text-xs text-gray-500">Новая мемориальная страница</p>
+                    <p className="text-xs text-gray-500">Создайте новый мемориал</p>
                   </div>
                 </Link>
+                <div className="mt-4">
+                  <Link to="/register-company" className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 text-lg font-semibold inline-block">
+                    Зарегистрировать компанию
+                  </Link>
+                </div>
 
                 <Link
                   to="/profile?tab=personal"

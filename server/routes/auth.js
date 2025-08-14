@@ -133,6 +133,14 @@ router.post('/login', async (req, res) => {
     // Генерация токена
     const token = generateToken(user._id);
 
+    // Установка токена в cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: false, // для локальной разработки
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 дней
+    });
+
     res.json({
       message: 'Авторизация успешна',
       token,

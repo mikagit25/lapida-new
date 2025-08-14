@@ -4,31 +4,24 @@ const User = require('../models/User');
 const auth = async (req, res, next) => {
   try {
     const authHeader = req.header('Authorization');
-    console.log('Auth header:', authHeader);
-    
-    const token = authHeader?.replace('Bearer ', '');
-    console.log('Token extracted:', !!token);
-    
+    const cookieToken = req.cookies?.token;
+    let token = null;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.replace('Bearer ', '');
+    } else if (cookieToken) {
+      token = cookieToken;
+    }
     if (!token) {
-      console.log('No token provided');
       return res.status(401).json({ message: 'Токен не предоставлен' });
     }
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Token decoded successfully:', decoded.userId);
-    
     const user = await User.findById(decoded.userId);
-    console.log('User found:', !!user);
-    
     if (!user) {
-      console.log('User not found in database');
       return res.status(401).json({ message: 'Пользователь не найден' });
     }
-
     req.user = user;
     next();
   } catch (error) {
-    console.error('Ошибка аутентификации:', error);
     res.status(401).json({ message: 'Неверный токен' });
   }
 };

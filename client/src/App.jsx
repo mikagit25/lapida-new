@@ -14,6 +14,12 @@ import NotificationBell from './components/NotificationBell';
 import Search from './components/Search';
 import { newMemorialService } from './services/api';
 import { fixImageUrl } from './utils/imageUrl';
+import Companies from './pages/Companies';
+import CompanyPage from './pages/CompanyPage';
+import Business from './pages/Business';
+import RegisterCompany from './pages/RegisterCompany';
+import CompanyCabinet from './pages/CompanyCabinet';
+import ProductPage from './pages/ProductPage';
 
 // Асинхронный компонент для загрузки изображения
 function AsyncImage({ url, alt, className, onError }) {
@@ -63,6 +69,12 @@ const Navigation = () => {
               )}
               <Link to="/memorials" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                 Мемориалы
+              </Link>
+              <Link to="/companies" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                Компании
+              </Link>
+              <Link to="/business" className="text-blue-700 hover:text-blue-900 px-3 py-2 rounded-md text-sm font-medium font-semibold">
+                Для бизнеса
               </Link>
               <Link to="/test-comments" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                 Тест комментариев
@@ -351,6 +363,12 @@ const App = () => {
               <Route path="/test-comments" element={<TestPhotoComments />} />
               <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path="/create-memorial" element={<PrivateRoute><MemorialCreate /></PrivateRoute>} />
+              <Route path="/companies" element={<Companies />} />
+              <Route path="/companies/:id" element={<CompanyPage />} />
+              <Route path="/business" element={<Business />} />
+              <Route path="/register-company" element={<RegisterCompany />} />
+              <Route path="/company-cabinet/:id" element={<CompanyCabinet />} />
+              <Route path="/companies/:companyId/products/:productId" element={<ProductPage />} />
               {/* Роут для красивых URL - должен быть последним */}
               <Route path="/:slug" element={<MemorialView />} />
             </Routes>
