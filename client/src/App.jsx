@@ -369,7 +369,7 @@ const App = () => {
               <Route path="/business" element={<Business />} />
               <Route path="/register-company" element={<RegisterCompany />} />
               <Route path="/company-cabinet/:id" element={<CompanyCabinet />} />
-              <Route path="/companies/:companyId/products/:productId" element={<ProductPage />} />
+              <Route path="/products/:slug" element={<ProductPage />} />
               {/* Роут для красивых URL - должен быть последним */}
               <Route path="/:slug" element={<MemorialView />} />
             </Routes>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import QRCode from 'react-qr-code';
 import { useParams, Link } from 'react-router-dom';
 
 const ProductPage = () => {
@@ -10,14 +11,14 @@ const ProductPage = () => {
   };
   const closeLightbox = () => setLightboxOpen(false);
   const nextImage = () => {
-    if (!product.gallery || product.gallery.length === 0) return;
-    setLightboxIndex(i => (i + 1) % product.gallery.length);
+    if (!product.images || product.images.length === 0) return;
+    setLightboxIndex(i => (i + 1) % product.images.length);
   };
   const prevImage = () => {
-    if (!product.gallery || product.gallery.length === 0) return;
-    setLightboxIndex(i => (i - 1 + product.gallery.length) % product.gallery.length);
+    if (!product.images || product.images.length === 0) return;
+    setLightboxIndex(i => (i - 1 + product.images.length) % product.images.length);
   };
-  const { companyId, productId } = useParams();
+  const { slug } = useParams();
   const [product, setProduct] = useState(null);
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,18 +27,18 @@ const ProductPage = () => {
 
   useEffect(() => {
     fetchProduct();
-  }, [companyId, productId]);
+  }, [slug]);
 
   const fetchProduct = async () => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`/api/companies/${companyId}`);
+  const res = await fetch(`http://localhost:5005/api/products/${slug}`);
       const data = await res.json();
-      setCompany(data.company || null);
-      if (data.company && data.company.products) {
-        const prod = data.company.products.find(p => p._id === productId);
-        setProduct(prod || null);
+      if (data.product) {
+        setProduct(data.product);
+      } else {
+        setError('Товар не найден');
       }
     } catch (e) {
       setError('Ошибка загрузки товара');
@@ -51,39 +52,50 @@ const ProductPage = () => {
     setTimeout(() => setOrderSuccess(false), 2000);
   };
 
+  // Lightbox галерея
+  const showGallery = lightboxOpen && product.images && product.images.length > 0;
+
   if (loading) return <div className="p-8">Загрузка...</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
   if (!product) return <div className="p-8">Товар не найден</div>;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      {showGallery && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center">
+          <button className="absolute top-4 right-8 text-white text-3xl" onClick={closeLightbox}>&times;</button>
+          <button className="absolute left-8 top-1/2 transform -translate-y-1/2 text-white text-3xl" onClick={prevImage}>&lt;</button>
+          <img src={product.images[lightboxIndex]} alt="Фото" className="max-h-[80vh] max-w-[80vw] rounded shadow-lg" />
+          <button className="absolute right-8 top-1/2 transform -translate-y-1/2 text-white text-3xl" onClick={nextImage}>&gt;</button>
+        </div>
+      )}
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Link to={`/companies/${companyId}`} className="text-blue-600 hover:underline mb-4 inline-block">← Назад к компании</Link>
+        <Link to="/companies" className="text-blue-600 hover:underline mb-4 inline-block">← К компаниям</Link>
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex flex-col md:flex-row gap-6">
             {/* Фото товара слева */}
             <div className="flex flex-col items-center md:items-start">
-              {product.gallery && product.gallery.length > 0 && (
-                <div className="mb-2 flex gap-2 flex-wrap">
-                  {product.gallery.map((img, idx) => (
-                    <img key={idx} src={img} alt="Фото товара" className="w-32 h-32 object-cover rounded shadow cursor-pointer" onClick={() => openLightbox(idx)} />
-                  ))}
-                </div>
-              )}
-              {/* Lightbox для фото товара */}
-              {lightboxOpen && product.gallery && product.gallery.length > 0 && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
-                  <button className="absolute top-4 right-8 text-white text-3xl" onClick={closeLightbox}>×</button>
-                  <button className="absolute left-8 text-white text-3xl" onClick={prevImage}>&lt;</button>
-                  <div className="flex flex-col items-center">
-                    <img src={product.gallery[lightboxIndex]} alt="Фото товара" className="max-h-[70vh] max-w-[80vw] rounded shadow-lg" />
-                    <div className="flex gap-2 mt-4">
-                      {product.gallery.map((img, i) => (
-                        <img key={i} src={img} alt="" className={`w-16 h-16 object-cover rounded cursor-pointer ${i === lightboxIndex ? 'ring-2 ring-blue-500' : ''}`} onClick={() => setLightboxIndex(i)} />
-                      ))}
-                    </div>
+              {product.images && product.images.length > 0 && (
+                <div className="mb-2 flex flex-col items-center">
+                  {/* Большая фото */}
+                  <img
+                    src={product.images[lightboxIndex] || product.images[0]}
+                    alt="Фото товара"
+                    className="w-64 h-64 object-cover rounded shadow cursor-pointer mb-2"
+                    onClick={() => openLightbox(lightboxIndex)}
+                  />
+                  {/* Миниатюры */}
+                  <div className="flex gap-2 flex-wrap justify-center">
+                    {product.images.map((img, idx) => (
+                      <img
+                        key={idx}
+                        src={img}
+                        alt="Миниатюра"
+                        className={`w-16 h-16 object-cover rounded shadow cursor-pointer border ${lightboxIndex === idx ? 'border-blue-500' : 'border-transparent'}`}
+                        onClick={() => { setLightboxIndex(idx); openLightbox(idx); }}
+                      />
+                    ))}
                   </div>
-                  <button className="absolute right-8 text-white text-3xl" onClick={nextImage}>&gt;</button>
                 </div>
               )}
             </div>
@@ -102,6 +114,12 @@ const ProductPage = () => {
             <p className="mb-2 text-gray-700">{product.description}</p>
             <p className="mb-2 text-gray-500">Категория: {product.category}</p>
           </div>
+        </div>
+        {/* QR-код и URL внизу страницы */}
+        <div className="mt-8 flex flex-col items-center">
+          <QRCode value={`https://lapida.one/product/${product.slug || slug}`} size={128} />
+          <div className="text-xs text-gray-500 mt-2">QR-код для быстрой передачи ссылки на товар</div>
+          <div className="mt-2 text-sm text-gray-700 font-mono break-all">https://lapida.one/product/{product.slug || slug}</div>
         </div>
       </div>
     </div>

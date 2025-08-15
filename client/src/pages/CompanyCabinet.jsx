@@ -1,5 +1,7 @@
+import ProductForm from '../components/ProductForm';
 import React, { useEffect, useState, useCallback } from 'react';
 import CompanyGallery from '../components/CompanyGallery';
+import ProductList from '../components/ProductList';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 
 function CompanyCabinet() {
@@ -43,6 +45,12 @@ function CompanyCabinet() {
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState('');
   const [editSuccess, setEditSuccess] = useState('');
+  // --- Products state ---
+  const [products, setProducts] = useState([]);
+  const [productFormOpen, setProductFormOpen] = useState(false);
+  const [productEditData, setProductEditData] = useState(null);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [productsError, setProductsError] = useState('');
 
   useEffect(() => {
     async function fetchCompany() {
@@ -77,7 +85,99 @@ function CompanyCabinet() {
     if (tab === 'gallery') {
       refetchCompany(); // рефетч только при переходе на галерею
     }
+    if (tab === 'products') {
+      fetchProducts();
+    }
   }, [tab]);
+
+  // --- Products CRUD ---
+  const fetchProducts = async () => {
+    setProductsLoading(true);
+    setProductsError('');
+    try {
+      const token = localStorage.getItem('authToken');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`/api/companies/${id}/products`, {
+        headers,
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.products) {
+        setProducts(data.products);
+      } else {
+        setProductsError('Не удалось загрузить товары');
+      }
+    } catch (e) {
+      setProductsError('Ошибка загрузки товаров');
+    }
+    setProductsLoading(false);
+  };
+
+  const handleAddProduct = () => {
+    setProductEditData(null);
+    setProductFormOpen(true);
+  };
+
+  const handleEditProduct = (prod) => {
+    setProductEditData(prod);
+    setProductFormOpen(true);
+  };
+
+  const handleDeleteProduct = async (prod) => {
+    if (!window.confirm('Удалить товар?')) return;
+    setProductsLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`/api/companies/${id}/products/${prod._id}`, {
+        method: 'DELETE',
+        headers,
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setProducts(products => products.filter(p => p._id !== prod._id));
+      } else {
+        setProductsError('Ошибка удаления товара');
+      }
+    } catch (e) {
+      setProductsError('Ошибка удаления товара');
+    }
+    setProductsLoading(false);
+  };
+
+  const handleSaveProduct = async (fd) => {
+    setProductsLoading(true);
+    setProductsError('');
+    try {
+      const token = localStorage.getItem('authToken');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const method = productEditData ? 'PUT' : 'POST';
+      const url = productEditData ? `/api/companies/${id}/products/${productEditData._id}` : `/api/companies/${id}/products`;
+      const res = await fetch(url, {
+        method,
+        headers: { ...headers },
+        credentials: 'include',
+        body: fd,
+      });
+      const data = await res.json();
+      if (res.ok && data.product) {
+        setProductFormOpen(false);
+        // Если это новый товар, добавляем задержку перед переходом
+        if (!productEditData) {
+          setTimeout(() => {
+            navigate(`/products/${data.product.slug}`);
+          }, 500);
+        } else {
+          fetchProducts();
+        }
+      } else {
+        setProductsError(data.message || 'Ошибка сохранения товара');
+      }
+    } catch (e) {
+      setProductsError('Ошибка сохранения товара');
+    }
+    setProductsLoading(false);
+  };
 
   useEffect(() => {
     console.log('CompanyCabinet gallery:', company?.gallery);
@@ -195,7 +295,27 @@ function CompanyCabinet() {
             {tab === 'products' && (
               <div>
                 <h2 className="font-semibold mb-2">Товары / услуги</h2>
-                {/* Здесь будет список товаров и форма добавления */}
+                {productsLoading && <div className="text-gray-500">Загрузка...</div>}
+                {productsError && <div className="text-red-600 mb-2">{productsError}</div>}
+                {!productFormOpen && isOwner && (
+                  <button className="bg-blue-600 text-white px-4 py-2 rounded mb-4" onClick={handleAddProduct}>Добавить товар/услугу</button>
+                )}
+                {!productFormOpen && (
+                  <>
+                    <ProductList
+                      products={products}
+                      onEdit={isOwner ? handleEditProduct : undefined}
+                      onDelete={isOwner ? handleDeleteProduct : undefined}
+                    />
+                  </>
+                )}
+                {productFormOpen && (
+                  <ProductForm
+                    initialData={productEditData}
+                    onSave={handleSaveProduct}
+                    onCancel={() => setProductFormOpen(false)}
+                  />
+                )}
               </div>
             )}
             {tab === 'documents' && (
