@@ -7,5 +7,8 @@
   },
   "scripts": {
     "start-api-5184": "set PORT=5184&& node server/app.js"
+  },
+  "dependencies": {
+    "qrcode.react": "^4.2.0"
   }
 }

@@ -1,3 +1,4 @@
+// ...existing code...
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -94,6 +95,7 @@ app.get('/api/health', (req, res) => {
 
 // Маршруты API
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/products', require('./routes/products'));
 app.use('/api/memorials', require('./routes/memorials-new'));
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/users', require('./routes/users'));
