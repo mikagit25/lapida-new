@@ -3,7 +3,11 @@ import React, { useEffect, useState, useRef } from 'react';
 import CompanyGallery from '../components/CompanyGallery';
 import ProductList from '../components/ProductList';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import QRCode from 'react-qr-code';
 import CompanyMap from '../components/CompanyMap';
+import CompanyNewsForm from '../components/CompanyNewsForm';
+import CompanyDocumentsForm from '../components/CompanyDocumentsForm';
+import CustomSlugEditor from '../components/CustomSlugEditor';
 
 // Обработчик клика по карте через useMapEvents
 function MapClickHandler({ setEditForm, setMapCenter }) {
@@ -32,7 +36,7 @@ function CompanyCabinet() {
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [editForm, setEditForm] = useState({ name: '', description: '', inn: '', extra: '', address: '', lat: null, lng: null, phones: [], emails: [] });
+  const [editForm, setEditForm] = useState({ name: '', description: '', inn: '', extra: '', address: '', lat: null, lng: null, phones: [], emails: [], news: [], documents: [], customSlug: '' });
   const [mapCenter, setMapCenter] = useState([55.751244, 37.618423]);
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState('');
@@ -43,6 +47,11 @@ function CompanyCabinet() {
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState('');
   const [mapError, setMapError] = useState('');
+  const [slug, setSlug] = useState('');
+  const [slugAvailable, setSlugAvailable] = useState(true);
+  const [slugCheckLoading, setSlugCheckLoading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [customSlugInput, setCustomSlugInput] = useState('');
   const mapRef = useRef(null);
 
   // Центрировать карту на маркере при изменении координат
@@ -66,17 +75,6 @@ function CompanyCabinet() {
         const data = await res.json();
         if (data.company) {
           setCompany(data.company);
-          setEditForm({
-            name: data.company.name || '',
-            description: data.company.description || '',
-            inn: data.company.inn || '',
-            extra: data.company.extra || '',
-            address: data.company.address || '',
-            lat: typeof data.company.lat === 'number' ? data.company.lat : (data.company.lat ? parseFloat(data.company.lat) : null),
-            lng: typeof data.company.lng === 'number' ? data.company.lng : (data.company.lng ? parseFloat(data.company.lng) : null),
-            phones: Array.isArray(data.company.phones) ? data.company.phones : [],
-            emails: Array.isArray(data.company.emails) ? data.company.emails : [],
-          });
         } else {
           setError('Компания не найдена');
         }
@@ -87,6 +85,29 @@ function CompanyCabinet() {
     }
     fetchCompany();
   }, [id]);
+
+  // Инициализация editForm только при первой загрузке company
+  useEffect(() => {
+    if (company && !editForm._initialized) {
+      setEditForm({
+        name: company.name || '',
+        description: company.description || '',
+        inn: company.inn || '',
+        extra: company.extra || '',
+        address: company.address || '',
+        lat: typeof company.lat === 'number' ? company.lat : (company.lat ? parseFloat(company.lat) : null),
+        lng: typeof company.lng === 'number' ? company.lng : (company.lng ? parseFloat(company.lng) : null),
+        phones: Array.isArray(company.phones) ? company.phones : [],
+        emails: Array.isArray(company.emails) ? company.emails : [],
+        news: Array.isArray(company.news) ? company.news : [],
+        documents: Array.isArray(company.documents) ? company.documents : [],
+        customSlug: company.customSlug || '',
+        _initialized: true
+      });
+      setSlug(company.customSlug || '');
+      setCustomSlugInput(company.customSlug || '');
+    }
+  }, [company]);
 
   useEffect(() => {
     if (tab === 'gallery' && company) refetchCompany();
@@ -202,8 +223,14 @@ function CompanyCabinet() {
     setProductsLoading(false);
   };
 
-  async function handleEditCompany(e) {
-    e.preventDefault();
+  async function handleEditCompany(arg) {
+    // Если пришёл массив документов — обновить только их
+    let newForm = { ...editForm };
+    if (Array.isArray(arg)) {
+      newForm.documents = arg;
+    } else if (arg && arg.preventDefault) {
+      arg.preventDefault();
+    }
     setEditLoading(true);
     setEditError('');
     setEditSuccess('');
@@ -217,20 +244,27 @@ function CompanyCabinet() {
         },
         credentials: 'include',
         body: JSON.stringify({
-          ...editForm,
-          lat: editForm.lat,
-          lng: editForm.lng,
-          phones: editForm.phones,
-          emails: editForm.emails
+          ...newForm,
+          lat: newForm.lat,
+          lng: newForm.lng,
+          phones: newForm.phones,
+          emails: newForm.emails,
+          news: newForm.news,
+          documents: newForm.documents,
+          customSlug: customSlugInput || undefined
         }),
       });
       const data = await res.json();
       if (res.ok && (!data.error && !data.message)) {
-        setCompany(prev => ({ ...prev, ...editForm }));
+        setCompany(prev => ({ ...prev, ...newForm, customSlug: customSlugInput }));
+        setEditForm(f => ({ ...f, customSlug: customSlugInput }));
+        setCustomSlugInput(customSlugInput);
         setEditSuccess('Изменения сохранены');
         setEditError('');
       } else if (data.success) {
-        setCompany(prev => ({ ...prev, ...editForm }));
+        setCompany(prev => ({ ...prev, ...newForm, customSlug: customSlugInput }));
+        setEditForm(f => ({ ...f, customSlug: customSlugInput }));
+        setCustomSlugInput(customSlugInput);
         setEditSuccess('Изменения сохранены');
         setEditError('');
       } else {
@@ -273,6 +307,30 @@ function CompanyCabinet() {
 
   const isOwner = company && company.isOwner;
 
+  const handleSlugChange = (e) => {
+    const value = e.target.value.replace(/[^a-zA-Z0-9-_]/g, '').toLowerCase();
+    setSlug(value);
+    setEditForm(f => {
+      // Не отправлять пустой customSlug на сервер
+      if (!value) {
+        const { customSlug, ...rest } = f;
+        return { ...rest };
+      }
+      return { ...f, customSlug: value };
+    });
+    if (!value) {
+      setSlugAvailable(true);
+      setSlugCheckLoading(false);
+      return;
+    }
+    setSlugCheckLoading(true);
+    fetch(`/api/companies/check-slug?slug=${value}`)
+      .then(res => res.json())
+      .then(data => setSlugAvailable(data.available))
+      .catch(() => setSlugAvailable(false))
+      .finally(() => setSlugCheckLoading(false));
+  };
+
   if (loading) return <div className="p-8">Загрузка...</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
   if (!company) return <div className="p-8 text-gray-500">Нет данных о компании</div>;
@@ -281,7 +339,7 @@ function CompanyCabinet() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex gap-2 items-center">
-          <Link to={`/companies/${company._id}`} className="text-blue-600 hover:underline">← Назад к компании</Link>
+          <Link to={company.customSlug ? `/${company.customSlug}` : `/companies/${company._id}`} className="text-blue-600 hover:underline">← Назад к компании</Link>
           <span className="text-gray-400">|</span>
           <span className="font-bold">Личный кабинет компании</span>
         </div>
@@ -297,6 +355,14 @@ function CompanyCabinet() {
           ))}
         </div>
         <div className="bg-white rounded-lg shadow p-6">
+          {/* QR-код компании с актуальным адресом */}
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold mb-2">QR-код компании</h2>
+            <div className="flex flex-col items-center gap-2">
+              <QRCode value={company.customSlug ? `${window.location.origin}/${company.customSlug}` : `${window.location.origin}/companies/${company._id}`} size={128} />
+              <div className="text-xs text-gray-500 break-all">{company.customSlug ? `${window.location.origin}/${company.customSlug}` : `${window.location.origin}/companies/${company._id}`}</div>
+            </div>
+          </div>
           {tab === 'info' && (
             <div>
               <h2 className="font-semibold text-xl mb-4">Информация о компании</h2>
@@ -358,12 +424,28 @@ function CompanyCabinet() {
                     onChange={e => setEditForm(f => ({ ...f, extra: e.target.value }))}
                     placeholder="Дополнительная строка (под названием)"
                   />
+                  <CustomSlugEditor
+                    companyId={company._id}
+                    initialSlug={company.customSlug}
+                    isOwner={isOwner}
+                    companyName={company.name}
+                    onSlugSaved={slug => {
+                      setEditForm(f => ({ ...f, customSlug: slug }));
+                      setCompany(prev => ({ ...prev, customSlug: slug }));
+                    }}
+                  />
                   {editError && <div className="text-red-600 text-sm">{editError}</div>}
                   {editSuccess && <div className="text-green-600 text-sm">{editSuccess}</div>}
                   <button type="submit" disabled={editLoading} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold">
                     {editLoading ? 'Сохранение...' : 'Сохранить изменения'}
                   </button>
                 </form>
+              )}
+              {!isOwner && (
+                <div className="mb-4">
+                  <label className="block font-medium mb-1">Адрес компании (URL)</label>
+                  <div className="mb-2 text-sm text-gray-600">lapida.one/{company.customSlug}</div>
+                </div>
               )}
               <div className="mt-6">
                 <h3 className="font-semibold text-lg mb-2">Контакты компании</h3>
@@ -484,16 +566,24 @@ function CompanyCabinet() {
             </div>
           )}
           {tab === 'documents' && (
-            <div>
-              <h2 className="font-semibold mb-2">Документы</h2>
-              {/* Здесь будет список документов и форма добавления */}
-            </div>
+            <CompanyDocumentsForm
+              documents={editForm.documents || []}
+              setDocuments={docs => setEditForm(f => ({ ...f, documents: docs }))}
+              onSave={handleEditCompany}
+              loading={editLoading}
+              error={editError}
+              success={editSuccess}
+            />
           )}
           {tab === 'news' && (
-            <div>
-              <h2 className="font-semibold mb-2">Новости / акции</h2>
-              {/* Здесь будет список новостей и форма добавления */}
-            </div>
+            <CompanyNewsForm
+              news={editForm.news || []}
+              setNews={news => setEditForm(f => ({ ...f, news }))}
+              onSave={handleEditCompany}
+              loading={editLoading}
+              error={editError}
+              success={editSuccess}
+            />
           )}
           {tab === 'reviews' && (
             <div>

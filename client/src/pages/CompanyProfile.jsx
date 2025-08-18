@@ -4,14 +4,20 @@ import CompanyHeader from '../components/CompanyHeader';
 import CompanyInfo from '../components/CompanyInfo';
 import CompanyGallery from '../components/CompanyGallery';
 import CompanyNews from '../components/CompanyNews';
-import CompanyDocuments from '../components/CompanyDocuments';
+import CompanyDocumentsViewer from '../components/CompanyDocumentsViewer';
 import CompanyReviews from '../components/CompanyReviews';
 import CompanyTeam from '../components/CompanyTeam';
 import CompanyContacts from '../components/CompanyContacts';
 import ProductList from '../components/ProductList';
+import QRCode from 'react-qr-code';
 
 export default function CompanyProfile({ company, user, news, team, contacts }) {
   if (!company) return <div>Компания не найдена</div>;
+
+  const companyUrl = company.customSlug
+    ? `${window.location.origin}/${company.customSlug}`
+    : `${window.location.origin}/companies/${company._id}`;
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <Link to="/companies" className="text-blue-600 hover:underline mb-4 block">← Назад к каталогу компаний</Link>
@@ -43,7 +49,7 @@ export default function CompanyProfile({ company, user, news, team, contacts }) 
         </div>
       )}
       <CompanyNews news={news} />
-      <CompanyDocuments documents={company.documents} />
+      <CompanyDocumentsViewer documents={company.documents} />
       <CompanyReviews reviews={company.reviews} />
       <CompanyTeam team={team} />
       <CompanyContacts contacts={company.contacts} phones={company.phones} emails={company.emails} />
@@ -68,6 +74,23 @@ export default function CompanyProfile({ company, user, news, team, contacts }) 
           )}
         </div>
       )}
+      {/* QR-код и поделиться */}
+      <div className="bg-white rounded-lg shadow p-6 mb-8">
+        <h2 className="text-lg font-semibold mb-4">QR-код компании</h2>
+        <div className="flex flex-col items-center gap-4">
+          <QRCode value={companyUrl} size={160} />
+          <div className="text-sm text-gray-500 break-all">{companyUrl}</div>
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded font-semibold mt-2"
+            onClick={() => {
+              navigator.clipboard.writeText(companyUrl);
+              alert('Ссылка на компанию скопирована!');
+            }}
+          >
+            Поделиться ссылкой
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

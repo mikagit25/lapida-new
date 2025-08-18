@@ -21,6 +21,7 @@ export default function CompanyGallery({ images, companyId, isOwner }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [deleting, setDeleting] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   React.useEffect(() => {
     setGalleryImages(images || []);
@@ -47,8 +48,37 @@ export default function CompanyGallery({ images, companyId, isOwner }) {
     }
   };
 
+  const handleUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+      const res = await fetch(`/api/companies/${companyId}/gallery`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      if (!res.ok) throw new Error('Ошибка загрузки');
+      const data = await res.json();
+      setGalleryImages(data.gallery || []);
+    } catch (err) {
+      alert('Ошибка загрузки');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <>
+      {isOwner && (
+        <div className="mb-2">
+          <label className="block text-sm font-medium mb-1">Добавить фото в галерею:</label>
+          <input type="file" accept="image/*" onChange={handleUpload} disabled={uploading} />
+        </div>
+      )}
       <div className="overflow-x-auto py-2">
         <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
           {galleryImages.map((img, idx) => (

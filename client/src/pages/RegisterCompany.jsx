@@ -12,6 +12,7 @@ const RegisterCompany = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [companySlug, setCompanySlug] = useState('');
   const navigate = useNavigate();
 
   const handleChange = e => {
@@ -38,6 +39,7 @@ const RegisterCompany = () => {
       const data = await res.json();
       if (data.company) {
         setSuccess(true);
+        setCompanySlug(data.company.customSlug || '');
         setTimeout(() => navigate(`/company-cabinet/${data.company._id}`), 1500);
       } else {
         setError(data.error || 'Ошибка регистрации');
@@ -71,7 +73,12 @@ const RegisterCompany = () => {
             <textarea name="description" value={form.description} onChange={handleChange} required className="border px-3 py-2 rounded-md w-full" rows={3} />
           </div>
           {error && <div className="text-red-600">{error}</div>}
-          {success && <div className="text-green-600">Компания успешно зарегистрирована!</div>}
+          {success && (
+            <div className="text-green-600">
+              Компания успешно зарегистрирована!<br />
+              Ваш адрес: <span className="font-mono">lapida.one/{companySlug}</span>
+            </div>
+          )}
           <button type="submit" disabled={loading} className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-semibold w-full">
             {loading ? 'Регистрация...' : 'Зарегистрировать'}
           </button>

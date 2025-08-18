@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -20,6 +21,8 @@ import Business from './pages/Business';
 import RegisterCompany from './pages/RegisterCompany';
 import CompanyCabinet from './pages/CompanyCabinet';
 import ProductPage from './pages/ProductPage';
+import Products from './pages/Products';
+import CompanyProfile from './pages/CompanyProfile';
 
 // Асинхронный компонент для загрузки изображения
 function AsyncImage({ url, alt, className, onError }) {
@@ -76,14 +79,9 @@ const Navigation = () => {
               <Link to="/business" className="text-blue-700 hover:text-blue-900 px-3 py-2 rounded-md text-sm font-medium font-semibold">
                 Для бизнеса
               </Link>
-              <Link to="/test-comments" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                Тест комментариев
+              <Link to="/products" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                Товары
               </Link>
-              {isAuthenticated && (
-                <Link to="/create-memorial" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                  Создать мемориал
-                </Link>
-              )}
             </div>
           </div>
 
@@ -369,7 +367,10 @@ const App = () => {
               <Route path="/business" element={<Business />} />
               <Route path="/register-company" element={<RegisterCompany />} />
               <Route path="/company-cabinet/:id" element={<CompanyCabinet />} />
+              <Route path="/products" element={<Products />} />
               <Route path="/products/:slug" element={<ProductPage />} />
+              {/* Красивый URL для компаний по customSlug */}
+              <Route path="/:companySlug" element={<CompanyProfileBySlug />} />
               {/* Роут для красивых URL - должен быть последним */}
               <Route path="/:slug" element={<MemorialView />} />
             </Routes>
@@ -380,5 +381,32 @@ const App = () => {
     </AuthProvider>
   );
 };
+
+// Компонент для поиска компании по customSlug
+function CompanyProfileBySlug() {
+  const { companySlug } = useParams();
+  const [company, setCompany] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/companies/by-slug/${companySlug}`)
+      .then(res => res.json())
+      .then(data => {
+        setCompany(data.company);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError('Компания не найдена');
+        setLoading(false);
+      });
+  }, [companySlug]);
+
+  if (loading) return <div className="p-8">Загрузка...</div>;
+  if (error || !company) return <div className="p-8 text-red-600">{error || 'Компания не найдена'}</div>;
+
+  return <CompanyProfile company={company} />;
+}
 
 export default App;
