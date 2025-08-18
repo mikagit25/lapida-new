@@ -1,4 +1,5 @@
 import ProductForm from '../components/ProductForm';
+import DeleteCompanyButton from '../components/DeleteCompanyButton';
 import React, { useEffect, useState, useRef } from 'react';
 import CompanyGallery from '../components/CompanyGallery';
 import ProductList from '../components/ProductList';
@@ -593,6 +594,12 @@ function CompanyCabinet() {
             </div>
           )}
         </div>
+      </div>
+      {/* Кнопка удаления компании внизу страницы */}
+      <div className="flex justify-center mt-8">
+        {company && company._id && (
+          <DeleteCompanyButton companyId={company._id} onDeleted={() => navigate('/companies')} />
+        )}
       </div>
     </div>
   );
