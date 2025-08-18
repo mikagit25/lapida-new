@@ -77,9 +77,15 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem('authToken');
-      const user = localStorage.getItem('user');
-
-      if (token && user) {
+      const userRaw = localStorage.getItem('user');
+      let userParsed = null;
+      try {
+        userParsed = userRaw ? JSON.parse(userRaw) : null;
+      } catch (e) {
+        userParsed = null;
+      }
+      console.log('[AuthProvider] user из localStorage:', userParsed);
+      if (token && userParsed) {
         try {
           // Проверяем действительность токена только если он есть
           const response = await authService.verifyToken();
@@ -87,7 +93,7 @@ export const AuthProvider = ({ children }) => {
             type: 'LOGIN_SUCCESS',
             payload: {
               token,
-              user: JSON.parse(user),
+              user: userParsed,
             },
           });
         } catch (error) {
@@ -103,6 +109,10 @@ export const AuthProvider = ({ children }) => {
 
     initializeAuth();
   }, []);
+
+  useEffect(() => {
+    console.log('[AuthProvider] user из состояния:', state.user);
+  }, [state.user]);
 
   // Функция входа
   const login = async (credentials) => {

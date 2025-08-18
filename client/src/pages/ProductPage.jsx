@@ -33,7 +33,7 @@ const ProductPage = () => {
     setLoading(true);
     setError('');
     try {
-  const res = await fetch(`http://localhost:5005/api/products/${slug}`);
+      const res = await fetch(`http://localhost:5182/api/products/${slug}`);
       const data = await res.json();
       if (data.product) {
         setProduct(data.product);

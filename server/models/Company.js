@@ -43,6 +43,7 @@ const companySchema = new mongoose.Schema({
     default: []
   },
   name: { type: String, required: true },
+  customSlug: { type: String, unique: true, sparse: true },
   address: { type: String, required: true },
   inn: { type: String, required: true },
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -66,7 +67,8 @@ const companySchema = new mongoose.Schema({
     default: []
   },
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
+  headerBackground: { type: String, default: '' }
 });
 
 module.exports = mongoose.model('Company', companySchema);

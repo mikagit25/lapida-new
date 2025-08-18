@@ -65,6 +65,13 @@ const Companies = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map(company => (
               <div key={company._id} className="bg-white rounded-lg shadow p-6 flex flex-col">
+                {company.avatar && (
+                  <img
+                    src={company.avatar}
+                    alt={company.name + ' аватар'}
+                    className="w-20 h-20 object-cover rounded-full mx-auto mb-3 border"
+                  />
+                )}
                 <h2 className="text-xl font-semibold mb-2">{company.name}</h2>
                 <p className="text-gray-600 mb-2">{company.address}</p>
                 <p className="text-gray-500 mb-2">ИНН: {company.inn}</p>
@@ -78,7 +85,12 @@ const Companies = () => {
                     <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">На проверке</span>
                   )}
                 </div>
-                <Link to={`/companies/${company._id}`} className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center">Подробнее</Link>
+                <Link
+                  to={company.customSlug ? `/${company.customSlug}` : `/companies/${company._id}`}
+                  className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center"
+                >
+                  Подробнее
+                </Link>
               </div>
             ))}
           </div>

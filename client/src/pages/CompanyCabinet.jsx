@@ -429,6 +429,7 @@ function CompanyCabinet() {
                     initialSlug={company.customSlug}
                     isOwner={isOwner}
                     companyName={company.name}
+                    isCabinet={true}
                     onSlugSaved={slug => {
                       setEditForm(f => ({ ...f, customSlug: slug }));
                       setCompany(prev => ({ ...prev, customSlug: slug }));

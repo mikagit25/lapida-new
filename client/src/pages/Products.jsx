@@ -21,6 +21,7 @@ export default function Products() {
       const params = new URLSearchParams({ search, category, sort });
       const res = await fetch(`/api/products?${params.toString()}`);
       const data = await res.json();
+      console.log('Products API response:', data);
       setProducts(data.products || []);
     } catch (err) {
       setError('Ошибка загрузки каталога');

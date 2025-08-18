@@ -1,12 +1,144 @@
 
-const express = require('express');
+
 const path = require('path');
+const express = require('express');
 const fs = require('fs');
 const multer = require('multer');
-const router = express.Router();
 const Company = require('../models/Company');
 const { auth } = require('../middleware/auth');
 const Product = require('../models/Product');
+const router = express.Router();
+
+// Получить отзывы компании
+router.get('/:id/reviews', async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id);
+    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+    res.json({ reviews: company.reviews || [] });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка получения отзывов' });
+  }
+});
+
+// Получить компанию по customSlug (для фронта)
+router.get('/by-slug/:customSlug', async (req, res) => {
+  try {
+    const company = await Company.findOne({ customSlug: req.params.customSlug });
+    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+    let isOwner = false;
+    try {
+      const authHeader = req.header('Authorization');
+      const cookieToken = req.cookies?.token;
+      let token = null;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.replace('Bearer ', '');
+      } else if (cookieToken) {
+        token = cookieToken;
+      }
+      if (token) {
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded && decoded.userId && company.owner && company.owner.toString() === decoded.userId.toString()) {
+          isOwner = true;
+        }
+      }
+    } catch (e) {}
+    const companyObj = company.toObject();
+    companyObj.isOwner = isOwner;
+    companyObj.phones = Array.isArray(company.phones) ? company.phones : [];
+    companyObj.emails = Array.isArray(company.emails) ? company.emails : [];
+    const products = await Product.find({ company: company._id });
+    companyObj.products = products;
+    res.json({ company: companyObj });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка сервера при получении компании' });
+  }
+});
+// Получить компанию по customSlug
+router.get('/slug/:customSlug', async (req, res) => {
+  try {
+    const company = await Company.findOne({ customSlug: req.params.customSlug });
+    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+    let isOwner = false;
+    try {
+      const authHeader = req.header('Authorization');
+      const cookieToken = req.cookies?.token;
+      let token = null;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.replace('Bearer ', '');
+      } else if (cookieToken) {
+        token = cookieToken;
+      }
+      if (token) {
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded && decoded.userId && company.owner && company.owner.toString() === decoded.userId.toString()) {
+          isOwner = true;
+        }
+      }
+    } catch (e) {}
+    const companyObj = company.toObject();
+    companyObj.isOwner = isOwner;
+    companyObj.phones = Array.isArray(company.phones) ? company.phones : [];
+    companyObj.emails = Array.isArray(company.emails) ? company.emails : [];
+    const products = await Product.find({ company: company._id });
+    companyObj.products = products;
+    res.json({ company: companyObj });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка сервера при получении компании' });
+  }
+});
+// ...existing code...
+
+// Проверка уникальности customSlug
+router.get('/check-slug', async (req, res) => {
+  try {
+    const { slug } = req.query;
+    if (!slug) return res.json({ available: false });
+    const exists = await Company.findOne({ customSlug: slug });
+    res.json({ available: !exists });
+  } catch (error) {
+    res.status(500).json({ available: false, message: 'Ошибка проверки slug' });
+  }
+});
+
+// --- Загрузка горизонтальных обоев за аватаром ---
+const headerBgDir = path.join(__dirname, '../public/uploads/company-header-backgrounds');
+if (!fs.existsSync(headerBgDir)) {
+  fs.mkdirSync(headerBgDir, { recursive: true });
+}
+const headerBgStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, headerBgDir);
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const filename = `${Date.now()}-${Math.round(Math.random()*1e9)}${ext}`;
+    cb(null, filename);
+  }
+});
+const uploadHeaderBg = multer({ storage: headerBgStorage });
+
+// Загрузить/сменить горизонтальные обои
+router.put('/:id/header-background', auth, uploadHeaderBg.single('headerBackground'), async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id);
+    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+    if (company.owner.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Нет доступа' });
+    if (!req.file) return res.status(400).json({ message: 'Файл не загружен' });
+    // Удалить старый файл, если был
+    if (company.headerBackground) {
+      const oldPath = path.join(__dirname, '../public', company.headerBackground);
+      fs.unlink(oldPath, () => {});
+    }
+    // Сохранить новый путь
+    company.headerBackground = `/uploads/company-header-backgrounds/${req.file.filename}`;
+    await company.save();
+    res.json({ headerBackground: company.headerBackground });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка загрузки обоев', error: error.message });
+  }
+});
 
 // Удалить фото из галереи компании
 router.delete('/:id/gallery', auth, async (req, res) => {
@@ -230,7 +362,7 @@ router.delete('/:id/logo', auth, async (req, res) => {
 // Обновить данные компании и контакты
 router.put('/:id', auth, async (req, res) => {
   try {
-  const { name, address, inn, description, contacts, phones, emails, lat, lng } = req.body;
+  const { name, address, inn, description, contacts, phones, emails, lat, lng, customSlug } = req.body;
     const company = await Company.findById(req.params.id);
     if (!company) return res.status(404).json({ message: 'Компания не найдена' });
     if (company.owner.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Нет доступа' });
@@ -243,6 +375,7 @@ router.put('/:id', auth, async (req, res) => {
   if (Array.isArray(emails)) company.emails = emails;
   if (typeof lat === 'number' || lat === null) company.lat = lat;
   if (typeof lng === 'number' || lng === null) company.lng = lng;
+  if (typeof customSlug === 'string' && customSlug.trim()) company.customSlug = customSlug.trim();
     company.updatedAt = Date.now();
     await company.save();
     res.json({ company });
@@ -443,7 +576,13 @@ router.post('/', auth, async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const companies = await Company.find().select('-documents -products -reviews');
-    res.json({ companies });
+    // Преобразуем logo в avatar для фронта
+    const companiesWithAvatar = companies.map(c => {
+      const obj = c.toObject();
+      obj.avatar = obj.logo || '';
+      return obj;
+    });
+    res.json({ companies: companiesWithAvatar });
   } catch (error) {
     console.error('Ошибка получения компаний:', error);
     res.status(500).json({ message: 'Ошибка сервера при получении компаний' });

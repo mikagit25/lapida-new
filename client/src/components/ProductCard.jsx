@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, onEdit, onDelete }) => {
   return (
     <div className="bg-white rounded-lg shadow hover:shadow-lg transition p-4 flex flex-col">
       {product.images && product.images.length > 0 ? (
@@ -14,9 +14,19 @@ const ProductCard = ({ product }) => {
       <div className="text-blue-700 font-bold mb-2">{product.price ? product.price + ' ₽' : 'Цена не указана'}</div>
       <div className="text-sm text-gray-500 mb-2 line-clamp-2">{product.description}</div>
       <Link to={`/companies/${product.companyId}`} className="text-blue-600 hover:underline text-sm mt-auto mb-2">{product.companyName}</Link>
-      <Link to={`/products/${product.slug || product._id}`} className="bg-blue-600 text-white px-4 py-2 rounded font-semibold text-center mt-2 hover:bg-blue-700 transition">
+      <Link to={`/products/${product.slug}`} className="bg-blue-600 text-white px-4 py-2 rounded font-semibold text-center mt-2 hover:bg-blue-700 transition">
         Просмотреть товар
       </Link>
+      {(onEdit || onDelete) && (
+        <div className="flex gap-2 mt-2">
+          {onEdit && (
+            <button className="bg-yellow-500 text-white px-3 py-1 rounded text-sm" onClick={onEdit}>Редактировать</button>
+          )}
+          {onDelete && (
+            <button className="bg-red-600 text-white px-3 py-1 rounded text-sm" onClick={onDelete}>Удалить</button>
+          )}
+        </div>
+      )}
     </div>
   );
 };

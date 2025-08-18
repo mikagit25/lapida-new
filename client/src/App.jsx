@@ -1,7 +1,8 @@
+import { AuthProvider, useAuth } from './context/AuthContext';
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+// ...existing code...
 import Login from './pages/Login';
 import Register from './pages/Register';
 import MemorialCreate from './pages/MemorialCreate';
@@ -345,6 +346,8 @@ const Memorials = () => {
 };
 
 const App = () => {
+  const { user } = useAuth();
+  console.log('App.jsx user:', user);
   return (
     <AuthProvider>
       <Router>
@@ -371,7 +374,7 @@ const App = () => {
               <Route path="/products/:slug" element={<ProductPage />} />
               {/* Красивый URL для компаний по customSlug */}
               <Route path="/:companySlug" element={<CompanyProfileBySlug />} />
-              {/* Роут для красивых URL - должен быть последним */}
+              {/* Роут для красивых URL мемориалов - должен быть ниже компаний */}
               <Route path="/:slug" element={<MemorialView />} />
             </Routes>
           </main>
@@ -388,6 +391,7 @@ function CompanyProfileBySlug() {
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { user } = useAuth();
 
   useEffect(() => {
     setLoading(true);
@@ -406,7 +410,7 @@ function CompanyProfileBySlug() {
   if (loading) return <div className="p-8">Загрузка...</div>;
   if (error || !company) return <div className="p-8 text-red-600">{error || 'Компания не найдена'}</div>;
 
-  return <CompanyProfile company={company} />;
+  return <CompanyProfile company={company} userData={user} />;
 }
 
 export default App;
