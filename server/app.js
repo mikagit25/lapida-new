@@ -102,6 +102,7 @@ app.use('/api/memorials', require('./routes/memorials-new'));
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/companies', require('./routes/companies'));
+app.use('/api/orders', require('./routes/orders'));
 app.use('/api/upload', require('./routes/uploadClean'));
 app.use('/api/photo-comments', require('./routes/photoComments'));
 app.use('/api/photo-comments-simple', require('./routes/photoCommentsSimple'));

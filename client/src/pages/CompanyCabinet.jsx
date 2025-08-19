@@ -460,8 +460,11 @@ function CompanyCabinet() {
           {tab === 'reviews' && <CompanyReviewsBlock />}
         </div>
       </div>
-      {/* Кнопка удаления компании внизу страницы */}
-      <div className="flex justify-center mt-8">
+      {/* Кнопка заказов и удаления компании внизу страницы */}
+      <div className="flex justify-center mt-8 gap-4">
+        {company && company._id && company.isOwner && (
+          <Link to={`/company-orders/${company._id}`} className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 font-semibold">Заказы компании</Link>
+        )}
         {company && company._id && (
           <DeleteCompanyButton companyId={company._id} onDeleted={() => navigate('/companies')} />
         )}

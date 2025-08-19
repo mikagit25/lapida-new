@@ -173,6 +173,7 @@ const PersonalCabinet = () => {
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Быстрые действия</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Link to="/my-orders" className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 text-lg font-semibold inline-block mb-4">Мои заказы</Link>
                 <Link
                   to="/create-memorial"
                   className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"

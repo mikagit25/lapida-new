@@ -1,0 +1,19 @@
+version: '3.7'
+services:
+  erpnext:
+    image: frappe/erpnext:v14.27.0
+    container_name: erpnext
+    ports:
+      - "8080:8080"
+    environment:
+      - SITE_NAME=erp.local
+      - DB_ROOT_USER=root
+      - MYSQL_ROOT_PASSWORD=admin
+      - ADMIN_PASSWORD=admin
+      - INSTALL_APPS=erpnext
+    volumes:
+      - erpnext-sites:/home/frappe/frappe-bench/sites
+      - erpnext-db:/var/lib/mysql
+volumes:
+  erpnext-sites:
+  erpnext-db:

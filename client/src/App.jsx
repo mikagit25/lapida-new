@@ -20,6 +20,8 @@ import Companies from './pages/Companies';
 import CompanyPage from './pages/CompanyPage';
 import Business from './pages/Business';
 import RegisterCompany from './pages/RegisterCompany';
+import CompanyOrdersPage from './orders/CompanyOrdersPage';
+import ClientOrdersPage from './orders/ClientOrdersPage';
 import CompanyCabinet from './pages/CompanyCabinet';
 import ProductPage from './pages/ProductPage';
 import Products from './pages/Products';
@@ -374,6 +376,8 @@ const App = () => {
               <Route path="/companies" element={<Companies />} />
               <Route path="/companies/:id" element={<CompanyPage />} />
               <Route path="/companies/:id/cabinet" element={<CompanyCabinet />} />
+              <Route path="/company-orders/:companyId" element={<PrivateRoute><CompanyOrdersPage /></PrivateRoute>} />
+              <Route path="/my-orders" element={<PrivateRoute><ClientOrdersPage /></PrivateRoute>} />
               <Route path="/business" element={<Business />} />
               <Route path="/register-company" element={<RegisterCompany />} />
               <Route path="/company-cabinet/:id" element={<CompanyCabinet />} />
