@@ -4,6 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { userService, memorialService, newMemorialService, notificationService } from '../services/api';
 import { getUserDisplayName } from '../utils/userUtils';
 import PersonalCabinetStats from './PersonalCabinetStats';
+import PersonalCabinetMemorials from './PersonalCabinetMemorials';
+import PersonalCabinetNotifications from './PersonalCabinetNotifications';
+import PersonalCabinetActivity from './PersonalCabinetActivity';
 
 const PersonalCabinet = () => {
   const { user, isAuthenticated } = useAuth();
@@ -237,150 +240,28 @@ const PersonalCabinet = () => {
             </div>
 
             {/* Последние мемориалы */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Мои мемориалы</h2>
-                <Link
-                  to="/profile?tab=memorials"
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                >
-                  Все мемориалы →
-                </Link>
-              </div>
-
-              {recentMemorials.length === 0 ? (
-                <div className="text-center py-8">
-                  <div className="text-gray-400 text-4xl mb-2">🏛️</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Нет мемориалов</h3>
-                  <p className="text-gray-500 mb-4">Создайте первый мемориал для сохранения памяти</p>
-                  <Link
-                    to="/create-memorial"
-                    className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                  >
-                    Создать мемориал
-                  </Link>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {recentMemorials.map((memorial) => (
-                    <div key={memorial._id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                      {memorial.photo && (
-                        <img
-                          src={fixImageUrl(memorial.photo)}
-                          alt={`${memorial.firstName} ${memorial.lastName}`}
-                          className="w-12 h-12 rounded-full object-cover"
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-medium text-gray-900 truncate">
-                          {memorial.firstName} {memorial.lastName}
-                        </h3>
-                        <p className="text-xs text-gray-500">
-                          Создан {formatDate(memorial.createdAt)}
-                        </p>
-                        {memorial.views && (
-                          <p className="text-xs text-gray-400">
-                            {memorial.views} просмотр{memorial.views === 1 ? '' : memorial.views < 5 ? 'а' : 'ов'}
-                          </p>
-                        )}
-                      </div>
-                      <Link
-                        to={memorial.customSlug ? `/${memorial.customSlug}` : `/memorial/${memorial._id}`}
-                        className="text-blue-600 hover:text-blue-800 text-sm"
-                      >
-                        Открыть
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <PersonalCabinetMemorials
+              recentMemorials={recentMemorials}
+              formatDate={formatDate}
+              fixImageUrl={fixImageUrl}
+            />
           </div>
 
           {/* Правая колонка - Уведомления и активность */}
           <div className="space-y-6">
             {/* Уведомления */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Уведомления</h2>
-                <Link
-                  to="/profile?tab=activity"
-                  className="text-blue-600 hover:text-blue-800 text-sm"
-                >
-                  Все →
-                </Link>
-              </div>
-
-              {notifications.length === 0 ? (
-                <div className="text-center py-6">
-                  <div className="text-gray-400 text-3xl mb-2">🔔</div>
-                  <p className="text-gray-500 text-sm">Нет новых уведомлений</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {notifications.slice(0, 5).map((notification) => (
-                    <div key={notification._id} className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
-                      <div className="flex-shrink-0">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-blue-600 text-sm">📩</span>
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-900 line-clamp-2">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {formatDate(notification.createdAt)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <PersonalCabinetNotifications
+              notifications={notifications}
+              formatDate={formatDate}
+            />
 
             {/* Последняя активность */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Моя активность</h2>
-                <Link
-                  to="/profile?tab=my-activity"
-                  className="text-blue-600 hover:text-blue-800 text-sm"
-                >
-                  Все →
-                </Link>
-              </div>
-
-              {recentActivity.length === 0 ? (
-                <div className="text-center py-6">
-                  <div className="text-gray-400 text-3xl mb-2">💬</div>
-                  <p className="text-gray-500 text-sm">Нет активности</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {recentActivity.slice(0, 5).map((activity) => (
-                    <div key={activity._id} className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
-                      <div className="flex-shrink-0">
-                        <span className="text-lg">{getActivityIcon(activity)}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-900">
-                          {getActivityText(activity)}
-                        </p>
-                        {activity.memorial && (
-                          <p className="text-xs text-gray-600">
-                            {activity.memorial.firstName} {activity.memorial.lastName}
-                          </p>
-                        )}
-                        <p className="text-xs text-gray-500 mt-1">
-                          {formatDate(activity.createdAt)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <PersonalCabinetActivity
+              recentActivity={recentActivity}
+              formatDate={formatDate}
+              getActivityIcon={getActivityIcon}
+              getActivityText={getActivityText}
+            />
           </div>
         </div>
       </div>

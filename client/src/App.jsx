@@ -372,10 +372,10 @@ const App = () => {
               <Route path="/company-cabinet/:id" element={<CompanyCabinet />} />
               <Route path="/products" element={<Products />} />
               <Route path="/products/:slug" element={<ProductPage />} />
+              {/* Роут для красивых URL мемориалов - должен быть выше компаний */}
+              <Route path="/:slug" element={<MemorialView />} />
               {/* Красивый URL для компаний по customSlug */}
               <Route path="/:companySlug" element={<CompanyProfileBySlug />} />
-              {/* Роут для красивых URL мемориалов - должен быть ниже компаний */}
-              <Route path="/:slug" element={<MemorialView />} />
             </Routes>
           </main>
           <MobileNavigation />

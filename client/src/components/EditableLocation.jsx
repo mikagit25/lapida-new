@@ -28,7 +28,12 @@ const EditableLocation = ({ memorial, onUpdate }) => {
   });
 
   // Проверяем права на редактирование
-  const canEdit = user && (memorial.createdBy === user.id || memorial.createdBy._id === user.id || memorial.createdBy.toString() === user.id);
+  const createdBy = memorial.createdBy?._id || memorial.createdBy || '';
+  const editors = memorial.editorsUsers || [];
+  const canEdit = user && (
+    user.id === createdBy || user._id === createdBy ||
+    editors.includes(user.id) || editors.includes(user._id)
+  );
 
   const handleLocationChange = (newLocationData) => {
     setLocationData(prev => ({
@@ -207,7 +212,7 @@ const EditableLocation = ({ memorial, onUpdate }) => {
 
   // Обычный режим просмотра
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
+  <div className="bg-white rounded-lg shadow-sm p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900 flex items-center">
           <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

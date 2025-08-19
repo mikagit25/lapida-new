@@ -47,8 +47,9 @@ import { fixImageUrl } from '../utils/imageUrl';
 
 const GravePhotoGallery = ({ memorial, onUpdate }) => {
   const { user } = useAuth();
-  // Получаем массив фото из memorial.location.gravePhotos
-  const gravePhotos = memorial.location?.gravePhotos || [];
+  // Защита: если нет location, не рендерим компонент
+  if (!memorial.location) return null;
+  const gravePhotos = memorial.location.gravePhotos || [];
   const [isUploading, setIsUploading] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(null);
   const [description, setDescription] = useState('');
@@ -70,10 +71,11 @@ const GravePhotoGallery = ({ memorial, onUpdate }) => {
   }, [selectedPhotoIndex, gravePhotos.length]);
 
   // Проверяем права на редактирование
+  const createdBy = memorial.createdBy?._id || memorial.createdBy || '';
+  const editors = memorial.editorsUsers || [];
   const canEdit = user && (
-    memorial.createdBy === user.id || 
-    memorial.createdBy._id === user.id || 
-    memorial.createdBy.toString() === user.id
+    user.id === createdBy || user._id === createdBy ||
+    editors.includes(user.id) || editors.includes(user._id)
   );
 
   // ...existing code...
@@ -122,10 +124,11 @@ const GravePhotoGallery = ({ memorial, onUpdate }) => {
 
       const API_BASE_URL = await getApiBaseUrl();
       const response = await fetch(`${API_BASE_URL}/memorials/${memorial._id}/grave-photo`, {
-        method: 'PUT',
+  // Единый алгоритм: используем PUT, как на сервере
+  method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
-        },
+  }, // Не указываем Content-Type для FormData!
         body: formData
       });
 

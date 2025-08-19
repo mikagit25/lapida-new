@@ -2,6 +2,7 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import GravePhotoGallery from './GravePhotoGallery';
 
 // Иконка маркера для Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -64,10 +65,16 @@ const LocationView = ({ memorial }) => {
           </div>
         )}
 
-        {/* Карта */}
+  {/* Галерея фото захоронения */}
+        {location.address && (
+          <div>
+            <span className="text-gray-600 block text-sm">Адрес</span>
+            <span className="font-semibold text-gray-900">{location.address}</span>
+          </div>
+        )}
         {hasCoordinates && (
-          <div className="mt-4">
-            <div className="h-48 border border-gray-300 rounded-md overflow-hidden">
+          <>
+            <div className="mt-4 h-48 border border-gray-300 rounded-md overflow-hidden">
               <MapContainer
                 center={[location.coordinates.lat, location.coordinates.lng]}
                 zoom={16}
@@ -90,8 +97,6 @@ const LocationView = ({ memorial }) => {
                 </Marker>
               </MapContainer>
             </div>
-            
-            {/* Координаты */}
             <div className="mt-2 text-xs text-gray-500 text-center">
               Координаты: {location.coordinates.lat.toFixed(6)}, {location.coordinates.lng.toFixed(6)}
               {location.coordinatesMethod && (
@@ -106,10 +111,10 @@ const LocationView = ({ memorial }) => {
                 </span>
               )}
             </div>
-          </div>
+            {/* Галерея фото захоронения под картой */}
+            <GravePhotoGallery memorial={memorial} />
+          </>
         )}
-
-        {/* Если координат нет, показываем сообщение */}
         {!hasCoordinates && (
           <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-md text-center">
             <p className="text-gray-600 text-sm">
@@ -123,6 +128,6 @@ const LocationView = ({ memorial }) => {
       </div>
     </div>
   );
-};
+}
 
 export default LocationView;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { newMemorialService } from '../services/api';
+import { getMemorialUrl } from '../utils/memorialUrl';
 
 const Memorials = () => {
   const [memorials, setMemorials] = useState([]);
@@ -164,7 +165,7 @@ const Memorials = () => {
                   </div>
                   
                   <Link
-                    to={memorial.customSlug ? `/${memorial.customSlug}` : `/memorial/${memorial.shareUrl}`}
+                    to={getMemorialUrl(memorial)}
                     className="w-full bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 inline-block"
                     onClick={() => console.log('Memorials - clicking memorial with shareUrl:', memorial.shareUrl)}
                   >

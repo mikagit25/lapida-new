@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { newMemorialService, commentService } from '../services/api';
 import Gallery from '../components/Gallery';
+import MemorialStats from '../components/MemorialStats';
+import MemorialSidebar from '../components/MemorialSidebar';
 import LifeTimeline from '../components/LifeTimeline';
 import ShareBlock from '../components/ShareBlock';
 import CommentSection from '../components/CommentSection';
@@ -9,6 +11,7 @@ import CollapsibleComments from '../components/CollapsibleComments';
 import EditableBiography from '../components/EditableBiography';
 import EditableEpitaph from '../components/EditableEpitaph';
 import EditableLocation from '../components/EditableLocation';
+import LocationView from '../components/LocationView';
 import EpitaphSection from '../components/EpitaphSection';
 import VirtualFlowers from '../components/VirtualFlowers';
 import VirtualCandles from '../components/VirtualCandles';
@@ -254,57 +257,34 @@ const MemorialView = () => {
             <LifeTimeline memorialId={memorial._id} />
 
             {/* Местоположение захоронения */}
-            <EditableLocation memorial={memorial} onUpdate={handleLocationUpdate} />
+            {/* Место захоронения: редактирование только для владельца/редактора */}
+            {(() => {
+              // Проверка прав на редактирование
+              const user = JSON.parse(localStorage.getItem('user'));
+              const createdBy = memorial.createdBy?._id || memorial.createdBy || '';
+              const editors = memorial.editorsUsers || [];
+              const canEdit = user && (
+                user.id === createdBy || user._id === createdBy ||
+                editors.includes(user.id) || editors.includes(user._id)
+              );
+              if (canEdit) {
+                return <EditableLocation memorial={memorial} onUpdate={handleLocationUpdate} />;
+              }
+              return <LocationView memorial={memorial} />;
+            })()}
 
             {/* Блок поделиться */}
             <ShareBlock memorial={memorial} />
 
             {/* Статистика */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Статистика</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Просмотры</span>
-                  <span className="font-semibold">{memorial.views || 0}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Комментарии</span>
-                  <span className="font-semibold">{comments.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Создан</span>
-                  <span className="font-semibold">
-                    {new Date(memorial.createdAt).toLocaleDateString('ru-RU')}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <MemorialStats memorial={memorial} comments={comments} />
 
           </div>
 
           {/* Боковая панель */}
           <div className="lg:col-span-1">
             <div className="sticky top-8 space-y-6">
-              {/* Дополнительная информация */}
-              {(memorial.birthPlace || memorial.deathPlace) && (
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Места</h3>
-                  <div className="space-y-3">
-                    {memorial.birthPlace && (
-                      <div>
-                        <span className="text-gray-600 block">Место рождения</span>
-                        <span className="font-semibold">{memorial.birthPlace}</span>
-                      </div>
-                    )}
-                    {memorial.deathPlace && (
-                      <div>
-                        <span className="text-gray-600 block">Место смерти</span>
-                        <span className="font-semibold">{memorial.deathPlace}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+              <MemorialSidebar memorial={memorial} />
             </div>
           </div>
         </div>
