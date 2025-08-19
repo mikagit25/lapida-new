@@ -5,6 +5,7 @@ import Gallery from '../components/Gallery';
 import MemorialStats from '../components/MemorialStats';
 import MemorialSidebar from '../components/MemorialSidebar';
 import LifeTimeline from '../components/LifeTimeline';
+import TimelineEventMui from '../components/TimelineEventMui';
 import ShareBlock from '../components/ShareBlock';
 import CommentSection from '../components/CommentSection';
 import CollapsibleComments from '../components/CollapsibleComments';
@@ -27,9 +28,11 @@ const MemorialView = () => {
   const [virtualCandles, setVirtualCandles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [timelineEvents, setTimelineEvents] = useState([]);
 
   useEffect(() => {
     loadMemorial();
+  loadTimelineEvents();
   }, [shareUrl, slug]);
 
   const loadMemorial = async () => {
@@ -85,6 +88,8 @@ const MemorialView = () => {
       const commentsData = await commentService.getByMemorial(memorialData._id);
       const commentsArray = commentsData.comments || commentsData;
       setComments(Array.isArray(commentsArray) ? commentsArray : []);
+      // Загружаем события таймлайна
+      loadTimelineEvents(memorialData._id);
     } catch (error) {
       console.error('Error loading memorial:', error);
       setError('Мемориал не найден или недоступен');
@@ -93,6 +98,17 @@ const MemorialView = () => {
     }
   };
 
+  // Загрузка событий таймлайна
+  const loadTimelineEvents = async (memorialIdParam) => {
+    try {
+      const id = memorialIdParam || memorial?._id;
+      if (!id) return;
+      const eventsData = await timelineService.getByMemorial(id);
+      setTimelineEvents(Array.isArray(eventsData) ? eventsData : (eventsData.events || []));
+    } catch (err) {
+      setTimelineEvents([]);
+    }
+  };
   const handleMemorialUpdate = (updateFn) => {
     console.log('MemorialView: handleMemorialUpdate called with:', updateFn);
     if (typeof updateFn === 'function') {
@@ -265,23 +281,22 @@ const MemorialView = () => {
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Фото и воспоминания</h2>
               <Gallery 
                 memorialId={memorial._id}
-                images={memorial.galleryImages || []} 
-                onImagesUpdate={handleImagesUpdate}
-                canEdit={true}
+                images={memorial.galleryImages || []}
                 currentProfileImage={memorial.profileImage}
                 onProfileImageChange={handleProfileImageChange}
+                canEdit={true}
+                onImagesUpdate={handleImagesUpdate}
               />
             </div>
 
             {/* Комментарии - Воспоминания и соболезнования */}
+            {/* Таймлайн жизни (новый компонент на MUI) */}
+            <LifeTimeline memorialId={memorial._id} />
             <CollapsibleComments
               memorialId={memorial._id}
               comments={comments}
               onNewComment={handleNewComment}
             />
-
-            {/* Лента жизни (Timeline) */}
-            <LifeTimeline memorialId={memorial._id} />
 
             {/* Местоположение захоронения */}
             {/* Место захоронения: редактирование только для владельца/редактора */}

@@ -1,33 +1,70 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import CardActions from '@mui/material/CardActions';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
+import Rating from '@mui/material/Rating';
 
 const ProductCard = ({ product, onEdit, onDelete }) => {
   return (
-    <div className="bg-white rounded-lg shadow hover:shadow-lg transition p-4 flex flex-col">
+    <Card sx={{ maxWidth: 345, display: 'flex', flexDirection: 'column', height: '100%' }}>
       {product.images && product.images.length > 0 ? (
-        <img src={product.images[0]} alt={product.name} className="w-full h-40 object-cover rounded mb-2" />
+        <CardMedia
+          component="img"
+          height="180"
+          image={product.images[0]}
+          alt={product.name}
+        />
       ) : (
-        <div className="w-full h-40 bg-gray-100 flex items-center justify-center rounded mb-2 text-gray-400 text-4xl">🛒</div>
+        <CardMedia
+          component="div"
+          sx={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5', fontSize: 48, color: '#bbb' }}
+        >🛒</CardMedia>
       )}
-      <h3 className="text-lg font-semibold mb-1 line-clamp-1">{product.name}</h3>
-      <div className="text-gray-600 mb-1 line-clamp-1">{product.category}</div>
-      <div className="text-blue-700 font-bold mb-2">{product.price ? product.price + ' ₽' : 'Цена не указана'}</div>
-      <div className="text-sm text-gray-500 mb-2 line-clamp-2">{product.description}</div>
-      <Link to={`/companies/${product.companyId}`} className="text-blue-600 hover:underline text-sm mt-auto mb-2">{product.companyName}</Link>
-      <Link to={`/products/${product.slug}`} className="bg-blue-600 text-white px-4 py-2 rounded font-semibold text-center mt-2 hover:bg-blue-700 transition">
-        Просмотреть товар
-      </Link>
-      {(onEdit || onDelete) && (
-        <div className="flex gap-2 mt-2">
-          {onEdit && (
-            <button className="bg-yellow-500 text-white px-3 py-1 rounded text-sm" onClick={onEdit}>Редактировать</button>
-          )}
-          {onDelete && (
-            <button className="bg-red-600 text-white px-3 py-1 rounded text-sm" onClick={onDelete}>Удалить</button>
-          )}
-        </div>
-      )}
-    </div>
+      <CardContent sx={{ flexGrow: 1 }}>
+        <Typography gutterBottom variant="h6" component="div" noWrap>{product.name}</Typography>
+        <Typography variant="body2" color="text.secondary" noWrap>{product.category}</Typography>
+        {/* Теги товара */}
+        {product.tags && product.tags.length > 0 && (
+          <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
+            {product.tags.map((tag, idx) => (
+              <Chip key={idx} label={tag} size="small" color="info" />
+            ))}
+          </Stack>
+        )}
+        {/* Рейтинг товара */}
+        <Rating name="product-rating" value={product.rating || 0} precision={0.5} readOnly sx={{ mb: 1 }} />
+        <Typography variant="subtitle1" color="primary" sx={{ fontWeight: 'bold', mb: 1 }}>
+          {product.price ? product.price + ' ₽' : 'Цена не указана'}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }} noWrap>{product.description}</Typography>
+        {product.companyName && (
+          <Typography variant="caption" color="text.secondary" component={Link} to={`/companies/${product.companyId}`} sx={{ textDecoration: 'none', color: 'blue' }}>
+            {product.companyName}
+          </Typography>
+        )}
+      </CardContent>
+      <CardActions sx={{ flexDirection: 'column', alignItems: 'stretch', gap: 1 }}>
+        <Button component={Link} to={`/products/${product.slug}`} variant="contained" color="primary" fullWidth>
+          Просмотреть товар
+        </Button>
+        {(onEdit || onDelete) && (
+          <div style={{ display: 'flex', gap: 8 }}>
+            {onEdit && (
+              <Button variant="contained" color="warning" size="small" onClick={onEdit}>Редактировать</Button>
+            )}
+            {onDelete && (
+              <Button variant="contained" color="error" size="small" onClick={onDelete}>Удалить</Button>
+            )}
+          </div>
+        )}
+      </CardActions>
+    </Card>
   );
 };
 

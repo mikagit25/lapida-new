@@ -7,7 +7,9 @@ export default function ProductForm({ initialData, onSave, onCancel }) {
     name: safeInitialData.name || '',
     description: safeInitialData.description || '',
     price: safeInitialData.price || '',
-    category: safeInitialData.category || ''
+    category: safeInitialData.category || '',
+    tags: safeInitialData.tags ? safeInitialData.tags.join(', ') : '',
+    rating: safeInitialData.rating || 0
   });
   const [files, setFiles] = useState([]); // реальные файлы
   const [previews, setPreviews] = useState([]); // превью для отображения
@@ -48,6 +50,10 @@ export default function ProductForm({ initialData, onSave, onCancel }) {
     fd.append('description', form.description);
     fd.append('price', form.price);
     fd.append('category', form.category);
+    // Теги: строка через запятую -> массив
+    const tagsArr = form.tags.split(',').map(t => t.trim()).filter(Boolean);
+    fd.append('tags', JSON.stringify(tagsArr));
+    fd.append('rating', form.rating);
     // Добавляем оставшиеся сохранённые фото как ссылки
     fd.append('existingImages', JSON.stringify(existingImages));
     // Добавляем новые файлы
@@ -61,10 +67,12 @@ export default function ProductForm({ initialData, onSave, onCancel }) {
 
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-      <input name="name" value={form.name} onChange={handleChange} placeholder="Название" className="border px-3 py-2 rounded" required />
-      <textarea name="description" value={form.description} onChange={handleChange} placeholder="Описание" className="border px-3 py-2 rounded" />
-      <input name="price" value={form.price} onChange={handleChange} placeholder="Цена" className="border px-3 py-2 rounded" type="number" min="0" />
-      <input name="category" value={form.category} onChange={handleChange} placeholder="Категория" className="border px-3 py-2 rounded" />
+  <input name="name" value={form.name} onChange={handleChange} placeholder="Название" className="border px-3 py-2 rounded" required />
+  <textarea name="description" value={form.description} onChange={handleChange} placeholder="Описание" className="border px-3 py-2 rounded" />
+  <input name="price" value={form.price} onChange={handleChange} placeholder="Цена" className="border px-3 py-2 rounded" type="number" min="0" />
+  <input name="category" value={form.category} onChange={handleChange} placeholder="Категория" className="border px-3 py-2 rounded" />
+  <input name="tags" value={form.tags} onChange={handleChange} placeholder="Теги (через запятую)" className="border px-3 py-2 rounded" />
+  <input name="rating" value={form.rating} onChange={handleChange} placeholder="Рейтинг (0-5)" className="border px-3 py-2 rounded" type="number" min="0" max="5" step="0.1" />
       <div>
         <div className="mb-2 font-semibold">Фото товара</div>
         <input type="file" multiple accept="image/*" style={{ display: 'none' }} ref={fileInputRef} onChange={handleFileSelect} />

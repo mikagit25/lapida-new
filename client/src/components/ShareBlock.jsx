@@ -85,12 +85,41 @@ const ShareBlock = ({ memorial }) => {
           <div className="mt-3 text-center">
             <div className="inline-block p-4 bg-white border border-gray-200 rounded-lg">
               <QRCodeSVG 
+                id="memorial-qr-svg"
                 value={qrCodeUrl}
-                size={128}
+                size={256}
                 level="M"
                 includeMargin={true}
               />
             </div>
+            <button
+              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              onClick={() => {
+                const svg = document.getElementById('memorial-qr-svg');
+                if (!svg) return;
+                const serializer = new XMLSerializer();
+                const svgStr = serializer.serializeToString(svg);
+                const canvas = document.createElement('canvas');
+                const img = new window.Image();
+                img.onload = function() {
+                  canvas.width = img.width;
+                  canvas.height = img.height;
+                  const ctx = canvas.getContext('2d');
+                  ctx.drawImage(img, 0, 0);
+                  canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'memorial-qr.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }, 'image/png');
+                };
+                img.src = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svgStr)));
+              }}
+            >Скачать QR код (PNG)</button>
             <p className="text-xs text-gray-500 mt-2">
               Сканируйте для быстрого доступа к мемориалу
             </p>
