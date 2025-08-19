@@ -6,17 +6,28 @@ import CompanyHeader from '../components/CompanyHeader';
 import CompanyInfo from '../components/CompanyInfo';
 // Removed duplicate import of React
 import CompanyNews from '../components/CompanyNews';
+import CompanyNewsProfileBlock from '../components/CompanyNewsProfileBlock';
 import CompanyGallery from '../components/CompanyGallery';
 import ProductList from '../components/ProductList';
+import CompanyProductsProfileBlock from '../components/CompanyProductsProfileBlock';
 import CompanyDocumentsViewer from '../components/CompanyDocumentsViewer';
+import CompanyDocumentsProfileBlock from '../components/CompanyDocumentsProfileBlock';
 import ReviewsFeed from '../components/ReviewsFeed';
 import CompanyTeam from '../components/CompanyTeam';
+import CompanyTeamProfileBlock from '../components/CompanyTeamProfileBlock';
 import CompanyContacts from '../components/CompanyContacts';
+import CompanyContactsProfileBlock from '../components/CompanyContactsProfileBlock';
 import CompanyReviewForm from '../components/CompanyReviewForm';
+import CompanyAddressMapProfileBlock from '../components/CompanyAddressMapProfileBlock';
+import CompanyReviewsProfileBlock from '../components/CompanyReviewsProfileBlock';
+import CompanyQRCodeProfileBlock from '../components/CompanyQRCodeProfileBlock';
 export default function CompanyProfile({ company, userData, news, team, contacts }) {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsError, setReviewsError] = useState('');
+  const [companyNews, setCompanyNews] = useState([]);
+  const [newsLoading, setNewsLoading] = useState(false);
+  const [newsError, setNewsError] = useState('');
   // Гарантируем, что owner всегда определён
   const initialCompanyState = {
     ...company,
@@ -44,7 +55,24 @@ export default function CompanyProfile({ company, userData, news, team, contacts
       }
       setReviewsLoading(false);
     }
+    async function fetchNews() {
+      setNewsLoading(true);
+      setNewsError('');
+      try {
+        const res = await fetch(`/api/companies/${companyState._id}/news`);
+        const data = await res.json();
+        if (res.ok && data.news) {
+          setCompanyNews(data.news);
+        } else {
+          setNewsError(data.message || 'Ошибка загрузки новостей');
+        }
+      } catch (e) {
+        setNewsError('Ошибка загрузки новостей');
+      }
+      setNewsLoading(false);
+    }
     if (companyState && companyState._id) fetchReviews();
+    if (companyState && companyState._id) fetchNews();
   }, [companyState]);
 
   // Обработчик для обновления customSlug
@@ -118,67 +146,25 @@ export default function CompanyProfile({ company, userData, news, team, contacts
         </div>
       )}
       <CompanyInfo company={companyState} />
-      {/* Мини-каталог товаров компании */}
-      {companyState.products && companyState.products.length > 0 && (
-        <div className="mb-8">
-          <h2 className="font-semibold text-xl mb-2">Товары и услуги</h2>
-          <ProductList products={companyState.products} />
-        </div>
-      )}
-      <CompanyNews news={news} />
-      <CompanyDocumentsViewer documents={companyState.documents} />
+  {/* Мини-каталог товаров компании */}
+  <CompanyProductsProfileBlock products={companyState.products} />
+  <CompanyNewsProfileBlock news={companyNews} />
+  {newsLoading && <div className="text-gray-500">Загрузка новостей...</div>}
+  {newsError && <div className="text-red-600 mb-2">{newsError}</div>}
+  <CompanyDocumentsProfileBlock documents={companyState.documents} />
   {/* <CompanyReviews reviews={companyState.reviews} /> */}
-      <CompanyTeam team={team} />
-      <CompanyContacts contacts={companyState.contacts} phones={companyState.phones} emails={companyState.emails} />
-      {/* Раздел адрес и карта */}
-      {(companyState.address || (companyState.lat && companyState.lng)) && (
-        <div className="mb-8">
-          <h2 className="font-semibold text-xl mb-2">Адрес и карта</h2>
-          {companyState.address && <div className="mb-2">Адрес: {companyState.address}</div>}
-          {(companyState.lat && companyState.lng) && (
-            <div className="mb-2">
-              <div className="text-sm text-gray-500">Координаты: {companyState.lat}, {companyState.lng}</div>
-              <div style={{ height: '250px', width: '100%' }}>
-                <iframe
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${companyState.lng-0.01},${companyState.lat-0.01},${companyState.lng+0.01},${companyState.lat+0.01}&layer=mapnik&marker=${companyState.lat},${companyState.lng}`}
-                  style={{ border: 0, width: '100%', height: '100%' }}
-                  allowFullScreen=""
-                  loading="lazy"
-                  title="Карта компании"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-      {/* QR-код и поделиться */}
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
-        <h2 className="text-lg font-semibold mb-4">QR-код компании</h2>
-        <div className="flex flex-col items-center gap-4">
-          <QRCode value={companyUrl} size={160} />
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded font-semibold mt-2"
-            onClick={() => {
-              navigator.clipboard.writeText(companyUrl);
-            }}
-          >
-            Поделиться ссылкой
-          </button>
-        </div>
-      </div>
+  <CompanyTeamProfileBlock team={team} />
+  <CompanyContactsProfileBlock contacts={companyState.contacts} phones={companyState.phones} emails={companyState.emails} />
+  <CompanyAddressMapProfileBlock address={companyState.address} lat={companyState.lat} lng={companyState.lng} />
+  <CompanyQRCodeProfileBlock companyUrl={companyUrl} />
 
-      {/* Reviews block at the bottom */}
-      <div className="mt-12">
-        <h2 className="font-semibold text-xl mb-4">Отзывы о компании</h2>
-        <CompanyReviewForm companyId={companyState._id} onReviewAdded={review => setReviews(r => [review, ...r])} />
-        {reviewsLoading && <div className="text-gray-500">Загрузка отзывов...</div>}
-        {reviewsError && <div className="text-red-600 mb-2">{reviewsError}</div>}
-        {reviews.length === 0 && !reviewsLoading ? (
-          <div className="text-gray-500">Пока нет отзывов</div>
-        ) : (
-          <ReviewsFeed reviews={reviews} />
-        )}
-      </div>
+      <CompanyReviewsProfileBlock
+        companyId={companyState._id}
+        reviews={reviews}
+        reviewsLoading={reviewsLoading}
+        reviewsError={reviewsError}
+        onReviewAdded={review => setReviews(r => [review, ...r])}
+      />
     </div>
   );
 }

@@ -1,14 +1,24 @@
+import CompanyNewsBlock from '../components/CompanyNewsBlock';
+import CompanyDocumentsBlock from '../components/CompanyDocumentsBlock';
+import CompanyGalleryBlock from '../components/CompanyGalleryBlock';
+import CompanyProductsBlock from '../components/CompanyProductsBlock';
+import CompanyAddressMap from '../components/CompanyAddressMap';
+import CompanyReviewsBlock from '../components/CompanyReviewsBlock';
+import CompanyTabs from '../components/CompanyTabs';
+import CompanyLogoUploader from '../components/CompanyLogoUploader';
 import ProductForm from '../components/ProductForm';
 import DeleteCompanyButton from '../components/DeleteCompanyButton';
 import React, { useEffect, useState, useRef } from 'react';
 import CompanyGallery from '../components/CompanyGallery';
 import ProductList from '../components/ProductList';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import QRCode from 'react-qr-code';
+import CompanyQRCodeBlock from '../components/CompanyQRCodeBlock';
 import CompanyMap from '../components/CompanyMap';
 import CompanyNewsForm from '../components/CompanyNewsForm';
 import CompanyDocumentsForm from '../components/CompanyDocumentsForm';
+import CompanyContactsForm from '../components/CompanyContactsForm';
 import CustomSlugEditor from '../components/CustomSlugEditor';
+import CompanyEditForm from '../components/CompanyEditForm';
 
 // Обработчик клика по карте через useMapEvents
 function MapClickHandler({ setEditForm, setMapCenter }) {
@@ -344,26 +354,12 @@ function CompanyCabinet() {
           <span className="text-gray-400">|</span>
           <span className="font-bold">Личный кабинет компании</span>
         </div>
-        <div className="mb-6 flex gap-4 border-b pb-2">
-          {TABS.map(t => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`px-4 py-2 rounded-t font-semibold ${tab === t.key ? 'bg-white shadow text-blue-700' : 'bg-gray-100 text-gray-600'}`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+  <CompanyTabs tabs={TABS} currentTab={tab} setTab={setTab} />
         <div className="bg-white rounded-lg shadow p-6">
           {/* QR-код компании с актуальным адресом */}
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">QR-код компании</h2>
-            <div className="flex flex-col items-center gap-2">
-              <QRCode value={company.customSlug ? `${window.location.origin}/${company.customSlug}` : `${window.location.origin}/companies/${company._id}`} size={128} />
-              <div className="text-xs text-gray-500 break-all">{company.customSlug ? `${window.location.origin}/${company.customSlug}` : `${window.location.origin}/companies/${company._id}`}</div>
-            </div>
-          </div>
+          <CompanyQRCodeBlock
+            url={company.customSlug ? `${window.location.origin}/${company.customSlug}` : `${window.location.origin}/companies/${company._id}`}
+          />
           {tab === 'info' && (
             <div>
               <h2 className="font-semibold text-xl mb-4">Информация о компании</h2>
@@ -377,198 +373,72 @@ function CompanyCabinet() {
                 </div>
                 <div className="flex flex-col items-center">
                   <img src={company.logo || '/default-company-logo.png'} alt="Логотип компании" className="w-20 h-20 object-cover rounded-full border mb-2" />
-                  {isOwner && (
-                    <form onSubmit={async e => {
-                      e.preventDefault();
-                      const file = e.target.logo.files[0];
-                      if (!file) return;
-                      const formData = new FormData();
-                      formData.append('logo', file);
-                      const token = localStorage.getItem('authToken');
-                      const res = await fetch(`/api/companies/${company._id}/logo`, {
-                        method: 'PUT',
-                        headers: token ? { Authorization: `Bearer ${token}` } : {},
-                        body: formData,
-                      });
-                      const data = await res.json();
-                      if (data.logo) setCompany(prev => ({ ...prev, logo: data.logo }));
-                    }}>
-                      <input type="file" name="logo" accept="image/*" className="mb-2" />
-                      <button type="submit" className="text-xs bg-blue-500 text-white px-2 py-1 rounded">Обновить аватар</button>
-                    </form>
-                  )}
+                  <CompanyLogoUploader company={company} isOwner={isOwner} setCompany={setCompany} />
                 </div>
               </div>
-              {isOwner && (
-                <form className="flex flex-col gap-3 mb-6" onSubmit={handleEditCompany}>
-                  <input
-                    className="border px-3 py-2 rounded"
-                    value={editForm.name}
-                    onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
-                    placeholder="Название компании"
-                  />
-                  <textarea
-                    className="border px-3 py-2 rounded"
-                    value={editForm.description}
-                    onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))}
-                    placeholder="Описание"
-                  />
-                  <input
-                    className="border px-3 py-2 rounded"
-                    value={editForm.inn || company.inn || ''}
-                    onChange={e => setEditForm(f => ({ ...f, inn: e.target.value }))}
-                    placeholder="ИНН"
-                  />
-                  <input
-                    className="border px-3 py-2 rounded"
-                    value={editForm.extra || company.extra || ''}
-                    onChange={e => setEditForm(f => ({ ...f, extra: e.target.value }))}
-                    placeholder="Дополнительная строка (под названием)"
-                  />
-                  <CustomSlugEditor
-                    companyId={company._id}
-                    initialSlug={company.customSlug}
-                    isOwner={isOwner}
-                    companyName={company.name}
-                    isCabinet={true}
-                    onSlugSaved={slug => {
-                      setEditForm(f => ({ ...f, customSlug: slug }));
-                      setCompany(prev => ({ ...prev, customSlug: slug }));
-                    }}
-                  />
-                  {editError && <div className="text-red-600 text-sm">{editError}</div>}
-                  {editSuccess && <div className="text-green-600 text-sm">{editSuccess}</div>}
-                  <button type="submit" disabled={editLoading} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold">
-                    {editLoading ? 'Сохранение...' : 'Сохранить изменения'}
-                  </button>
-                </form>
-              )}
+              <CompanyEditForm
+                editForm={editForm}
+                setEditForm={setEditForm}
+                handleEditCompany={handleEditCompany}
+                editLoading={editLoading}
+                editError={editError}
+                editSuccess={editSuccess}
+                company={company}
+                isOwner={isOwner}
+              />
               {!isOwner && (
                 <div className="mb-4">
                   <label className="block font-medium mb-1">Адрес компании (URL)</label>
                   <div className="mb-2 text-sm text-gray-600">lapida.one/{company.customSlug}</div>
                 </div>
               )}
-              <div className="mt-6">
-                <h3 className="font-semibold text-lg mb-2">Контакты компании</h3>
-                <div className="mb-4">
-                  <label className="block font-medium mb-1">Телефоны:</label>
-                  {(editForm.phones || []).map((phone, idx) => (
-                    <div key={idx} className="flex items-center mb-2">
-                      <input
-                        type="text"
-                        className="border px-3 py-2 rounded w-full"
-                        value={phone}
-                        onChange={e => {
-                          const phones = [...editForm.phones];
-                          phones[idx] = e.target.value;
-                          setEditForm(f => ({ ...f, phones }));
-                        }}
-                        placeholder="Телефон"
-                      />
-                      <button type="button" className="ml-2 text-xs text-red-600" onClick={() => {
-                        const phones = [...editForm.phones];
-                        phones.splice(idx, 1);
-                        setEditForm(f => ({ ...f, phones }));
-                      }}>Удалить</button>
-                    </div>
-                  ))}
-                  <button type="button" className="text-xs bg-gray-200 px-2 py-1 rounded" onClick={() => {
-                    setEditForm(f => ({ ...f, phones: [...(f.phones || []), ''] }));
-                  }}>Добавить телефон</button>
-                </div>
-                <div className="mb-4">
-                  <label className="block font-medium mb-1">Email:</label>
-                  {(editForm.emails || []).map((email, idx) => (
-                    <div key={idx} className="flex items-center mb-2">
-                      <input
-                        type="email"
-                        className="border px-3 py-2 rounded w-full"
-                        value={email}
-                        onChange={e => {
-                          const emails = [...editForm.emails];
-                          emails[idx] = e.target.value;
-                          setEditForm(f => ({ ...f, emails }));
-                        }}
-                        placeholder="Email"
-                      />
-                      <button type="button" className="ml-2 text-xs text-red-600" onClick={() => {
-                        const emails = [...editForm.emails];
-                        emails.splice(idx, 1);
-                        setEditForm(f => ({ ...f, emails }));
-                      }}>Удалить</button>
-                    </div>
-                  ))}
-                  <button type="button" className="text-xs bg-gray-200 px-2 py-1 rounded" onClick={() => {
-                    setEditForm(f => ({ ...f, emails: [...(f.emails || []), ''] }));
-                  }}>Добавить email</button>
-                </div>
-                <button type="button" className="bg-blue-600 text-white px-4 py-2 rounded font-semibold" disabled={editLoading} onClick={handleEditCompany}>
-                  {editLoading ? 'Сохранение...' : 'Сохранить контакты'}
-                </button>
-                {editError && <div className="text-red-600 text-sm mt-2">{editError}</div>}
-                {editSuccess && <div className="text-green-600 text-sm mt-2">{editSuccess}</div>}
-              </div>
+              <CompanyContactsForm
+                editForm={editForm}
+                setEditForm={setEditForm}
+                editLoading={editLoading}
+                editError={editError}
+                editSuccess={editSuccess}
+                handleEditCompany={handleEditCompany}
+              />
             </div>
           )}
           {tab === 'address' && (
-            <div>
-              <h2 className="font-semibold text-xl mb-4">Адрес и карта</h2>
-              <CompanyMap
-                address={editForm.address}
-                lat={editForm.lat}
-                lng={editForm.lng}
-                setAddress={addr => setEditForm(f => ({ ...f, address: addr }))}
-                setLat={lat => setEditForm(f => ({ ...f, lat }))}
-                setLng={lng => setEditForm(f => ({ ...f, lng }))}
-                foundAddress={editForm.foundAddress}
-                setFoundAddress={fa => setEditForm(f => ({ ...f, foundAddress: fa }))}
-                mapError={mapError}
-                setMapError={setMapError}
-              />
-              <button type="button" className="bg-blue-600 text-white px-4 py-2 rounded font-semibold mt-4" disabled={editLoading} onClick={handleEditCompany}>
-                {editLoading ? 'Сохранение...' : 'Сохранить адрес и координаты'}
-              </button>
-              {editError && <div className="text-red-600 text-sm mt-2">{editError}</div>}
-              {editSuccess && <div className="text-green-600 text-sm mt-2">{editSuccess}</div>}
-            </div>
+            <CompanyAddressMap
+              editForm={editForm}
+              setEditForm={setEditForm}
+              mapError={mapError}
+              setMapError={setMapError}
+              editLoading={editLoading}
+              editError={editError}
+              editSuccess={editSuccess}
+              handleEditCompany={handleEditCompany}
+            />
           )}
           {tab === 'gallery' && (
-            <div>
-              <CompanyGallery
-                companyId={company._id}
-                images={company.gallery || []}
-                isOwner={isOwner}
-                onImagesUpdate={newGallery => setCompany(prev => ({ ...prev, gallery: newGallery }))}
-              />
-            </div>
+            <CompanyGalleryBlock
+              companyId={company._id}
+              gallery={company.gallery || []}
+              isOwner={isOwner}
+              onImagesUpdate={newGallery => setCompany(prev => ({ ...prev, gallery: newGallery }))}
+            />
           )}
           {tab === 'products' && (
-            <div>
-              <h2 className="font-semibold mb-2">Товары / услуги</h2>
-              {productsLoading && <div className="text-gray-500">Загрузка...</div>}
-              {productsError && <div className="text-red-600 mb-2">{productsError}</div>}
-              {!productFormOpen && isOwner && (
-                <button className="bg-blue-600 text-white px-4 py-2 rounded mb-4" onClick={handleAddProduct}>Добавить товар/услугу</button>
-              )}
-              {!productFormOpen && (
-                <ProductList
-                  products={products}
-                  onEdit={isOwner ? handleEditProduct : undefined}
-                  onDelete={isOwner ? handleDeleteProduct : undefined}
-                />
-              )}
-              {productFormOpen && (
-                <ProductForm
-                  initialData={productEditData}
-                  onSave={handleSaveProduct}
-                  onCancel={() => setProductFormOpen(false)}
-                />
-              )}
-            </div>
+            <CompanyProductsBlock
+              products={products}
+              productsLoading={productsLoading}
+              productsError={productsError}
+              productFormOpen={productFormOpen}
+              isOwner={isOwner}
+              handleAddProduct={handleAddProduct}
+              handleEditProduct={handleEditProduct}
+              handleDeleteProduct={handleDeleteProduct}
+              handleSaveProduct={handleSaveProduct}
+              productEditData={productEditData}
+              setProductFormOpen={setProductFormOpen}
+            />
           )}
           {tab === 'documents' && (
-            <CompanyDocumentsForm
+            <CompanyDocumentsBlock
               documents={editForm.documents || []}
               setDocuments={docs => setEditForm(f => ({ ...f, documents: docs }))}
               onSave={handleEditCompany}
@@ -578,7 +448,7 @@ function CompanyCabinet() {
             />
           )}
           {tab === 'news' && (
-            <CompanyNewsForm
+            <CompanyNewsBlock
               news={editForm.news || []}
               setNews={news => setEditForm(f => ({ ...f, news }))}
               onSave={handleEditCompany}
@@ -587,12 +457,7 @@ function CompanyCabinet() {
               success={editSuccess}
             />
           )}
-          {tab === 'reviews' && (
-            <div>
-              <h2 className="font-semibold mb-2">Отзывы</h2>
-              {/* Здесь будет список отзывов */}
-            </div>
-          )}
+          {tab === 'reviews' && <CompanyReviewsBlock />}
         </div>
       </div>
       {/* Кнопка удаления компании внизу страницы */}

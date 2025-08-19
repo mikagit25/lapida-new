@@ -1,13 +1,45 @@
-
-
 const path = require('path');
 const express = require('express');
+const router = express.Router();
 const fs = require('fs');
 const multer = require('multer');
 const Company = require('../models/Company');
 const { auth } = require('../middleware/auth');
 const Product = require('../models/Product');
-const router = express.Router();
+
+// Удалить компанию
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id);
+    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+    if (company.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Нет прав на удаление этой компании' });
+    }
+    // Удалить связанные товары
+    await Product.deleteMany({ company: company._id });
+    // Удалить связанные файлы (галерея, документы, лого, headerBackground)
+    const fileFields = ['gallery', 'documents', 'logo', 'headerBackground'];
+    for (const field of fileFields) {
+      if (Array.isArray(company[field])) {
+        for (const file of company[field]) {
+          if (file && typeof file === 'string' && file.startsWith('/uploads/')) {
+            try {
+              fs.unlinkSync(path.join(__dirname, '../public', file));
+            } catch (e) {}
+          }
+        }
+      } else if (company[field] && typeof company[field] === 'string' && company[field].startsWith('/uploads/')) {
+        try {
+          fs.unlinkSync(path.join(__dirname, '../public', company[field]));
+        } catch (e) {}
+      }
+    }
+    await company.deleteOne();
+    res.json({ message: 'Компания и связанные данные удалены' });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка удаления компании', error: error.message });
+  }
+});
 
 // Получить отзывы компании
 router.get('/:id/reviews', async (req, res) => {
@@ -362,7 +394,7 @@ router.delete('/:id/logo', auth, async (req, res) => {
 // Обновить данные компании и контакты
 router.put('/:id', auth, async (req, res) => {
   try {
-  const { name, address, inn, description, contacts, phones, emails, lat, lng, customSlug } = req.body;
+  const { name, address, inn, description, contacts, phones, emails, lat, lng, customSlug, news } = req.body;
     const company = await Company.findById(req.params.id);
     if (!company) return res.status(404).json({ message: 'Компания не найдена' });
     if (company.owner.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Нет доступа' });
@@ -376,6 +408,7 @@ router.put('/:id', auth, async (req, res) => {
   if (typeof lat === 'number' || lat === null) company.lat = lat;
   if (typeof lng === 'number' || lng === null) company.lng = lng;
   if (typeof customSlug === 'string' && customSlug.trim()) company.customSlug = customSlug.trim();
+  if (Array.isArray(news)) company.news = news;
     company.updatedAt = Date.now();
     await company.save();
     res.json({ company });
