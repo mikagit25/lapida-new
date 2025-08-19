@@ -35,27 +35,54 @@ const MemorialView = () => {
   const loadMemorial = async () => {
     try {
       setLoading(true);
-      
       // Определяем тип URL и загружаем соответственно
       const isSlugRoute = location.pathname.startsWith('/memorial/') === false && location.pathname !== '/';
       const isShareUrlRoute = location.pathname.startsWith('/memorial/');
-      
-      let memorialData;
-      if (isSlugRoute && slug) {
-        console.log('MemorialView - loading by slug:', slug);
-        memorialData = await newMemorialService.getBySlug(slug);
-      } else if (isShareUrlRoute && shareUrl) {
-        console.log('MemorialView - loading by shareUrl:', shareUrl);
-        memorialData = await newMemorialService.getByShareUrl(shareUrl);
-      } else {
-        throw new Error('Неверный формат URL');
+      let memorialData = null;
+      let tried = [];
+      try {
+        if (isSlugRoute && slug) {
+          console.log('MemorialView - loading by slug:', slug);
+          memorialData = await newMemorialService.getBySlug(slug);
+          tried.push('slug');
+        } else if (isShareUrlRoute && shareUrl) {
+          console.log('MemorialView - loading by shareUrl:', shareUrl);
+          memorialData = await newMemorialService.getByShareUrl(shareUrl);
+          tried.push('shareUrl');
+        } else {
+          throw new Error('Неверный формат URL');
+        }
+      } catch (err) {
+        console.warn('Primary memorial load failed:', err);
       }
-      
+      // Fallback: если не найден, пробуем альтернативные варианты
+      if (!memorialData) {
+        if (isShareUrlRoute && shareUrl) {
+          // Пробуем как slug
+          try {
+            memorialData = await newMemorialService.getBySlug(shareUrl);
+            tried.push('fallback-slug');
+          } catch (err) {
+            console.warn('Fallback by slug failed:', err);
+          }
+        }
+        if (!memorialData && (slug || shareUrl)) {
+          // Пробуем как _id
+          const id = slug || shareUrl;
+          try {
+            memorialData = await newMemorialService.getById(id);
+            tried.push('fallback-id');
+          } catch (err) {
+            console.warn('Fallback by id failed:', err);
+          }
+        }
+      }
+      if (!memorialData) {
+        throw new Error('Мемориал не найден');
+      }
       setMemorial(memorialData);
-      
       // Загружаем комментарии
       const commentsData = await commentService.getByMemorial(memorialData._id);
-      // Проверяем, что сервер вернул - объект с comments или массив
       const commentsArray = commentsData.comments || commentsData;
       setComments(Array.isArray(commentsArray) ? commentsArray : []);
     } catch (error) {

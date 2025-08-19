@@ -200,6 +200,13 @@ const newMemorialService = {
     return response.data;
   },
 
+  // Получение мемориала по _id (fallback)
+  getById: async (id) => {
+    const api = await getApi();
+    const response = await api.get(`/memorials/${id}`);
+    return response.data;
+  },
+
   // Получение мемориалов пользователя
   getMy: async (params = {}) => {
     const api = await getApi();

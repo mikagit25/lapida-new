@@ -350,7 +350,7 @@ function CompanyCabinet() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex gap-2 items-center">
-          <Link to={company.customSlug ? `/${company.customSlug}` : `/companies/${company._id}`} className="text-blue-600 hover:underline">← Назад к компании</Link>
+          <Link to={company.customSlug ? `/company/${company.customSlug}` : `/companies/${company._id}`} className="text-blue-600 hover:underline">← Назад к компании</Link>
           <span className="text-gray-400">|</span>
           <span className="font-bold">Личный кабинет компании</span>
         </div>

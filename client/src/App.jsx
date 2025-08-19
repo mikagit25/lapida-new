@@ -112,9 +112,6 @@ const Navigation = () => {
                   </div>
                 )}
                 <span className="text-gray-700">Привет, {user?.name}</span>
-                <Link to="/profile" className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                  Профиль
-                </Link>
                 <Link to="/create-memorial" className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium">
                   Создать мемориал
                 </Link>
@@ -330,7 +327,7 @@ const Memorials = () => {
                   </div>
                   
                   <Link
-                    to={memorial.customSlug ? `/${memorial.customSlug}` : `/memorial/${memorial.shareUrl}`}
+                    to={memorial.customSlug ? `/memorial/${memorial.customSlug}` : `/memorial/${memorial.shareUrl}`}
                     className="w-full bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 inline-block"
                   >
                     Посетить мемориал
@@ -346,6 +343,15 @@ const Memorials = () => {
 };
 
 const App = () => {
+  const NotFound = () => (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-red-600 mb-4">Страница не найдена</h1>
+        <p className="text-gray-600">Проверьте адрес или воспользуйтесь навигацией выше.</p>
+        <Link to="/" className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded">На главную</Link>
+      </div>
+    </div>
+  );
   const { user } = useAuth();
   console.log('App.jsx user:', user);
   return (
@@ -361,6 +367,7 @@ const App = () => {
               <Route path="/register" element={<Register />} />
               <Route path="/memorials" element={<Memorials />} />
               <Route path="/memorial/:shareUrl" element={<MemorialView />} />
+              <Route path="/memorial/:slug" element={<MemorialView />} />
               <Route path="/test-comments" element={<TestPhotoComments />} />
               <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path="/create-memorial" element={<PrivateRoute><MemorialCreate /></PrivateRoute>} />
@@ -372,10 +379,8 @@ const App = () => {
               <Route path="/company-cabinet/:id" element={<CompanyCabinet />} />
               <Route path="/products" element={<Products />} />
               <Route path="/products/:slug" element={<ProductPage />} />
-              {/* Роут для красивых URL мемориалов - должен быть выше компаний */}
-              <Route path="/:slug" element={<MemorialView />} />
-              {/* Красивый URL для компаний по customSlug */}
-              <Route path="/:companySlug" element={<CompanyProfileBySlug />} />
+              <Route path="/company/:companySlug" element={<CompanyProfileBySlug />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
           <MobileNavigation />
@@ -410,6 +415,7 @@ function CompanyProfileBySlug() {
   if (loading) return <div className="p-8">Загрузка...</div>;
   if (error || !company) return <div className="p-8 text-red-600">{error || 'Компания не найдена'}</div>;
 
+  // Исправляем ссылки на компанию: используем короткий slug, но с префиксом /company/
   return <CompanyProfile company={company} userData={user} />;
 }
 

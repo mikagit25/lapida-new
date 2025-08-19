@@ -7,6 +7,7 @@ import PersonalCabinetStats from './PersonalCabinetStats';
 import PersonalCabinetMemorials from './PersonalCabinetMemorials';
 import PersonalCabinetNotifications from './PersonalCabinetNotifications';
 import PersonalCabinetActivity from './PersonalCabinetActivity';
+import { fixImageUrl } from '../utils/imageUrl';
 
 const PersonalCabinet = () => {
   const { user, isAuthenticated } = useAuth();
