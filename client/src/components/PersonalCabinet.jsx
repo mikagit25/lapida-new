@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { userService, memorialService, newMemorialService, notificationService } from '../services/api';
 import { getUserDisplayName } from '../utils/userUtils';
 import PersonalCabinetStats from './PersonalCabinetStats';
+import NotificationsList from './NotificationsList';
 import PersonalCabinetMemorials from './PersonalCabinetMemorials';
 import PersonalCabinetNotifications from './PersonalCabinetNotifications';
 import PersonalCabinetActivity from './PersonalCabinetActivity';
@@ -252,10 +253,7 @@ const PersonalCabinet = () => {
           {/* Правая колонка - Уведомления и активность */}
           <div className="space-y-6">
             {/* Уведомления */}
-            <PersonalCabinetNotifications
-              notifications={notifications}
-              formatDate={formatDate}
-            />
+            <NotificationsList />
 
             {/* Последняя активность */}
             <PersonalCabinetActivity

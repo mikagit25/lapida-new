@@ -1,3 +1,3 @@
 Set-Location "d:\Mikalai\lapida-new\server"
 Write-Host "Starting Lapida server..."
-node app.js
+Write-Host "Запуск сервера разрешён только из папки server."

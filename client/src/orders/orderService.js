@@ -1,42 +1,50 @@
-import axios from 'axios';
 
-const API_URL = '/api/orders';
-
-// Получить заголовки авторизации
-function getAuthHeaders() {
-  const token = localStorage.getItem('authToken');
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+import { getApi } from '../services/api';
 
 const orderService = {
+  // Отменить заказ
+  cancelOrder: async (orderId, comment = '') => {
+    const api = await getApi();
+    const res = await api.patch(`/orders/${orderId}/status`, { status: 'cancelled', comment });
+    return res.data;
+  },
   // Заказы пользователя
   getMyOrders: async () => {
-    const res = await axios.get(`${API_URL}/my`, { headers: getAuthHeaders() });
-    return res.data;
+  const api = await getApi();
+  console.log('orderService.getMyOrders: api =', api);
+  const res = await api.get('/orders/my');
+  console.log('orderService.getMyOrders: res =', res);
+  console.log('orderService.getMyOrders: res.data =', res.data);
+  return res.data;
   },
   // Заказы компании
   getCompanyOrders: async (companyId) => {
-    const res = await axios.get(`${API_URL}/company/${companyId}`, { headers: getAuthHeaders() });
+    const api = await getApi();
+    const res = await api.get(`/orders/company/${companyId}`);
     return res.data;
   },
   // Создать заказ
   createOrder: async (orderData) => {
-    const res = await axios.post(`${API_URL}`, orderData, { headers: getAuthHeaders() });
+    const api = await getApi();
+    const res = await api.post('/orders', orderData);
     return res.data;
   },
   // Обновить заказ
   updateOrder: async (id, update) => {
-    const res = await axios.put(`${API_URL}/${id}`, update, { headers: getAuthHeaders() });
+    const api = await getApi();
+    const res = await api.put(`/orders/${id}`, update);
     return res.data;
   },
   // Получить заказ по id
   getOrder: async (id) => {
-    const res = await axios.get(`${API_URL}/${id}`, { headers: getAuthHeaders() });
+    const api = await getApi();
+    const res = await api.get(`/orders/${id}`);
     return res.data;
   },
   // Удалить заказ
   deleteOrder: async (id) => {
-    const res = await axios.delete(`${API_URL}/${id}`, { headers: getAuthHeaders() });
+    const api = await getApi();
+    const res = await api.delete(`/orders/${id}`);
     return res.data;
   }
 };

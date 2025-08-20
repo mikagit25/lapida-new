@@ -1,3 +1,4 @@
+import CompanyNotificationsList from '../components/CompanyNotificationsList';
 import CompanyNewsBlock from '../components/CompanyNewsBlock';
 import CompanyDocumentsBlock from '../components/CompanyDocumentsBlock';
 import CompanyGalleryBlock from '../components/CompanyGalleryBlock';
@@ -460,6 +461,12 @@ function CompanyCabinet() {
           {tab === 'reviews' && <CompanyReviewsBlock />}
         </div>
       </div>
+      {/* Уведомления компании для владельца */}
+      {company && company._id && company.isOwner && (
+        <div className="max-w-2xl mx-auto my-8">
+          <CompanyNotificationsList companyId={company._id} />
+        </div>
+      )}
       {/* Кнопка заказов и удаления компании внизу страницы */}
       <div className="flex justify-center mt-8 gap-4">
         {company && company._id && company.isOwner && (

@@ -47,9 +47,21 @@ const ProductPage = () => {
     }
   };
 
+  // Универсальная логика заказа: добавить товар в корзину и перейти к оформлению
   const handleOrder = () => {
-    setOrderSuccess(true);
-    setTimeout(() => setOrderSuccess(false), 2000);
+    if (!product) return;
+    // Получить текущие товары из корзины
+    const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+    // Проверить, есть ли товар уже в корзине
+    const exists = cartItems.find(item => item._id === product._id);
+    if (exists) {
+      exists.quantity = (exists.quantity || 1) + 1;
+    } else {
+      cartItems.push({ ...product, quantity: 1, companyId: product.companyId });
+    }
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    // Перейти к оформлению заказа
+    window.location.href = '/checkout';
   };
 
   // Lightbox галерея

@@ -11,6 +11,27 @@ import Stack from '@mui/material/Stack';
 import Rating from '@mui/material/Rating';
 
 const ProductCard = ({ product, onEdit, onDelete }) => {
+  // Универсальная функция покупки
+  const handleBuy = () => {
+    if (!product) return;
+    const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+    const exists = cartItems.find(item => item.productId === product._id);
+    if (exists) {
+      exists.quantity = (exists.quantity || 1) + 1;
+    } else {
+      cartItems.push({
+        productId: product._id,
+        name: product.name,
+        price: product.price,
+        quantity: 1,
+        companyId: product.companyId,
+        images: product.images,
+        slug: product.slug
+      });
+    }
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    window.location.href = '/checkout';
+  };
   return (
     <Card sx={{ maxWidth: 345, display: 'flex', flexDirection: 'column', height: '100%' }}>
       {product.images && product.images.length > 0 ? (
@@ -52,6 +73,9 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
       <CardActions sx={{ flexDirection: 'column', alignItems: 'stretch', gap: 1 }}>
         <Button component={Link} to={`/products/${product.slug}`} variant="contained" color="primary" fullWidth>
           Просмотреть товар
+        </Button>
+        <Button variant="contained" color="success" fullWidth onClick={handleBuy} sx={{ mt: 1 }}>
+          Купить
         </Button>
         {(onEdit || onDelete) && (
           <div style={{ display: 'flex', gap: 8 }}>

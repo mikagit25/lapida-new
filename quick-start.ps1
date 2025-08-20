@@ -42,7 +42,7 @@ $serverJob = Start-Job -ScriptBlock {
     param($ServerPort, $ProjectPath)
     Set-Location "$ProjectPath\server"
     $env:PORT = $ServerPort
-    node app.js
+    Write-Host "Запуск сервера разрешён только из папки server."
 } -ArgumentList $ServerPort, $PWD
 
 # Wait for server to start
