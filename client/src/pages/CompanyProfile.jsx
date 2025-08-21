@@ -20,7 +20,7 @@ import CompanyContactsProfileBlock from '../components/CompanyContactsProfileBlo
 import CompanyReviewForm from '../components/CompanyReviewForm';
 import CompanyAddressMapProfileBlock from '../components/CompanyAddressMapProfileBlock';
 import CompanyReviewsProfileBlock from '../components/CompanyReviewsProfileBlock';
-import CompanyQRCodeProfileBlock from '../components/CompanyQRCodeProfileBlock';
+import CompanyQRCodeBlock from '../components/CompanyQRCodeBlock';
 export default function CompanyProfile({ company, userData, news, team, contacts }) {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -125,39 +125,78 @@ export default function CompanyProfile({ company, userData, news, team, contacts
     : `${window.location.origin}/companies/${companyState._id}`;
 
   return (
-  <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-8">
       <Link to="/companies" className="text-blue-600 hover:underline mb-4 block">← Назад к каталогу компаний</Link>
       <CompanyHeader company={companyState} canEdit={isOwner} onHeaderBgUpload={handleHeaderBgUpload} />
       {isOwner && (
         <Link to={`/company-cabinet/${companyState._id}`} className="bg-blue-600 text-white px-4 py-2 rounded mb-4 inline-block">Личный кабинет</Link>
       )}
-      {/* Show extra string under name if present */}
-      {companyState.extra && (
-        <div className="text-gray-500 mb-2">{companyState.extra}</div>
-      )}
-      {/* Show address if present */}
-      {false && companyState.address && (
-        <div className="text-gray-700 mb-2">Адрес: {companyState.address}</div>
-      )}
-      {/* Show map if present */}
+      {/* ...existing code... */}
+      {/* Старая поддержка iframe-карты, если поле map есть */}
       {companyState.map && (
         <div className="mb-4">
           <iframe src={companyState.map} title="Карта" width="100%" height="200" style={{ border: 0 }} allowFullScreen="" loading="lazy"></iframe>
         </div>
       )}
       <CompanyInfo company={companyState} />
-  {/* Мини-каталог товаров компании */}
-  <CompanyProductsProfileBlock products={companyState.products} />
-  <CompanyNewsProfileBlock news={companyNews} />
-  {newsLoading && <div className="text-gray-500">Загрузка новостей...</div>}
-  {newsError && <div className="text-red-600 mb-2">{newsError}</div>}
-  <CompanyDocumentsProfileBlock documents={companyState.documents} />
-  {/* <CompanyReviews reviews={companyState.reviews} /> */}
-  <CompanyTeamProfileBlock team={team} />
-  <CompanyContactsProfileBlock contacts={companyState.contacts} phones={companyState.phones} emails={companyState.emails} />
-  <CompanyAddressMapProfileBlock address={companyState.address} lat={companyState.lat} lng={companyState.lng} />
-  <CompanyQRCodeProfileBlock companyUrl={companyUrl} />
-
+      {/* Мини-каталог товаров компании */}
+      <CompanyProductsProfileBlock products={companyState.products} />
+      <CompanyNewsProfileBlock news={companyNews} />
+      {newsLoading && <div className="text-gray-500">Загрузка новостей...</div>}
+      {newsError && <div className="text-red-600 mb-2">{newsError}</div>}
+      <CompanyDocumentsProfileBlock documents={companyState.documents} />
+      {/* <CompanyReviews reviews={companyState.reviews} /> */}
+      <CompanyTeamProfileBlock team={team} />
+      <CompanyContactsProfileBlock contacts={companyState.contacts} phones={companyState.phones} emails={companyState.emails} />
+      {/* Show address and map if present (OpenStreetMap) - теперь ниже контактов */}
+      {(companyState.address || (companyState.lat && companyState.lng)) && (
+        <CompanyAddressMapProfileBlock
+          address={companyState.address}
+          lat={companyState.lat}
+          lng={companyState.lng}
+        />
+      )}
+      {/* QR-код компании теперь под картой */}
+      <CompanyQRCodeBlock
+        url={companyState.customSlug
+          ? `${window.location.origin}/${companyState.customSlug}`
+          : `${window.location.origin}/companies/${companyState._id}`}
+      />
+      <CompanyReviewsProfileBlock
+        companyId={companyState._id}
+        reviews={reviews}
+        reviewsLoading={reviewsLoading}
+        reviewsError={reviewsError}
+        onReviewAdded={review => setReviews(r => [review, ...r])}
+      />
+      {/* Show extra string under name if present */}
+      {companyState.extra && (
+        <div className="text-gray-500 mb-2">{companyState.extra}</div>
+      )}
+      {/* Старая поддержка iframe-карты, если поле map есть */}
+      {companyState.map && (
+        <div className="mb-4">
+          <iframe src={companyState.map} title="Карта" width="100%" height="200" style={{ border: 0 }} allowFullScreen="" loading="lazy"></iframe>
+        </div>
+      )}
+      <CompanyInfo company={companyState} />
+      {/* Мини-каталог товаров компании */}
+      <CompanyProductsProfileBlock products={companyState.products} />
+      <CompanyNewsProfileBlock news={companyNews} />
+      {newsLoading && <div className="text-gray-500">Загрузка новостей...</div>}
+      {newsError && <div className="text-red-600 mb-2">{newsError}</div>}
+      <CompanyDocumentsProfileBlock documents={companyState.documents} />
+      {/* <CompanyReviews reviews={companyState.reviews} /> */}
+      <CompanyTeamProfileBlock team={team} />
+      <CompanyContactsProfileBlock contacts={companyState.contacts} phones={companyState.phones} emails={companyState.emails} />
+      {/* Show address and map if present (OpenStreetMap) - теперь ниже контактов */}
+      {(companyState.address || (companyState.lat && companyState.lng)) && (
+        <CompanyAddressMapProfileBlock
+          address={companyState.address}
+          lat={companyState.lat}
+          lng={companyState.lng}
+        />
+      )}
       <CompanyReviewsProfileBlock
         companyId={companyState._id}
         reviews={reviews}
