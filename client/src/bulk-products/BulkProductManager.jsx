@@ -5,6 +5,7 @@ import BulkProductImport from './BulkProductImport';
 import BulkProductActions from './BulkProductActions';
 
 const BulkProductManager = () => {
+  const [products, setProducts] = useState([]);
   // Фильтрация и поиск
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -51,7 +52,6 @@ const BulkProductManager = () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
-  const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]); // индексы выбранных товаров
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
