@@ -224,7 +224,7 @@ const upload = multer({ storage });
 // Добавить товар/услугу с несколькими фото
 router.post('/:id/products', auth, upload.array('images', 10), async (req, res) => {
   try {
-    const { name, description, price, category } = req.body;
+  const { name, description, price, category, sku, quantity, unit } = req.body;
     if (!name) return res.status(400).json({ message: 'Название обязательно' });
     const company = await Company.findById(req.params.id);
     if (!company) return res.status(404).json({ message: 'Компания не найдена' });
@@ -252,13 +252,16 @@ router.post('/:id/products', auth, upload.array('images', 10), async (req, res) 
     const tempId = Math.random().toString(36).slice(2, 8);
     const baseSlug = translit(name);
     let product = await Product.create({
-      company: company._id,
-      name,
-      slug: baseSlug + '-' + tempId,
-      description,
-      price,
-      category,
-      images
+  company: company._id,
+  name,
+  slug: baseSlug + '-' + tempId,
+  description,
+  price,
+  category,
+  sku,
+  quantity,
+  unit,
+  images
     });
     // После создания товара обновляем slug с реальным id
     product.slug = baseSlug + '-' + product._id.toString().slice(-6);
@@ -283,6 +286,9 @@ router.put('/:id/products/:productId', auth, upload.array('images', 10), async (
     const product = await Product.findById(req.params.productId);
     if (!product) return res.status(404).json({ message: 'Товар не найден' });
     if (name) product.name = name;
+  if (sku) product.sku = sku;
+  if (quantity) product.quantity = quantity;
+  if (unit) product.unit = unit;
     if (description) product.description = description;
     if (price) product.price = price;
     if (category) product.category = category;
@@ -432,15 +438,16 @@ router.post('/:id/reviews', async (req, res) => {
     res.status(500).json({ message: 'Ошибка добавления отзыва' });
   }
 });
-router.get('/:id/products', async (req, res) => {
-  try {
-    const company = await Company.findById(req.params.id);
-    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
-    res.json({ products: company.products });
-  } catch (error) {
-    res.status(500).json({ message: 'Ошибка получения товаров' });
-  }
-});
+// Дублирующий маршрут, возвращающий company.products, закомментирован для избежания конфликта
+// router.get('/:id/products', async (req, res) => {
+//   try {
+//     const company = await Company.findById(req.params.id);
+//     if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+//     res.json({ products: company.products });
+//   } catch (error) {
+//     res.status(500).json({ message: 'Ошибка получения товаров' });
+//   }
+// });
 
 // Добавить документ
 // Добавить новость

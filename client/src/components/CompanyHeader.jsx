@@ -1,7 +1,9 @@
 import React, { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function CompanyHeader({ company, canEdit, onHeaderBgUpload }) {
   const fileInputRef = useRef();
+    const navigate = useNavigate();
   return (
     <div className="relative w-full mb-4">
       {/* Горизонтальные обои */}
@@ -18,7 +20,14 @@ export default function CompanyHeader({ company, canEdit, onHeaderBgUpload }) {
       <div className="relative flex items-center gap-4 h-40 z-10 px-6">
         <img src={company.logo} alt="Логотип" className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg bg-white" />
         <div>
-          <div className="font-bold text-2xl text-white drop-shadow-lg">{company.name}</div>
+          {/* Имя компании теперь кликабельно для перехода в личный кабинет */}
+          <div
+            className="font-bold text-2xl text-white drop-shadow-lg cursor-pointer hover:underline"
+              onClick={() => navigate(`/company-cabinet/${company._id}`)}
+              title="Перейти в личный кабинет компании"
+          >
+            {company.name}
+          </div>
           {company.extra && (
             <div className="text-gray-200 drop-shadow">{company.extra}</div>
           )}

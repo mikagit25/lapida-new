@@ -1,4 +1,29 @@
 const express = require('express');
+const passport = require('../oauth');
+
+// --- OAuth маршруты временно отключены ---
+/*
+// Google
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/login', session: false }), (req, res) => {
+  res.redirect('/?oauth=success');
+});
+// Facebook
+router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));
+router.get('/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/login', session: false }), (req, res) => {
+  res.redirect('/?oauth=success');
+});
+// Apple
+router.get('/apple', passport.authenticate('apple'));
+router.post('/apple/callback', passport.authenticate('apple', { failureRedirect: '/login', session: false }), (req, res) => {
+  res.redirect('/?oauth=success');
+});
+// LinkedIn
+router.get('/linkedin', passport.authenticate('linkedin', { scope: ['r_emailaddress', 'r_liteprofile'] }));
+router.get('/linkedin/callback', passport.authenticate('linkedin', { failureRedirect: '/login', session: false }), (req, res) => {
+  res.redirect('/?oauth=success');
+});
+*/
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');

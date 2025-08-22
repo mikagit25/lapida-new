@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import OAuthButtons from '../components/OAuthButtons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -84,6 +85,12 @@ const Register = () => {
     }
   };
 
+  // Обработчик клика по кнопке Google OAuth
+  const handleGoogleOAuth = () => {
+    // Здесь будет логика для запуска OAuth через Google
+    window.location.href = '/api/auth/google'; // пример редиректа на серверный endpoint
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -103,6 +110,9 @@ const Register = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {/* Кнопки OAuth для всех соцсетей */}
+          <OAuthButtons />
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">

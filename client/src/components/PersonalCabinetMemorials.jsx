@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { getMemorialUrl } from '../utils/memorialUrl';
+  import MemorialAvatar from './MemorialAvatar';
 
 function PersonalCabinetMemorials({ recentMemorials, formatDate, fixImageUrl }) {
   return (
@@ -30,16 +31,16 @@ function PersonalCabinetMemorials({ recentMemorials, formatDate, fixImageUrl }) 
         <div className="space-y-4">
           {recentMemorials.map((memorial) => (
             <div key={memorial._id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-              {memorial.photo && (
-                <img
-                  src={fixImageUrl(memorial.photo)}
-                  alt={`${memorial.firstName} ${memorial.lastName}`}
+                <MemorialAvatar
+                  profileImage={memorial.profileImage}
+                  photo={memorial.photo}
+                  galleryImages={memorial.galleryImages}
+                  alt={memorial.fullName || `${memorial.firstName} ${memorial.lastName}`}
                   className="w-12 h-12 rounded-full object-cover"
                 />
-              )}
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-medium text-gray-900 truncate">
-                  {memorial.firstName} {memorial.lastName}
+                  {memorial.fullName || `${memorial.firstName} ${memorial.lastName}`}
                 </h3>
                 <p className="text-xs text-gray-500">
                   Создан {formatDate(memorial.createdAt)}

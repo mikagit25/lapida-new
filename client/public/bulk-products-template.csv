@@ -1,0 +1,7 @@
+Название;Описание;Цена;Категория;Артикул;Остаток;Ед. изм.;Статус;Теги;Рейтинг;Фото
+Пример товара 1;Описание товара 1;1000;Категория 1;SKU001;10;шт;active;метка1, метка2;4.5;image1.jpg, image2.jpg
+Пример товара 2;Описание товара 2;1500;Категория 2;SKU002;5;шт;active;метка3;5;image3.jpg
+
+Name;Description;Price;Category;SKU;Quantity;Unit;Status;Tags;Rating;Photo
+Sample Product 1;Product description 1;1000;Category 1;SKU001;10;pcs;active;tag1, tag2;4.5;image1.jpg, image2.jpg
+Sample Product 2;Product description 2;1500;Category 2;SKU002;5;pcs;active;tag3;5;image3.jpg

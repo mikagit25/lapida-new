@@ -3,13 +3,15 @@
  */
 
 export const getMemorialUrl = (memorial) => {
-  // Если есть customSlug, используем красивый URL
+  // Если есть customSlug или shareUrl, используем короткий адрес
   if (memorial.customSlug) {
     return `/${memorial.customSlug}`;
   }
-  
-  // Иначе используем стандартный URL с shareUrl или _id
-  return `/memorial/${memorial.shareUrl || memorial._id}`;
+  if (memorial.shareUrl) {
+    return `/${memorial.shareUrl}`;
+  }
+  // fallback на длинный адрес
+  return `/memorial/${memorial._id}`;
 };
 
 export const getMemorialShareUrl = (memorial) => {

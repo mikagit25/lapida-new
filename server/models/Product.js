@@ -7,6 +7,9 @@ const ProductSchema = new mongoose.Schema({
   description: { type: String },
   price: { type: Number },
   category: { type: String },
+  sku: { type: String },
+  quantity: { type: Number },
+  unit: { type: String },
   images: [{ type: String }], // массив ссылок на фото
   tags: { type: [String], default: [] }, // массив тегов
   rating: { type: Number, default: 0 }, // рейтинг товара

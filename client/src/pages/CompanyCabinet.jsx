@@ -355,7 +355,27 @@ function CompanyCabinet() {
           <span className="text-gray-400">|</span>
           <span className="font-bold">Личный кабинет компании</span>
         </div>
-  <CompanyTabs tabs={TABS} currentTab={tab} setTab={setTab} />
+        {/* Быстрые действия для владельца */}
+        {company && company._id && company.isOwner && (
+          <div className="mb-4 flex gap-3 items-center">
+            <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-semibold" onClick={() => setTab('products')}>Товары/Услуги</button>
+            <Link
+              to={company.customSlug ? `/company/${company.customSlug}/bulk-products` : `/company/${company._id}/bulk-products`}
+              className="bg-green-100 text-green-800 px-4 py-2 rounded hover:bg-green-200 font-semibold border border-green-300"
+            >
+              Массовое добавление товаров
+            </Link>
+            <button className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 font-semibold" onClick={() => setTab('info')}>Информация</button>
+            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold" onClick={() => navigate(`/company-orders/${company._id}`)}>Заказы компании</button>
+          </div>
+        )}
+        {/* Статистика компании */}
+        <div className="mb-4 flex gap-8 items-center text-sm text-gray-700">
+          <div><b>Товаров:</b> {products.length}</div>
+          <div><b>Заказов:</b> {company.ordersCount ?? '—'}</div>
+          <div><b>Отзывы:</b> {Array.isArray(company.reviews) ? company.reviews.length : '—'}</div>
+        </div>
+        <CompanyTabs tabs={TABS} currentTab={tab} setTab={setTab} />
         <div className="bg-white rounded-lg shadow p-6">
           {/* QR-код компании с актуальным адресом */}
           <CompanyQRCodeBlock
@@ -467,11 +487,8 @@ function CompanyCabinet() {
           <CompanyNotificationsList companyId={company._id} />
         </div>
       )}
-      {/* Кнопка заказов и удаления компании внизу страницы */}
+      {/* Кнопка удаления компании внизу страницы */}
       <div className="flex justify-center mt-8 gap-4">
-        {company && company._id && company.isOwner && (
-          <Link to={`/company-orders/${company._id}`} className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 font-semibold">Заказы компании</Link>
-        )}
         {company && company._id && (
           <DeleteCompanyButton companyId={company._id} onDeleted={() => navigate('/companies')} />
         )}

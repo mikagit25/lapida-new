@@ -9,19 +9,33 @@ export default function Products() {
   const [sort, setSort] = useState('new');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [companySlug, setCompanySlug] = useState('');
+  const [companyId, setCompanyId] = useState('');
 
   useEffect(() => {
     fetchProducts();
-  }, [search, category, sort]);
+  }, [search, category, sort, companyId]);
+
+  // Получить companyId по slug, если указан
+  useEffect(() => {
+    if (!companySlug) return;
+    fetch(`/api/companies/by-slug/${companySlug}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.company && data.company._id) setCompanyId(data.company._id);
+        else setCompanyId('');
+      })
+      .catch(() => setCompanyId(''));
+  }, [companySlug]);
 
   async function fetchProducts() {
     setLoading(true);
     setError('');
     try {
       const params = new URLSearchParams({ search, category, sort });
+      if (companyId) params.append('companyId', companyId);
       const res = await fetch(`/api/products?${params.toString()}`);
       const data = await res.json();
-      console.log('Products API response:', data);
       setProducts(data.products || []);
     } catch (err) {
       setError('Ошибка загрузки каталога');
@@ -42,6 +56,13 @@ export default function Products() {
             placeholder="Поиск по названию или описанию..."
             value={search}
             onChange={e => setSearch(e.target.value)}
+            className="border px-3 py-2 rounded w-64"
+          />
+          <input
+            type="text"
+            placeholder="Короткий адрес компании (например, comp1)"
+            value={companySlug}
+            onChange={e => setCompanySlug(e.target.value)}
             className="border px-3 py-2 rounded w-64"
           />
           <select value={category} onChange={e => setCategory(e.target.value)} className="border px-3 py-2 rounded">

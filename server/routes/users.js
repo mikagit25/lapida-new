@@ -244,21 +244,26 @@ router.put('/me/profile', auth, async (req, res) => {
       address
     } = req.body;
 
-    // Подготавливаем данные для обновления
-    const updateData = {};
-    if (name !== undefined) updateData.name = name;
-    if (email !== undefined) updateData.email = email;
-    if (bio !== undefined) updateData.bio = bio;
-    if (phone !== undefined) updateData.phone = phone;
-    if (avatar !== undefined) updateData.avatar = avatar;
-    if (firstName !== undefined) updateData.firstName = firstName;
-    if (lastName !== undefined) updateData.lastName = lastName;
-    if (middleName !== undefined) updateData.middleName = middleName;
-    if (gender !== undefined) updateData.gender = gender;
-    if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth;
-    if (country !== undefined) updateData.country = country;
-    if (city !== undefined) updateData.city = city;
-    if (address !== undefined) updateData.address = address;
+  // Подготавливаем данные для обновления
+  const updateData = {};
+  if (name !== undefined) updateData.name = name;
+  if (email !== undefined) updateData.email = email;
+  if (bio !== undefined) updateData.bio = bio;
+  if (phone !== undefined) updateData.phone = phone;
+  if (avatar !== undefined) updateData.avatar = avatar;
+  if (firstName !== undefined) updateData.firstName = firstName;
+  if (lastName !== undefined) updateData.lastName = lastName;
+  if (middleName !== undefined) updateData.middleName = middleName;
+  if (gender !== undefined) updateData.gender = gender;
+  if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth;
+  if (country !== undefined) updateData.country = country;
+  if (city !== undefined) updateData.city = city;
+  if (address !== undefined) updateData.address = address;
+  if (biography !== undefined) updateData.biography = biography;
+  if (interests !== undefined) updateData.interests = interests;
+  if (profession !== undefined) updateData.profession = profession;
+  if (education !== undefined) updateData.education = education;
+  if (achievements !== undefined) updateData.achievements = achievements;
 
     // Обновляем пользователя
     const updatedUser = await User.findByIdAndUpdate(

@@ -42,7 +42,7 @@ const PersonalCabinet = () => {
       });
 
       // Загружаем мемориалы
-      const memorialsData = await userService.getMyMemorials({ limit: 5 }).catch(err => {
+      const memorialsData = await memorialService.getMyMemorials({ limit: 5 }).catch(err => {
         console.log('Memorials error:', err);
         return { memorials: [] };
       });

@@ -125,6 +125,15 @@ const ProductPage = () => {
           <div className="mt-6">
             <p className="mb-2 text-gray-700">{product.description}</p>
             <p className="mb-2 text-gray-500">Категория: {product.category}</p>
+            {product.sku && (
+              <p className="mb-2 text-gray-500">Артикул: {product.sku}</p>
+            )}
+            {product.quantity !== undefined && (
+              <p className="mb-2 text-gray-500">Остаток: {product.quantity}</p>
+            )}
+            {product.unit && (
+              <p className="mb-2 text-gray-500">Ед. изм.: {product.unit}</p>
+            )}
           </div>
         </div>
         {/* QR-код и URL внизу страницы */}

@@ -23,12 +23,15 @@ import Checkout from './pages/Checkout';
 import CompanyCabinet from './pages/CompanyCabinet';
 import ProductPage from './pages/ProductPage';
 import Products from './pages/Products';
+import BulkProductPage from './pages/BulkProductPage';
 import CompanyProfile from './pages/CompanyProfile';
 import UserOrders from './pages/UserOrders';
 import OrderDetails from './pages/OrderDetails';
 import CompanyOrders from './pages/CompanyOrders';
 import CompanyOrdersPage from './orders/CompanyOrdersPage';
 import ClientOrdersPage from './orders/ClientOrdersPage';
+import HomeTest from './pages/HomeTest';
+import SlugRouter from './pages/SlugRouter';
 
 function CompanyOrdersWrapper() {
   const { companyId } = useParams();
@@ -93,10 +96,8 @@ const Navigation = () => {
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 text-xl font-bold text-gray-900">Lapida</Link>
             <div className="hidden md:ml-6 md:flex md:space-x-8">
-              <Link to="/" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">Главная</Link>
-              {isAuthenticated && (
-                <Link to="/cabinet" className="text-blue-600 hover:text-blue-800 px-3 py-2 rounded-md text-sm font-medium font-semibold">Личный кабинет</Link>
-              )}
+              {/* <Link to="/" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">Главная</Link> */}
+              {/* Ссылка 'Личный кабинет' скрыта, переход теперь только по имени пользователя */}
               <Link to="/memorials" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">Мемориалы</Link>
               <Link to="/companies" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">Компании</Link>
               <Link to="/business" className="text-blue-700 hover:text-blue-900 px-3 py-2 rounded-md text-sm font-medium font-semibold">Для бизнеса</Link>
@@ -122,7 +123,7 @@ const Navigation = () => {
                     </svg>
                   </div>
                 )}
-                <span className="text-gray-700">Привет, {user?.name}</span>
+                <Link to="/cabinet" className="text-gray-700 cursor-pointer hover:underline" title="Перейти в личный кабинет">Привет, {user?.name}</Link>
                 <Link to="/create-memorial" className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium">Создать мемориал</Link>
                 <button onClick={logout} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium">Выйти</button>
               </>
@@ -158,6 +159,7 @@ const App = () => {
           <main className="pb-16 lg:pb-0">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/home-test" element={<HomeTest />} />
               <Route path="/cabinet" element={<PrivateRoute><PersonalCabinet /></PrivateRoute>} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
@@ -165,11 +167,13 @@ const App = () => {
               <Route path="/memorials" element={<Memorials />} />
               <Route path="/memorial/:shareUrl" element={<MemorialView />} />
               <Route path="/memorial/:slug" element={<MemorialView />} />
+                <Route path=":slug" element={<SlugRouter />} />
               <Route path="/test-comments" element={<TestPhotoComments />} />
               <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path="/create-memorial" element={<PrivateRoute><MemorialCreate /></PrivateRoute>} />
               <Route path="/companies" element={<Companies />} />
               <Route path="/companies/:id" element={<CompanyPage />} />
+              <Route path=":companySlug" element={<CompanyProfileBySlug />} />
               <Route path="/companies/:id/cabinet" element={<CompanyCabinet />} />
               <Route path="/order/:orderId" element={<OrderDetails />} />
               <Route path="/cart" element={<Cart />} />
@@ -181,6 +185,9 @@ const App = () => {
               <Route path="/company-cabinet/:id" element={<CompanyCabinet />} />
               <Route path="/products" element={<Products />} />
               <Route path="/products/:slug" element={<ProductPage />} />
+              <Route path="/bulk-products" element={<BulkProductPage />} />
+              <Route path="/company/:companySlug/bulk-products" element={<BulkProductPage />} />
+              <Route path="/company/:companyId/bulk-products" element={<BulkProductPage />} />
               <Route path="/company/:companySlug" element={<CompanyProfileBySlug />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

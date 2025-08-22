@@ -50,6 +50,15 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
       <CardContent sx={{ flexGrow: 1 }}>
         <Typography gutterBottom variant="h6" component="div" noWrap>{product.name}</Typography>
         <Typography variant="body2" color="text.secondary" noWrap>{product.category}</Typography>
+        {product.sku && (
+          <Typography variant="body2" color="text.secondary">Артикул: {product.sku}</Typography>
+        )}
+        {product.quantity !== undefined && (
+          <Typography variant="body2" color="text.secondary">Остаток: {product.quantity}</Typography>
+        )}
+        {product.unit && (
+          <Typography variant="body2" color="text.secondary">Ед. изм.: {product.unit}</Typography>
+        )}
         {/* Теги товара */}
         {product.tags && product.tags.length > 0 && (
           <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
