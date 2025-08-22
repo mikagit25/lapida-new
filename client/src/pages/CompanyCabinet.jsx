@@ -20,6 +20,7 @@ import CompanyDocumentsForm from '../components/CompanyDocumentsForm';
 import CompanyContactsForm from '../components/CompanyContactsForm';
 import CustomSlugEditor from '../components/CustomSlugEditor';
 import CompanyEditForm from '../components/CompanyEditForm';
+import { userService } from '../services/api';
 
 // Обработчик клика по карте через useMapEvents
 function MapClickHandler({ setEditForm, setMapCenter }) {
@@ -64,6 +65,7 @@ function CompanyCabinet() {
   const [slugCheckLoading, setSlugCheckLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [customSlugInput, setCustomSlugInput] = useState('');
+  const [userCompanies, setUserCompanies] = useState([]);
   const mapRef = useRef(null);
 
   // Центрировать карту на маркере при изменении координат
@@ -343,6 +345,25 @@ function CompanyCabinet() {
       .finally(() => setSlugCheckLoading(false));
   };
 
+  useEffect(() => {
+    async function fetchUserCompanies() {
+      try {
+        console.log('[CompanyCabinet] Запрос к /api/users/me...');
+        const res = await userService.getMe();
+        console.log('[CompanyCabinet] userService.getMe() response:', res);
+        if (res && Array.isArray(res.companies)) {
+          setUserCompanies(res.companies);
+        } else {
+          setUserCompanies([]);
+        }
+      } catch (err) {
+        console.error('[CompanyCabinet] Ошибка запроса компаний пользователя:', err);
+        setUserCompanies([]);
+      }
+    }
+    fetchUserCompanies();
+  }, []);
+
   if (loading) return <div className="p-8">Загрузка...</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
   if (!company) return <div className="p-8 text-gray-500">Нет данных о компании</div>;
@@ -355,20 +376,7 @@ function CompanyCabinet() {
           <span className="text-gray-400">|</span>
           <span className="font-bold">Личный кабинет компании</span>
         </div>
-        {/* Быстрые действия для владельца */}
-        {company && company._id && company.isOwner && (
-          <div className="mb-4 flex gap-3 items-center">
-            <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-semibold" onClick={() => setTab('products')}>Товары/Услуги</button>
-            <Link
-              to={company.customSlug ? `/company/${company.customSlug}/bulk-products` : `/company/${company._id}/bulk-products`}
-              className="bg-green-100 text-green-800 px-4 py-2 rounded hover:bg-green-200 font-semibold border border-green-300"
-            >
-              Массовое добавление товаров
-            </Link>
-            <button className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 font-semibold" onClick={() => setTab('info')}>Информация</button>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold" onClick={() => navigate(`/company-orders/${company._id}`)}>Заказы компании</button>
-          </div>
-        )}
+  {/* Быстрый переход в личные кабинеты компаний пользователя */}
         {/* Статистика компании */}
         <div className="mb-4 flex gap-8 items-center text-sm text-gray-700">
           <div><b>Товаров:</b> {products.length}</div>

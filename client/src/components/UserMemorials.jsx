@@ -30,9 +30,11 @@ const UserMemorials = () => {
     }
   };
 
-  const handleStatusChange = async (memorialId, newStatus) => {
+  const handleStatusChange = async (memorialId, action) => {
     try {
-      await memorialService.updateStatus(memorialId, newStatus);
+      // Публикация/скрытие мемориала
+      const isPublic = action === 'publish';
+      await memorialService.updateStatus(memorialId, isPublic);
       await fetchMemorials(); // Перезагружаем список
     } catch (error) {
       console.error('Error updating status:', error);

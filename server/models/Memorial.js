@@ -206,10 +206,23 @@ const memorialSchema = new mongoose.Schema({
     ref: 'User'
   }],
   
-  // Пользователи с правом редактирования
-  editorsUsers: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+  // Пользователи с правом редактирования и делегированием по секциям
+  editors: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    sections: [{
+      type: String,
+      enum: ['bio', 'gallery', 'epitaph', 'timeline', 'documents', 'comments', 'other'],
+      default: 'other'
+    }],
+    role: {
+      type: String,
+      enum: ['relative', 'friend', 'custom'],
+      default: 'custom'
+    }
   }],
   
   // Фоновое изображение шапки

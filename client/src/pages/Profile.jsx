@@ -26,11 +26,14 @@ import Gallery from '../components/Gallery';
 import UserSettings from '../components/UserSettings';
 import UserMemorials from '../components/UserMemorials';
 import UserActivity from '../components/UserActivity';
+import { Link } from 'react-router-dom';
 import PersonalDataManager from '../components/PersonalDataManager';
 import ActivityHistory from '../components/ActivityHistory';
 import PreferencesManager from '../components/PreferencesManager';
+import GoToConnectionsButton from '../components/GoToConnectionsButton';
 
 const Profile = () => {
+
   const { user, updateProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -41,13 +44,31 @@ const Profile = () => {
     flowersLeft: 0,
     commentsLeft: 0
   });
+  const [companies, setCompanies] = useState([]);
+  const [profileLoading, setProfileLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      // Загружаем статистику
-      fetchStats();
+    async function fetchProfileAndCompanies() {
+      setProfileLoading(true);
+      try {
+        console.log('Profile.jsx: Запрос к /api/users/me...');
+        const res = await userService.getMe();
+        console.log('Profile.jsx: Ответ от /api/users/me:', res);
+        if (res && Array.isArray(res.companies)) {
+          setCompanies(res.companies);
+        } else {
+          setCompanies([]);
+        }
+      } catch (err) {
+        console.error('Profile.jsx: Ошибка запроса /api/users/me:', err);
+        setCompanies([]);
+      } finally {
+        setProfileLoading(false);
+      }
     }
-  }, [user]);
+    fetchStats();
+    fetchProfileAndCompanies();
+  }, []);
 
   const fetchStats = async () => {
     try {
@@ -70,7 +91,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+  <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Заголовок профиля */}
         <div className="bg-white shadow rounded-lg mb-6">
@@ -175,6 +196,10 @@ const Profile = () => {
                           <p className="mt-1 text-lg text-gray-900 whitespace-pre-wrap">{user.bio}</p>
                         </div>
                       )}
+                      {/* Быстрые действия: вход в кабинет компании (массив компаний) */}
+                      {/* КНОПКИ ПЕРЕНЕСЕНЫ В CompanyCabinet.jsx */}
+                      {/* Быстрые действия: переход в кабинет компании */}
+                      {/* Кнопка перехода в кабинет компании перенесена в /cabinet */}
                     </div>
                     {/* Новый раздел галереи пользователя */}
                     <div className="bg-white rounded-lg shadow p-6 mb-6">

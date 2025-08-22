@@ -18,7 +18,7 @@ const MemorialCreate = () => {
     profileImage: null,
     cemetery: '',
     customSlug: '',
-    isPrivate: false
+    isPublic: true
   });
 
   const handleChange = (e) => {
@@ -64,7 +64,7 @@ const MemorialCreate = () => {
         epitaph: formData.epitaph,
         profileImage: profileImagePath,
         customSlug: formData.customSlug,
-        isPrivate: formData.isPrivate,
+        isPublic: true,
         location: {
           cemetery: formData.cemetery
         }

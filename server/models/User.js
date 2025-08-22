@@ -2,6 +2,12 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
+  // Друзья пользователя
+  friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+
+  // Родственники пользователя
+  relatives: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  companies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Company' }],
   // Галерея пользователя: пути вида /upload/gallery/имя_файла.jpg (как в мемориалах)
   gallery: {
     type: [String],

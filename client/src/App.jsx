@@ -1,3 +1,9 @@
+import AdminUsersManager from './pages/AdminUsersManager';
+import AdminPagesManager from './pages/AdminPagesManager';
+import AdminCompaniesManager from './pages/AdminCompaniesManager';
+import AdminMemorialsManager from './pages/AdminMemorialsManager';
+import AdminReportsManager from './pages/AdminReportsManager';
+import AdminCabinet from './pages/AdminCabinet';
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -25,6 +31,7 @@ import ProductPage from './pages/ProductPage';
 import Products from './pages/Products';
 import BulkProductPage from './pages/BulkProductPage';
 import CompanyProfile from './pages/CompanyProfile';
+import UserConnections from './components/UserConnections';
 import UserOrders from './pages/UserOrders';
 import OrderDetails from './pages/OrderDetails';
 import CompanyOrders from './pages/CompanyOrders';
@@ -32,6 +39,7 @@ import CompanyOrdersPage from './orders/CompanyOrdersPage';
 import ClientOrdersPage from './orders/ClientOrdersPage';
 import HomeTest from './pages/HomeTest';
 import SlugRouter from './pages/SlugRouter';
+import UserPublicPage from './pages/UserPublicPage';
 
 function CompanyOrdersWrapper() {
   const { companyId } = useParams();
@@ -158,9 +166,16 @@ const App = () => {
           <Navigation />
           <main className="pb-16 lg:pb-0">
             <Routes>
+              <Route path="/admin" element={<PrivateRoute><AdminCabinet /></PrivateRoute>} />
+              <Route path="/admin/users" element={<PrivateRoute><AdminUsersManager /></PrivateRoute>} />
+              <Route path="/admin/pages" element={<PrivateRoute><AdminPagesManager /></PrivateRoute>} />
+              <Route path="/admin/companies" element={<PrivateRoute><AdminCompaniesManager /></PrivateRoute>} />
+              <Route path="/admin/memorials" element={<PrivateRoute><AdminMemorialsManager /></PrivateRoute>} />
+              <Route path="/admin/reports" element={<PrivateRoute><AdminReportsManager /></PrivateRoute>} />
               <Route path="/" element={<Home />} />
               <Route path="/home-test" element={<HomeTest />} />
               <Route path="/cabinet" element={<PrivateRoute><PersonalCabinet /></PrivateRoute>} />
+              <Route path="/connections" element={<PrivateRoute><UserConnections /></PrivateRoute>} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               {/* <Route path="/my-orders" element={<UserOrders />} /> */}
@@ -189,6 +204,7 @@ const App = () => {
               <Route path="/company/:companySlug/bulk-products" element={<BulkProductPage />} />
               <Route path="/company/:companyId/bulk-products" element={<BulkProductPage />} />
               <Route path="/company/:companySlug" element={<CompanyProfileBySlug />} />
+              <Route path="/user/:id" element={<UserPublicPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

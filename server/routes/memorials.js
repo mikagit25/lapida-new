@@ -1,3 +1,25 @@
+// Обновление статуса публичности мемориала (публикация/скрытие)
+router.patch('/:id/status', authMiddleware, async (req, res) => {
+  try {
+    const { isPublic } = req.body;
+    const memorial = await Memorial.findById(req.params.id);
+    if (!memorial) {
+      return res.status(404).json({ message: 'Мемориал не найден' });
+    }
+    // Проверка прав
+    const userId = req.user.id || req.user._id;
+    const memorialCreatorId = memorial.createdBy?.toString() || memorial.createdBy;
+    if (memorialCreatorId !== userId.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Нет прав для изменения статуса мемориала' });
+    }
+    memorial.isPublic = Boolean(isPublic);
+    await memorial.save();
+    res.json({ message: 'Статус мемориала обновлен', isPublic: memorial.isPublic });
+  } catch (error) {
+    console.error('Ошибка обновления статуса мемориала:', error);
+    res.status(500).json({ message: 'Ошибка сервера при обновлении статуса мемориала' });
+  }
+});
 // --- Галерея мемориала ---
 const memorialGalleryStorage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -293,9 +315,11 @@ router.post('/:id/flowers', async (req, res) => {
 });
 
 // Получение мемориалов пользователя
+
 router.get('/user/my', auth, async (req, res) => {
   try {
-    const memorials = await Memorial.find({ creator: req.user._id })
+    // Поиск мемориалов по createdBy (унификация логики)
+    const memorials = await Memorial.find({ createdBy: req.user._id })
       .sort({ createdAt: -1 });
 
     res.json(memorials);

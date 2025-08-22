@@ -95,7 +95,9 @@ const PersonalDataManager = () => {
         ...profileData,
         ...biographyData
       };
+      console.log('[PersonalDataManager] Отправка данных профиля:', allProfileData);
       const response = await updateProfile(allProfileData);
+      console.log('[PersonalDataManager] Ответ сервера:', response);
       updateUser(response.user);
       setSuccess('Профиль успешно обновлен');
     } catch (error) {
@@ -380,6 +382,20 @@ const PersonalDataManager = () => {
                 value={profileData.address}
                 onChange={(e) => setProfileData(prev => ({ ...prev, address: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Ник (отображается возле аватара)
+              </label>
+              <input
+                type="text"
+                value={profileData.name || ''}
+                onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Введите ваш ник"
+                maxLength={50}
               />
             </div>
 

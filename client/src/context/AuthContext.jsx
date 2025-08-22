@@ -73,31 +73,24 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Проверка токена при загрузке приложения
+  // Проверка токена и загрузка свежего профиля при загрузке приложения
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem('authToken');
-      const userRaw = localStorage.getItem('user');
-      let userParsed = null;
-      try {
-        userParsed = userRaw ? JSON.parse(userRaw) : null;
-      } catch (e) {
-        userParsed = null;
-      }
-      console.log('[AuthProvider] user из localStorage:', userParsed);
-      if (token && userParsed) {
+      if (token) {
         try {
-          // Проверяем действительность токена только если он есть
-          const response = await authService.verifyToken();
+          await authService.verifyToken();
+          // Загружаем свежий профиль пользователя
+          const profileRes = await userService.getMe();
+          localStorage.setItem('user', JSON.stringify(profileRes.user || profileRes));
           dispatch({
             type: 'LOGIN_SUCCESS',
             payload: {
               token,
-              user: userParsed,
+              user: profileRes.user || profileRes,
             },
           });
         } catch (error) {
-          // Токен недействителен
           localStorage.removeItem('authToken');
           localStorage.removeItem('user');
           dispatch({ type: 'SET_LOADING', payload: false });
@@ -106,7 +99,6 @@ export const AuthProvider = ({ children }) => {
         dispatch({ type: 'SET_LOADING', payload: false });
       }
     };
-
     initializeAuth();
   }, []);
 
@@ -119,14 +111,23 @@ export const AuthProvider = ({ children }) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       const response = await authService.login(credentials);
+      // После логина загружаем свежий профиль
+      let freshUser = response.user;
+      try {
+        const profileRes = await userService.getMe();
+        freshUser = profileRes.user || profileRes;
+        localStorage.setItem('user', JSON.stringify(freshUser));
+      } catch (e) {
+        // fallback: используем user из ответа
+      }
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: {
-          user: response.user,
+          user: freshUser,
           token: response.token,
         },
       });
-      return response;
+      return { ...response, user: freshUser };
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Ошибка входа';
       dispatch({
@@ -142,14 +143,23 @@ export const AuthProvider = ({ children }) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       const response = await authService.register(userData);
+      // После регистрации загружаем свежий профиль
+      let freshUser = response.user;
+      try {
+        const profileRes = await userService.getMe();
+        freshUser = profileRes.user || profileRes;
+        localStorage.setItem('user', JSON.stringify(freshUser));
+      } catch (e) {
+        // fallback: используем user из ответа
+      }
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: {
-          user: response.user,
+          user: freshUser,
           token: response.token,
         },
       });
-      return response;
+      return { ...response, user: freshUser };
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Ошибка регистрации';
       dispatch({
@@ -170,13 +180,20 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (userData) => {
     try {
       const response = await authService.updateProfile(userData);
-      // Сохраняем пользователя в localStorage
-      localStorage.setItem('user', JSON.stringify(response.user));
+      // После обновления профиля загружаем свежий профиль
+      let freshUser = response.user;
+      try {
+        const profileRes = await userService.getMe();
+        freshUser = profileRes.user || profileRes;
+        localStorage.setItem('user', JSON.stringify(freshUser));
+      } catch (e) {
+        // fallback: используем user из ответа
+      }
       dispatch({
         type: 'UPDATE_USER',
-        payload: response.user,
+        payload: freshUser,
       });
-      return response;
+      return { ...response, user: freshUser };
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Ошибка обновления профиля';
       dispatch({

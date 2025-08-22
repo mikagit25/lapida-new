@@ -2,6 +2,9 @@
 const express = require('express');
 const multer = require('multer');
 const User = require('../models/User');
+const Company = require('../models/Company');
+
+
 const Memorial = require('../models/Memorial');
 const Comment = require('../models/Comment');
 const { auth, adminAuth } = require('../middleware/auth');
@@ -9,6 +12,22 @@ const path = require('path');
 const fs = require('fs');
 
 const router = express.Router();
+
+// Получение профиля текущего пользователя с компаниями
+router.get('/me', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'Пользователь не найден' });
+    }
+    // Находим компании, где пользователь является владельцем
+    const companies = await Company.find({ owner: user._id });
+    res.json({ user, companies });
+  } catch (error) {
+    console.error('Ошибка получения профиля пользователя:', error);
+    res.status(500).json({ message: 'Ошибка сервера при получении профиля пользователя' });
+  }
+});
 
 // Удаление фото из галереи пользователя
 router.delete('/me/gallery', auth, async (req, res) => {
@@ -355,6 +374,71 @@ router.get('/:id', auth, async (req, res) => {
   } catch (error) {
     console.error('Ошибка получения пользователя:', error);
     res.status(500).json({ message: 'Ошибка сервера при получении пользователя' });
+  }
+});
+
+// Публичная страница пользователя по ID
+router.get('/:id/public', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select('-password -email -resetPasswordToken -resetPasswordExpires -verificationToken');
+    if (!user) {
+      return res.status(404).json({ message: 'Пользователь не найден' });
+    }
+
+    // Проверка публичности профиля
+    if (user.preferences && user.preferences.publicProfile === false) {
+      return res.status(403).json({ message: 'Профиль скрыт' });
+    }
+
+    // Получение публичных мемориалов пользователя (createdBy)
+    const memorials = await Memorial.find({ createdBy: user._id, isPublic: true })
+      .select('title date photo customSlug _id');
+
+    // Получение друзей (только публичные профили)
+    let friends = [];
+    if (user.friends && user.friends.length > 0) {
+      friends = await User.find({ _id: { $in: user.friends }, 'preferences.publicProfile': true })
+        .select('name avatar');
+    }
+
+    // Галерея
+    const gallery = user.gallery || [];
+
+    // Статистика
+    const stats = {
+      memorials: memorials.length,
+      friends: friends.length
+    };
+
+    // Формируем публичные данные
+    res.json({
+      user: {
+        _id: user._id,
+        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        middleName: user.middleName,
+        gender: user.gender,
+        dateOfBirth: user.dateOfBirth,
+        country: user.country,
+        city: user.city,
+        avatar: user.avatar,
+        bio: user.bio,
+        biography: user.biography,
+        interests: user.interests,
+        profession: user.profession,
+        education: user.education,
+        achievements: user.achievements,
+        gallery,
+      },
+      friends,
+      memorials,
+      stats
+    });
+  } catch (error) {
+    console.error('Ошибка получения публичных данных пользователя:', error);
+    res.status(500).json({ message: 'Ошибка сервера при получении публичных данных пользователя' });
   }
 });
 

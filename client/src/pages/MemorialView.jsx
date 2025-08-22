@@ -19,6 +19,7 @@ import VirtualCandles from '../components/VirtualCandles';
 import BackgroundImageManager from '../components/BackgroundImageManager';
 import HeaderBackgroundManager from '../components/HeaderBackgroundManager';
 import { fixImageUrl } from '../utils/imageUrl';
+import MemorialEditorsManager from '../components/MemorialEditorsManager';
 
 const MemorialView = () => {
   const { shareUrl, slug } = useParams();
@@ -319,6 +320,12 @@ const MemorialView = () => {
             <ShareBlock memorial={memorial} />
 
             {/* Статистика */}
+
+            {/* Делегирование прав редактирования мемориала */}
+            {memorial && memorial._id && (
+              <MemorialEditorsManager memorialId={memorial._id} />
+            )}
+
             <MemorialStats memorial={memorial} comments={comments} />
 
           </div>

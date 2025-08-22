@@ -1,4 +1,3 @@
-
 import { findWorkingApiUrl, API_BASE_URL } from '../config/api-universal';
 import axios from 'axios';
 
@@ -132,6 +131,64 @@ export {
   userService,
   notificationService,
   friendsService,
+  companyService,
+  pageService,
+  reportService,
+};
+// Сервис компаний
+const companyService = {
+  getAll: async () => {
+    const api = await getApi();
+    const response = await api.get('/companies');
+    return response.data.companies || [];
+  },
+};
+// Временный сервис страниц
+const pageService = {
+  getAll: async () => {
+    const api = await getApi();
+    const response = await api.get('/pages');
+    return response.data.pages || [];
+  },
+  create: async (pageData) => {
+    const api = await getApi();
+    const response = await api.post('/pages', pageData);
+    return response.data.page;
+  },
+  update: async (id, pageData) => {
+    const api = await getApi();
+    const response = await api.put(`/pages/${id}`, pageData);
+    return response.data.page;
+  },
+  remove: async (id) => {
+    const api = await getApi();
+    const response = await api.delete(`/pages/${id}`);
+    return response.data;
+  },
+};
+
+// Временный сервис жалоб
+const reportService = {
+  getAll: async () => {
+    const api = await getApi();
+    const response = await api.get('/reports');
+    return response.data.reports || [];
+  },
+  create: async (reportData) => {
+    const api = await getApi();
+    const response = await api.post('/reports', reportData);
+    return response.data.report;
+  },
+  updateStatus: async (id, status) => {
+    const api = await getApi();
+    const response = await api.patch(`/reports/${id}/status`, { status });
+    return response.data.report;
+  },
+  remove: async (id) => {
+    const api = await getApi();
+    const response = await api.delete(`/reports/${id}`);
+    return response.data;
+  },
 };
 
 // Сервис мемориалов
@@ -163,9 +220,9 @@ const memorialService = {
   },
 
   // Обновление статуса мемориала
-  updateStatus: async (memorialId, status) => {
+  updateStatus: async (memorialId, isPublic) => {
     const api = await getApi();
-    const response = await api.patch(`/memorials/${memorialId}/status`, { status });
+    const response = await api.patch(`/memorials/${memorialId}/status`, { isPublic });
     return response.data;
   },
 
@@ -374,10 +431,23 @@ const uploadService = {
 
 // Сервис пользователя и статистики
 const userService = {
+  // Получение всех пользователей (только для администратора)
+  getAllUsers: async () => {
+    const api = await getApi();
+    const response = await api.get('/users');
+    return response.data;
+  },
   // Получение статистики пользователя
   getStats: async () => {
     const api = await getApi();
     const response = await api.get('/users/me/stats');
+    return response.data;
+  },
+
+  // Получение информации о пользователе и его компаниях
+  getMe: async () => {
+    const api = await getApi();
+    const response = await api.get('/users/me');
     return response.data;
   },
 

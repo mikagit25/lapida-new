@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { userService, memorialService, newMemorialService, notificationService } from '../services/api';
 import { getUserDisplayName } from '../utils/userUtils';
@@ -9,9 +9,16 @@ import PersonalCabinetMemorials from './PersonalCabinetMemorials';
 import PersonalCabinetNotifications from './PersonalCabinetNotifications';
 import PersonalCabinetActivity from './PersonalCabinetActivity';
 import { fixImageUrl } from '../utils/imageUrl';
+import GoToCompanyCabinetButton from './GoToCompanyCabinetButton';
+import CompanyCabinetQuickActions from './CompanyCabinetQuickActions';
+import { Link } from 'react-router-dom';
+import GoToConnectionsButton from './GoToConnectionsButton';
 
 const PersonalCabinet = () => {
+  const [userCompanies, setUserCompanies] = useState([]);
   const { user, isAuthenticated } = useAuth();
+  console.log('[PersonalCabinet] user:', user);
+  console.log('[PersonalCabinet] user.companies:', user?.companies);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     memorialsCreated: 0,
@@ -27,6 +34,14 @@ const PersonalCabinet = () => {
   useEffect(() => {
     if (isAuthenticated && user) {
       fetchPersonalCabinetData();
+      // Загружаем компании пользователя
+      userService.getMe().then(res => {
+        if (res && Array.isArray(res.companies)) {
+          setUserCompanies(res.companies);
+        } else {
+          setUserCompanies([]);
+        }
+      }).catch(() => setUserCompanies([]));
     }
   }, [isAuthenticated, user]);
 
@@ -119,7 +134,9 @@ const PersonalCabinet = () => {
             </Link>
           </div>
         </div>
-      </div>
+      {/* Кнопка перехода в кабинет компании — отображается всегда, если есть компании */}
+  <GoToCompanyCabinetButton companies={userCompanies} />
+    </div>
     );
   }
 
@@ -137,6 +154,9 @@ const PersonalCabinet = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-end mb-4">
+          <GoToConnectionsButton />
+        </div>
         {/* Заголовок личного кабинета */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
@@ -189,10 +209,27 @@ const PersonalCabinet = () => {
                     <p className="text-xs text-gray-500">Создайте новый мемориал</p>
                   </div>
                 </Link>
-                <div className="mt-4">
-                  <Link to="/register-company" className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 text-lg font-semibold inline-block">
-                    Зарегистрировать компанию
-                  </Link>
+                <div className="mt-4 flex flex-col gap-2">
+                  <GoToCompanyCabinetButton companies={user && user.companies ? user.companies : []} />
+                  <GoToConnectionsButton />
+                  {user && user.companies && user.companies.length > 0 && (
+                    <Link
+                      to={`/company-cabinet/${user.companies[0]._id}`}
+                      className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                    >
+                      <span style={{ fontSize: '1.2em', marginRight: '8px' }}>🏢</span>
+                      Личный кабинет компании
+                    </Link>
+                  )}
+                  {user && (
+                    <Link
+                      to={`/user/${user._id}`}
+                      className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                    >
+                      <span style={{ fontSize: '1.2em', marginRight: '8px' }}>👤</span>
+                      Моя публичная страница
+                    </Link>
+                  )}
                 </div>
 
                 <Link
@@ -239,8 +276,15 @@ const PersonalCabinet = () => {
                     <p className="text-xs text-gray-500">Предпочтения и приватность</p>
                   </div>
                 </Link>
+
+                {/* Кнопка перехода в кабинет компании */}
+                {/* Быстрый переход в личные кабинеты всех компаний пользователя */}
+                <GoToCompanyCabinetButton companies={user && user.companies ? user.companies : []} />
               </div>
-            </div>
+
+            {/* Кнопка перехода в кабинет компании вне блока быстрых действий */}
+            <GoToCompanyCabinetButton companies={user && user.companies ? user.companies : []} />
+          </div>
 
             {/* Последние мемориалы */}
             <PersonalCabinetMemorials

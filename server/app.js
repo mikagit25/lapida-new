@@ -1,6 +1,8 @@
 const express = require('express');
 const passport = require('./oauth');
 const app = express();
+app.use('/api/user-connections', require('./routes/userConnections'));
+app.use('/api/memorial-editors', require('./routes/memorialEditors'));
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
@@ -88,6 +90,8 @@ app.use('/api/timeline', require('./routes/timeline'));
 app.use('/api/virtual', require('./routes/virtual'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/gallery-recovery', require('./routes/galleryRecovery'));
+app.use('/api/pages', require('./routes/pages'));
+app.use('/api/reports', require('./routes/reports'));
 
 // Корневой маршрут
 app.get('/', (req, res) => {

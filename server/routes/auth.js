@@ -220,7 +220,8 @@ router.put('/profile', auth, upload.single('photo'), async (req, res) => {
       gender, dateOfBirth, country, city, address,
       biography, interests, profession, education, achievements
     } = req.body;
-    const updates = {};
+  const updates = {};
+  console.log('[SERVER] Получены данные профиля:', req.body);
 
     if (name) updates.name = name;
     if (email) {
