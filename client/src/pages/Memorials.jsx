@@ -1,23 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { newMemorialService } from '../services/api';
+import MemorialsFilterSearch from '../components/MemorialsFilterSearch';
 import { getMemorialUrl } from '../utils/memorialUrl';
 
 const Memorials = () => {
   const [memorials, setMemorials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({});
   const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
     loadMemorials();
   }, []);
 
+  // Обработка фильтров и поиска
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+  };
   const loadMemorials = async () => {
     try {
       setLoading(true);
-      const data = await newMemorialService.getAll();
+      // Передаем фильтры в API (если поддерживается)
+      const apiFilters = {};
+      if (filters.searchTerm) apiFilters.q = filters.searchTerm;
+      if (filters.dateFrom) apiFilters.dateFrom = filters.dateFrom;
+      if (filters.dateTo) apiFilters.dateTo = filters.dateTo;
+      if (filters.gender) apiFilters.gender = filters.gender;
+      if (filters.country) apiFilters.country = filters.country;
+      if (filters.city) apiFilters.city = filters.city;
+      if (filters.hasPhoto) apiFilters.hasPhoto = filters.hasPhoto;
+      if (filters.hasEpitaph) apiFilters.hasEpitaph = filters.hasEpitaph;
+      const data = await newMemorialService.getAll(apiFilters);
       console.log('Memorials - loaded data:', data);
       setMemorials(data);
     } catch (error) {
@@ -28,9 +43,31 @@ const Memorials = () => {
     }
   };
 
+  // Перезагрузка мемориалов при изменении фильтров
+  useEffect(() => {
+    loadMemorials();
+    // eslint-disable-next-line
+  }, [filters]);
   const filteredMemorials = memorials.filter(memorial =>
-    memorial.fullName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    // Расширенный поиск по имени, фамилии, эпитафии
+    (() => {
+      const term = filters.searchTerm ? filters.searchTerm.toLowerCase() : '';
+      return (
+        (!term ||
+          (memorial.fullName && memorial.fullName.toLowerCase().includes(term)) ||
+          (memorial.lastName && memorial.lastName.toLowerCase().includes(term)) ||
+          (memorial.epitaph && memorial.epitaph.toLowerCase().includes(term))
+        ) &&
+        (!filters.gender || memorial.gender === filters.gender) &&
+        (!filters.country || (memorial.country && memorial.country.toLowerCase().includes(filters.country.toLowerCase()))) &&
+        (!filters.city || (memorial.city && memorial.city.toLowerCase().includes(filters.city.toLowerCase()))) &&
+        (!filters.hasPhoto || !!memorial.profileImage) &&
+        (!filters.hasEpitaph || !!memorial.epitaph) &&
+        (!filters.dateFrom || (memorial.dateOfBirth && memorial.dateOfBirth >= filters.dateFrom)) &&
+        (!filters.dateTo || (memorial.dateOfDeath && memorial.dateOfDeath <= filters.dateTo))
+      );
+    })()
+  });
 
   const sortedMemorials = [...filteredMemorials].sort((a, b) => {
     switch (sortBy) {
@@ -65,17 +102,9 @@ const Memorials = () => {
             Сохраните память о близких и поделитесь их историями
           </p>
 
-          {/* Поиск и фильтры */}
+          {/* Новый компонент фильтров и поиска */}
+          <MemorialsFilterSearch onFilterChange={handleFilterChange} />
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Поиск по имени..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}

@@ -242,7 +242,7 @@ router.post('/', authMiddleware, async (req, res) => {
       location,
       galleryImages,
       timeline,
-      isPrivate,
+      isPrivate: typeof isPrivate === 'boolean' ? isPrivate : false,
       createdBy: req.user._id
     });
     

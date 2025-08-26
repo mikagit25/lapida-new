@@ -223,7 +223,7 @@ const PersonalCabinet = () => {
                   )}
                   {user && (
                     <Link
-                      to={`/user/${user._id}`}
+                      to={`/user/${user._id || user.id}`}
                       className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                     >
                       <span style={{ fontSize: '1.2em', marginRight: '8px' }}>👤</span>

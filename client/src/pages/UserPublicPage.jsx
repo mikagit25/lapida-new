@@ -12,6 +12,7 @@ import UserPrivacyToggle from '../components/UserPrivacyToggle';
 const UserPublicPage = () => {
   const { id } = useParams();
   const [user, setUser] = useState(null);
+  const [error, setError] = useState('');
   const [visibleBlocks, setVisibleBlocks] = useState({
     avatar: true,
     bio: true,
@@ -24,58 +25,38 @@ const UserPublicPage = () => {
   const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
-    // Временный fetch для теста (заменить на реальный API)
+    if (!id || id === 'undefined') {
+      setError('Некорректный адрес пользователя. Публичная страница не может быть загружена.');
+      setUser(null);
+      return;
+    }
     fetch(`/api/users/${id}/public`)
       .then(res => res.json())
       .then(data => {
-          // Для отладки: выводим ответ API в консоль
-          console.log('User public API response:', data);
-          // Объединяем данные из API: user, gallery, memorials
-          if (data && data.user) {
-              setUser({
-                ...data.user,
-                gallery: data.gallery || data.user.gallery || [],
-                memorials: data.memorials || [],
-                stats: data.stats || {},
-                friends: data.friends || [],
-                // Для статистики
-                memorialsCreated: (data.stats && (data.stats.memorialsCreated ?? data.stats.memorials ?? data.memorials?.length)) || data.memorials?.length || 0,
-                flowersLeft: (data.stats && data.stats.flowersLeft) || 0,
-                commentsLeft: (data.stats && data.stats.commentsLeft) || 0,
-                // Для блока "О себе"
-                bio: data.user.bio || data.user.biography || '',
-              });
-          } else {
-            setUser({
-              name: 'Тестовый пользователь',
-              avatar: '',
-              bio: 'Тестовая биография',
-              email: 'test@example.com',
-              phone: '',
-              friends: [],
-              relatives: [],
-              gallery: [],
-              memorials: [],
-              stats: { memorialsCreated: 0, flowersLeft: 0, commentsLeft: 0 },
-              isPublic: true
-            });
-          }
-        // TODO: set isOwner по логике авторизации
+        console.log('User public API response:', data);
+        if (data && data.user) {
+          // Явно копируем массив мемориалов и выводим в консоль
+          const memorialsArr = Array.isArray(data.memorials) ? data.memorials : [];
+          console.log('User public memorials:', memorialsArr);
+          setUser({
+            ...data.user,
+            gallery: data.gallery || data.user.gallery || [],
+            memorials: memorialsArr,
+            stats: data.stats || {},
+            friends: data.friends || [],
+            memorialsCreated: (data.stats && (data.stats.memorialsCreated ?? data.stats.memorials ?? memorialsArr.length)) || memorialsArr.length || 0,
+            flowersLeft: (data.stats && data.stats.flowersLeft) || 0,
+            commentsLeft: (data.stats && data.stats.commentsLeft) || 0,
+            bio: data.user.bio || data.user.biography || '',
+          });
+        } else {
+          setError(data?.message || 'Пользователь не найден или профиль скрыт.');
+          setUser(null);
+        }
       })
       .catch(() => {
-        setUser({
-          name: 'Тестовый пользователь',
-          avatar: '',
-          bio: 'Тестовая биография',
-          email: 'test@example.com',
-          phone: '',
-          friends: [],
-          relatives: [],
-          gallery: [],
-          memorials: [],
-          stats: { memorialsCreated: 0, flowersLeft: 0, commentsLeft: 0 },
-          isPublic: true
-        });
+        setError('Ошибка загрузки публичных данных пользователя.');
+        setUser(null);
       });
   }, [id]);
 
@@ -83,6 +64,7 @@ const UserPublicPage = () => {
     setVisibleBlocks((prev) => ({ ...prev, [block]: !prev[block] }));
   };
 
+  if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
   if (!user) return <div className="p-8 text-center">Загрузка...</div>;
 
   return (
@@ -90,6 +72,11 @@ const UserPublicPage = () => {
       <h1 className="text-2xl font-bold mb-4">Личная страница пользователя</h1>
       {isOwner && <UserPrivacyToggle user={user} />}
       <div className="space-y-6">
+        {/* Временный вывод массива мемориалов для отладки */}
+        <div className="bg-yellow-100 p-2 rounded text-xs mb-4">
+          <b>DEBUG: user.memorials</b>
+          <pre>{JSON.stringify(user.memorials, null, 2)}</pre>
+        </div>
         {visibleBlocks.avatar && <UserAvatarBlock user={user} onToggle={() => handleToggleBlock('avatar')} isOwner={isOwner} />}
         {visibleBlocks.bio && <UserBioBlock user={user} onToggle={() => handleToggleBlock('bio')} isOwner={isOwner} />}
         {visibleBlocks.contacts && <UserContactsBlock user={user} onToggle={() => handleToggleBlock('contacts')} isOwner={isOwner} />}

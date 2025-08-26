@@ -21,23 +21,28 @@ const authReducer = (state, action) => {
         ...state,
         isLoading: action.payload,
       };
-    case 'LOGIN_SUCCESS':
-      // Сохраняем пользователя и токен в localStorage
+    case 'LOGIN_SUCCESS': {
+      // Гарантируем наличие _id
+      let user = action.payload.user;
+      if (user && !user._id && user.id) {
+        user = { ...user, _id: user.id };
+      }
       if (action.payload.token) {
         localStorage.setItem('authToken', action.payload.token);
         localStorage.setItem('token', action.payload.token);
       }
-      if (action.payload.user) {
-        localStorage.setItem('user', JSON.stringify(action.payload.user));
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
       }
       return {
         ...state,
-        user: action.payload.user,
+        user,
         token: action.payload.token,
         isAuthenticated: true,
         isLoading: false,
         error: null,
       };
+    }
     case 'LOGOUT':
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
@@ -55,9 +60,14 @@ const authReducer = (state, action) => {
         token: null,
       };
     case 'UPDATE_USER':
+      // Гарантируем наличие _id
+      let user = action.payload;
+      if (user && !user._id && user.id) {
+        user = { ...user, _id: user.id };
+      }
       return {
         ...state,
-        user: action.payload,
+        user,
       };
     case 'CLEAR_ERROR':
       return {

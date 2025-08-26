@@ -392,8 +392,10 @@ router.get('/:id/public', async (req, res) => {
     }
 
     // Получение публичных мемориалов пользователя (createdBy)
-    const memorials = await Memorial.find({ createdBy: user._id, isPublic: true })
+    const memorials = await Memorial.find({ createdBy: user._id, isPrivate: false })
       .select('title date photo customSlug _id');
+    console.log('DEBUG: memorials for user', user._id, JSON.stringify(memorials, null, 2));
+    console.log('DEBUG: memorials for user', user._id, JSON.stringify(memorials, null, 2));
 
     // Получение друзей (только публичные профили)
     let friends = [];
