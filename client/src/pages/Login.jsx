@@ -150,6 +150,26 @@ const Login = () => {
               </div>
             </div>
 
+            {/* Кнопка входа через Google */}
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={() => window.location.href = '/api/auth/google'}
+                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <svg className="h-5 w-5 mr-2" viewBox="0 0 48 48">
+                  <g>
+                    <path fill="#4285F4" d="M24 9.5c3.54 0 6.73 1.23 9.24 3.25l6.9-6.9C36.34 2.69 30.52 0 24 0 14.61 0 6.35 5.74 2.18 14.09l8.06 6.27C12.34 13.16 17.68 9.5 24 9.5z"/>
+                    <path fill="#34A853" d="M46.09 24.59c0-1.56-.14-3.06-.39-4.5H24v9.02h12.44c-.54 2.9-2.18 5.36-4.64 7.02l7.18 5.59C43.73 37.41 46.09 31.54 46.09 24.59z"/>
+                    <path fill="#FBBC05" d="M10.24 28.36c-1.04-3.08-1.04-6.38 0-9.46l-8.06-6.27C-1.13 17.61-1.13 30.39 2.18 33.91l8.06-6.27z"/>
+                    <path fill="#EA4335" d="M24 44c6.52 0 12.34-2.69 16.14-7.36l-7.18-5.59c-2.01 1.35-4.56 2.15-7.36 2.15-6.32 0-11.66-3.66-13.76-8.86l-8.06 6.27C6.35 42.26 14.61 48 24 48z"/>
+                    <path fill="none" d="M0 0h48v48H0z"/>
+                  </g>
+                </svg>
+                Войти через Google
+              </button>
+            </div>
+
             <div className="mt-6 text-center">
               <Link
                 to="/"
