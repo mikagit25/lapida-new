@@ -14,8 +14,9 @@ const cookieParser = require('cookie-parser');
 const allowedOrigins = [
   'http://localhost:5182',
   'http://localhost:3000',
-  'https://lapida.ru',
-  'https://admin.lapida.ru'
+  'https://lapida.one',
+  'https://admin.lapida.one',
+  'https://lapida.onrender.com'
 ];
 app.use(cors({
   origin: function(origin, callback) {
