@@ -30,6 +30,8 @@ const authReducer = (state, action) => {
       if (action.payload.token) {
         localStorage.setItem('authToken', action.payload.token);
         localStorage.setItem('token', action.payload.token);
+        // Явно кладём токен в cookie для совместимости с сервером
+        document.cookie = `token=${action.payload.token}; path=/; max-age=${7*24*60*60}`;
       }
       if (user) {
         localStorage.setItem('user', JSON.stringify(user));
@@ -81,36 +83,61 @@ const authReducer = (state, action) => {
 
 // Провайдер контекста
 export const AuthProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Проверка токена и загрузка свежего профиля при загрузке приложения
+  // Восстановление авторизации при загрузке приложения
   useEffect(() => {
-    const initializeAuth = async () => {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        try {
-          await authService.verifyToken();
-          // Загружаем свежий профиль пользователя
-          const profileRes = await userService.getMe();
-          localStorage.setItem('user', JSON.stringify(profileRes.user || profileRes));
+    const token = localStorage.getItem('authToken');
+    const user = localStorage.getItem('user');
+
+    if (token && user) {
+      // Проверяем токен через API
+      authService.verifyToken()
+        .then(() => {
           dispatch({
             type: 'LOGIN_SUCCESS',
             payload: {
               token,
-              user: profileRes.user || profileRes,
+              user: JSON.parse(user),
             },
           });
-        } catch (error) {
+        })
+        .catch(() => {
           localStorage.removeItem('authToken');
           localStorage.removeItem('user');
           dispatch({ type: 'SET_LOADING', payload: false });
-        }
+        });
+    } else {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  }, []);
+    const [state, dispatch] = useReducer(authReducer, initialState);
+
+    // Восстановление авторизации при загрузке приложения
+    useEffect(() => {
+      const token = localStorage.getItem('authToken');
+      const user = localStorage.getItem('user');
+
+      if (token && user) {
+        // Проверяем токен через API
+        authService.verifyToken()
+          .then(() => {
+            dispatch({
+              type: 'LOGIN_SUCCESS',
+              payload: {
+                token,
+                user: JSON.parse(user),
+              },
+            });
+          })
+          .catch(() => {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            dispatch({ type: 'SET_LOADING', payload: false });
+          });
       } else {
         dispatch({ type: 'SET_LOADING', payload: false });
       }
-    };
-    initializeAuth();
-  }, []);
+    }, []);
 
   useEffect(() => {
     console.log('[AuthProvider] user из состояния:', state.user);

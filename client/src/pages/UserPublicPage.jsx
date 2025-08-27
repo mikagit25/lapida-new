@@ -72,11 +72,6 @@ const UserPublicPage = () => {
       <h1 className="text-2xl font-bold mb-4">Личная страница пользователя</h1>
       {isOwner && <UserPrivacyToggle user={user} />}
       <div className="space-y-6">
-        {/* Временный вывод массива мемориалов для отладки */}
-        <div className="bg-yellow-100 p-2 rounded text-xs mb-4">
-          <b>DEBUG: user.memorials</b>
-          <pre>{JSON.stringify(user.memorials, null, 2)}</pre>
-        </div>
         {visibleBlocks.avatar && <UserAvatarBlock user={user} onToggle={() => handleToggleBlock('avatar')} isOwner={isOwner} />}
         {visibleBlocks.bio && <UserBioBlock user={user} onToggle={() => handleToggleBlock('bio')} isOwner={isOwner} />}
         {visibleBlocks.contacts && <UserContactsBlock user={user} onToggle={() => handleToggleBlock('contacts')} isOwner={isOwner} />}

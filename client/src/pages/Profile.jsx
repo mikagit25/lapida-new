@@ -31,6 +31,7 @@ import PersonalDataManager from '../components/PersonalDataManager';
 import ActivityHistory from '../components/ActivityHistory';
 import PreferencesManager from '../components/PreferencesManager';
 import GoToConnectionsButton from '../components/GoToConnectionsButton';
+import DemoFeaturesBlock from '../components/DemoFeaturesBlock';
 
 const Profile = () => {
 
@@ -166,6 +167,7 @@ const Profile = () => {
             {/* Контент табов */}
             {activeTab === 'overview' && (
               <div className="space-y-6">
+                <DemoFeaturesBlock />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2">
                     <div className="bg-gray-50 rounded-lg p-6 mb-6">
@@ -196,10 +198,6 @@ const Profile = () => {
                           <p className="mt-1 text-lg text-gray-900 whitespace-pre-wrap">{user.bio}</p>
                         </div>
                       )}
-                      {/* Быстрые действия: вход в кабинет компании (массив компаний) */}
-                      {/* КНОПКИ ПЕРЕНЕСЕНЫ В CompanyCabinet.jsx */}
-                      {/* Быстрые действия: переход в кабинет компании */}
-                      {/* Кнопка перехода в кабинет компании перенесена в /cabinet */}
                     </div>
                     {/* Новый раздел галереи пользователя */}
                     <div className="bg-white rounded-lg shadow p-6 mb-6">

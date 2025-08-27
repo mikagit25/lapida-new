@@ -60,6 +60,7 @@ app.use((req, res, next) => {
 // Статика
 app.use('/upload/gallery', express.static(path.join(__dirname, 'upload/gallery')));
 app.use('/upload/memorials', express.static(path.join(__dirname, 'upload/memorials')));
+app.use('/upload/media', express.static(path.join(__dirname, 'upload/media')));
 app.use('/upload', express.static(path.join(__dirname, 'upload')));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -85,6 +86,8 @@ app.use('/api/companies', require('./routes/companies'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/upload', require('./routes/uploadClean'));
 app.use('/api/photo-comments', require('./routes/photoComments'));
+app.use('/api/memory-days', require('./routes/memoryDays'));
+app.use('/api/support-groups', require('./routes/supportGroups'));
 app.use('/api/photo-comments-simple', require('./routes/photoCommentsSimple'));
 app.use('/api/timeline', require('./routes/timeline'));
 app.use('/api/virtual', require('./routes/virtual'));
@@ -92,6 +95,16 @@ app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/gallery-recovery', require('./routes/galleryRecovery'));
 app.use('/api/pages', require('./routes/pages'));
 app.use('/api/reports', require('./routes/reports'));
+app.use('/api/search', require('./routes/search'));
+const genealogyRouter = require('./routes/genealogy');
+app.use('/api/genealogy', genealogyRouter);
+app.use('/api/timeline-events', require('./routes/timeline-events'));
+app.use('/api/complaints', require('./routes/complaints'));
+app.use('/api/social', require('./routes/social'));
+app.use('/api/payments', require('./routes/payments'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/integrations', require('./routes/integrations'));
+app.use('/api/media', require('./routes/media'));
 
 // Корневой маршрут
 app.get('/', (req, res) => {

@@ -44,6 +44,8 @@ const authService = {
     if (response.data.token) {
       localStorage.setItem('authToken', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
+      // Явно кладём токен в cookie для совместимости с сервером
+      document.cookie = `token=${response.data.token}; path=/; max-age=${7*24*60*60}`;
     }
     return response.data;
   },
@@ -431,10 +433,10 @@ const uploadService = {
 
 // Сервис пользователя и статистики
 const userService = {
-  // Получение всех пользователей (только для администратора)
+  // Получение всех публичных пользователей
   getAllUsers: async () => {
     const api = await getApi();
-    const response = await api.get('/users');
+    const response = await api.get('/users/public');
     return response.data;
   },
   // Получение статистики пользователя
@@ -627,6 +629,7 @@ const notificationService = {
 const friendsService = {
   // Поиск пользователей
   searchUsers: async (query, params = {}) => {
+    const api = await getApi();
     const response = await api.get('/users/search', { 
       params: { q: query, ...params } 
     });

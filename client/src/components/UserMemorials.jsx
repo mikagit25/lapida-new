@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { memorialService } from '../services/api';
+import { getApi } from '../services/api';
 
 const UserMemorials = () => {
   const [memorials, setMemorials] = useState([]);
@@ -11,17 +11,15 @@ const UserMemorials = () => {
 
   useEffect(() => {
     fetchMemorials();
+    // eslint-disable-next-line
   }, [filter, sortBy]);
 
   const fetchMemorials = async () => {
     try {
       setLoading(true);
-      const response = await memorialService.getMyMemorials({ 
-        filter, 
-        sortBy,
-        includeStats: true 
-      });
-      setMemorials(response.memorials || []);
+      const api = await getApi();
+      const response = await api.get('/users/me/memorials');
+      setMemorials(response.data.memorials || []);
     } catch (error) {
       console.error('Error fetching memorials:', error);
       setError('Ошибка при загрузке мемориалов');
@@ -185,15 +183,16 @@ const UserMemorials = () => {
                       )}
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900">
-                          {memorial.firstName} {memorial.lastName}
+                          {memorial.fullName || `${memorial.firstName || ''} ${memorial.lastName || ''}`.trim()}
                         </h3>
                         <div className="flex items-center space-x-2 mt-1">
                           {getStatusBadge(memorial)}
                           <span className="text-sm text-gray-500">
-                            {memorial.birthDate && memorial.deathDate && (
-                              `${new Date(memorial.birthDate).getFullYear()} - ${new Date(memorial.deathDate).getFullYear()}`
-                            )}
+                            {memorial.lifespan && memorial.lifespan !== 'Invalid Date - Invalid Date' ? memorial.lifespan : ''}
                           </span>
+                          {memorial.age && memorial.age > 0 && (
+                            <span className="text-xs text-gray-400">Возраст: {memorial.age}</span>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -1,9 +1,12 @@
+import OAuthCallback from './pages/OAuthCallback';
+import UsersCatalogPage from './pages/UsersCatalogPage';
 import AdminUsersManager from './pages/AdminUsersManager';
 import AdminPagesManager from './pages/AdminPagesManager';
 import AdminCompaniesManager from './pages/AdminCompaniesManager';
 import AdminMemorialsManager from './pages/AdminMemorialsManager';
 import AdminReportsManager from './pages/AdminReportsManager';
 import AdminCabinet from './pages/AdminCabinet';
+import AdminPage from './pages/AdminPage';
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -38,6 +41,23 @@ import CompanyOrders from './pages/CompanyOrders';
 import CompanyOrdersPage from './orders/CompanyOrdersPage';
 import ClientOrdersPage from './orders/ClientOrdersPage';
 import HomeTest from './pages/HomeTest';
+import DemoFeatures from './pages/DemoFeatures';
+import SearchDemo from './pages/SearchDemo';
+import SearchPage from './pages/SearchPage';
+import GenealogyDemo from './pages/GenealogyDemo';
+import GenealogyPage from './pages/GenealogyPage';
+import TimelineDemo from './pages/TimelineDemo';
+import TimelinePage from './pages/TimelinePage';
+import ComplaintsDemo from './pages/ComplaintsDemo';
+import ComplaintsPage from './pages/ComplaintsPage';
+import SocialDemo from './pages/SocialDemo';
+import SocialPage from './pages/SocialPage';
+import PaymentsDemo from './pages/PaymentsDemo';
+import PaymentsPage from './pages/PaymentsPage';
+import IntegrationsDemo from './pages/IntegrationsDemo';
+import IntegrationsPage from './pages/IntegrationsPage';
+import MobileDemo from './pages/MobileDemo';
+import MobilePage from './pages/MobilePage';
 import SlugRouter from './pages/SlugRouter';
 import UserPublicPage from './pages/UserPublicPage';
 
@@ -108,6 +128,7 @@ const Navigation = () => {
               {/* Ссылка 'Личный кабинет' скрыта, переход теперь только по имени пользователя */}
               <Link to="/memorials" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">Мемориалы</Link>
               <Link to="/companies" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">Компании</Link>
+              <Link to="/users-catalog" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">Пользователи</Link>
               <Link to="/business" className="text-blue-700 hover:text-blue-900 px-3 py-2 rounded-md text-sm font-medium font-semibold">Для бизнеса</Link>
               <Link to="/products" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">Товары</Link>
               <Link to="/cart" className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium font-semibold">Корзина</Link>
@@ -166,7 +187,7 @@ const App = () => {
           <Navigation />
           <main className="pb-16 lg:pb-0">
             <Routes>
-              <Route path="/admin" element={<PrivateRoute><AdminCabinet /></PrivateRoute>} />
+              <Route path="/admin" element={<PrivateRoute><AdminPage /></PrivateRoute>} />
               <Route path="/admin/users" element={<PrivateRoute><AdminUsersManager /></PrivateRoute>} />
               <Route path="/admin/pages" element={<PrivateRoute><AdminPagesManager /></PrivateRoute>} />
               <Route path="/admin/companies" element={<PrivateRoute><AdminCompaniesManager /></PrivateRoute>} />
@@ -174,6 +195,16 @@ const App = () => {
               <Route path="/admin/reports" element={<PrivateRoute><AdminReportsManager /></PrivateRoute>} />
               <Route path="/" element={<Home />} />
               <Route path="/home-test" element={<HomeTest />} />
+              <Route path="/demo-features" element={<DemoFeatures />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/genealogy" element={<GenealogyPage />} />
+              <Route path="/oauth-callback" element={<OAuthCallback />} />
+              <Route path="/timeline" element={<TimelinePage />} />
+              <Route path="/complaints" element={<ComplaintsPage />} />
+              <Route path="/social" element={<SocialPage />} />
+              <Route path="/payments" element={<PaymentsPage />} />
+              <Route path="/integrations" element={<IntegrationsPage />} />
+              <Route path="/mobile" element={<MobilePage />} />
               <Route path="/cabinet" element={<PrivateRoute><PersonalCabinet /></PrivateRoute>} />
               <Route path="/connections" element={<PrivateRoute><UserConnections /></PrivateRoute>} />
               <Route path="/login" element={<Login />} />
@@ -205,6 +236,7 @@ const App = () => {
               <Route path="/company/:companyId/bulk-products" element={<BulkProductPage />} />
               <Route path="/company/:companySlug" element={<CompanyProfileBySlug />} />
               <Route path="/user/:id" element={<UserPublicPage />} />
+              <Route path="/users-catalog" element={<UsersCatalogPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

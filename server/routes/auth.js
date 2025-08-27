@@ -13,7 +13,7 @@ const router = express.Router();
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/login', session: false }), (req, res) => {
   const token = jwt.sign({ userId: req.user._id }, process.env.JWT_SECRET || 'devsecret', { expiresIn: '7d' });
-  res.redirect(`/?oauth=success&token=${token}`);
+  res.redirect(`/oauth-callback?token=${token}`);
 });
 
 

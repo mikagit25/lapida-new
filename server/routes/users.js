@@ -3,8 +3,6 @@ const express = require('express');
 const multer = require('multer');
 const User = require('../models/User');
 const Company = require('../models/Company');
-
-
 const Memorial = require('../models/Memorial');
 const Comment = require('../models/Comment');
 const { auth, adminAuth } = require('../middleware/auth');
@@ -13,23 +11,42 @@ const fs = require('fs');
 
 const router = express.Router();
 
-// Получение профиля текущего пользователя с компаниями
-router.get('/me', auth, async (req, res) => {
+// Публичный каталог пользователей (для всех)
+router.get('/public', async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select('-password');
-    if (!user) {
-      return res.status(404).json({ message: 'Пользователь не найден' });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const search = req.query.search || '';
+
+    const filter = { publicProfile: true };
+    if (search) {
+      filter.$or = [
+        { name: new RegExp(search, 'i') },
+        { email: new RegExp(search, 'i') }
+      ];
     }
-    // Находим компании, где пользователь является владельцем
-    const companies = await Company.find({ owner: user._id });
-    res.json({ user, companies });
+
+    const users = await User.find(filter)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const total = await User.countDocuments(filter);
+
+    res.json({
+      users,
+      pagination: {
+        current: page,
+        total: Math.ceil(total / limit),
+        count: total
+      }
+    });
   } catch (error) {
-    console.error('Ошибка получения профиля пользователя:', error);
-    res.status(500).json({ message: 'Ошибка сервера при получении профиля пользователя' });
+    console.error('Ошибка получения публичного каталога пользователей:', error);
+    res.status(500).json({ message: 'Ошибка сервера при получении каталога пользователей' });
   }
 });
-
-// Удаление фото из галереи пользователя
 router.delete('/me/gallery', auth, async (req, res) => {
   try {
     const { imageUrl } = req.body;
@@ -171,42 +188,11 @@ router.get('/me/stats', auth, async (req, res) => {
     res.json({
       memorialsCreated,
       commentsLeft,
-      flowersLeft,
-      totalViews: 0 // Заглушка для просмотров
+      flowersLeft
     });
   } catch (error) {
-    console.error('Ошибка получения статистики пользователя:', error);
+    console.error('Ошибка получения статистики:', error);
     res.status(500).json({ message: 'Ошибка сервера при получении статистики' });
-  }
-});
-
-// Получение мемориалов текущего пользователя
-router.get('/me/memorials', auth, async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-
-    const memorials = await Memorial.find({ creator: userId })
-      .populate('creator', 'name avatar')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    const total = await Memorial.countDocuments({ creator: userId });
-
-    res.json({
-      memorials,
-      pagination: {
-        current: page,
-        total: Math.ceil(total / limit),
-        count: total
-      }
-    });
-  } catch (error) {
-    console.error('Ошибка получения мемориалов пользователя:', error);
-    res.status(500).json({ message: 'Ошибка сервера при получении мемориалов' });
   }
 });
 
@@ -394,8 +380,6 @@ router.get('/:id/public', async (req, res) => {
     // Получение публичных мемориалов пользователя (createdBy)
     const memorials = await Memorial.find({ createdBy: user._id, isPrivate: false })
       .select('title date photo customSlug _id');
-    console.log('DEBUG: memorials for user', user._id, JSON.stringify(memorials, null, 2));
-    console.log('DEBUG: memorials for user', user._id, JSON.stringify(memorials, null, 2));
 
     // Получение друзей (только публичные профили)
     let friends = [];
