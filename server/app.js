@@ -64,6 +64,13 @@ app.use('/upload/memorials', express.static(path.join(__dirname, 'upload/memoria
 app.use('/upload/media', express.static(path.join(__dirname, 'upload/media')));
 app.use('/upload', express.static(path.join(__dirname, 'upload')));
 app.use(express.static(path.join(__dirname, 'public')));
+ 
+ // Фронтенд (React/Vite)
+ app.use(express.static(path.join(__dirname, '../client/dist')));
+ // SPA fallback: отдаём index.html для всех не-API запросов
+ app.get(/^\/(?!api\/).*/, (req, res) => {
+   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+ });
 
 // Healthcheck
 app.get('/api/health', (req, res) => {
@@ -109,7 +116,8 @@ app.use('/api/media', require('./routes/media'));
 
 // Корневой маршрут
 app.get('/', (req, res) => {
-  res.json({ message: 'Lapida API запущен' });
+  // Корневой маршрут теперь отдаёт фронтенд через SPA fallback выше
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 // 404 обработчик

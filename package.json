@@ -6,6 +6,7 @@
     "eslint-plugin-react": "^7.37.5"
   },
   "scripts": {
+    "start": "node server/app.js",
     "start-api-5184": "set PORT=5184&& node server/app.js"
   },
   "dependencies": {
