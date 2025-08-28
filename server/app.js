@@ -16,7 +16,9 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://lapida.one',
   'https://admin.lapida.one',
-  'https://lapida.onrender.com'
+  'https://lapida.onrender.com',
+  'https://lapida-f2cv.onrender.com', // фронт на Render.com
+  'https://www.lapida.one',           // будущий основной домен
 ];
 app.use(cors({
   origin: function(origin, callback) {
