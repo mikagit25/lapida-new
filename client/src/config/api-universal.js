@@ -38,7 +38,34 @@ export async function findWorkingApiUrl() {
     const currentHost = window.location.hostname;
     const currentProtocol = window.location.protocol;
     // Пробуем 5005 первым, остальные порты после
-    const portsToTry = [5005, 5184, 3000, 5007, 8000, 5000, 4000, 8080, 9000];
+    const apiUrlsToTry = [
+        'https://lapida.onrender.com/api',
+        ...[5005, 5184, 3000, 5007, 8000, 5000, 4000, 8080, 9000].map(port => `${currentProtocol}//${currentHost}:${port}/api`)
+    ];
+    console.log('🔍 Поиск работающего API сервера...');
+    for (const testUrl of apiUrlsToTry) {
+        try {
+            const response = await fetch(`${testUrl}/health`, {
+                method: 'GET',
+                timeout: 2000
+            });
+            if (response.ok) {
+                const json = await response.json();
+                if (json && json.app === 'lapida') {
+                    console.log(`✅ Найден работающий API сервер: ${testUrl}`);
+                    window.__cachedWorkingApiUrl = testUrl;
+                    return testUrl;
+                } else {
+                    console.log(`⚠️ Сервер отвечает, но не lapida:`, json);
+                }
+            }
+        } catch (error) {
+            console.log(`❌ Сервер недоступен: ${testUrl}`);
+        }
+    }
+    console.log('⚠️ Работающий API сервер не найден, используем базовый URL');
+    window.__cachedWorkingApiUrl = API_BASE_URL;
+    return API_BASE_URL;
     console.log('🔍 Поиск работающего API сервера...');
     for (const port of portsToTry) {
         const testUrl = `${currentProtocol}//${currentHost}:${port}`;
