@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../config/api';
 import GenealogyTree from './GenealogyTree';
 import GenealogyEditor from '../components/GenealogyEditor';
 import ReactModal from 'react-modal';
@@ -17,7 +18,7 @@ const GenealogyManager = () => {
   const [template, setTemplate] = useState('');
 
   useEffect(() => {
-    fetch('/api/genealogy')
+    fetch(`${API_BASE_URL}/genealogy`)
       .then(res => res.json())
       .then(data => {
         if (data && data.members) {
@@ -84,7 +85,7 @@ const GenealogyManager = () => {
                 setCreating(true);
                 setCreateError('');
                 try {
-                  const res = await fetch('/api/genealogy', {
+                  const res = await fetch(`${API_BASE_URL}/genealogy`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ members: [newMember] })

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { API_BASE_URL } from '../config/api';
 
 const OrderDetails = () => {
   const { orderId } = useParams();
@@ -9,7 +10,7 @@ const OrderDetails = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/orders/${orderId}`, { credentials: 'include' })
+  fetch(`${API_BASE_URL}/orders/${orderId}`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         setOrder(data.order);

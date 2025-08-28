@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
 const SECTIONS = [
   { key: 'bio', label: 'Биография' },
@@ -35,7 +36,7 @@ export default function MemorialEditorsManager({ memorialId }) {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`/api/memorial-editors/${memorialId}/editors`, {
+  const res = await axios.get(`${API_BASE_URL}/memorial-editors/${memorialId}/editors`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       setEditors(res.data.editors || []);
@@ -48,7 +49,7 @@ export default function MemorialEditorsManager({ memorialId }) {
 
   async function fetchUsers() {
     try {
-      const res = await axios.get('/api/users');
+  const res = await axios.get(`${API_BASE_URL}/users`);
       setUsers(res.data.users || []);
     } catch (err) {
       setUsers([]);
@@ -60,7 +61,7 @@ export default function MemorialEditorsManager({ memorialId }) {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`/api/memorial-editors/${memorialId}/editors`, {
+  await axios.post(`${API_BASE_URL}/memorial-editors/${memorialId}/editors`, {
         userId: selectedUser,
         sections: selectedSections,
         role: selectedRole
@@ -82,7 +83,7 @@ export default function MemorialEditorsManager({ memorialId }) {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`/api/memorial-editors/${memorialId}/editors/${editorUserId}`, {
+  await axios.delete(`${API_BASE_URL}/memorial-editors/${memorialId}/editors/${editorUserId}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       fetchEditors();

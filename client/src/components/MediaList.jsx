@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 const MediaList = () => {
   const [media, setMedia] = useState([]);
@@ -6,7 +7,7 @@ const MediaList = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('/api/media')
+  fetch(`${API_BASE_URL}/media`)
       .then(res => res.json())
       .then(data => {
         setMedia(data);

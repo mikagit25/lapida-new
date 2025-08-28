@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 const NotificationsList = () => {
   const { user } = useAuth();
@@ -15,7 +16,7 @@ const NotificationsList = () => {
   useEffect(() => {
     if (!user?._id) return;
     setLoading(true);
-    fetch(`/api/notifications/user/${user._id}?page=${page}&limit=${limit}`, { credentials: 'include' })
+  fetch(`${API_BASE_URL}/notifications/user/${user._id}?page=${page}&limit=${limit}`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         setNotifications(data.notifications || []);
@@ -45,7 +46,7 @@ const NotificationsList = () => {
           className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
           onClick={async () => {
             try {
-              const res = await fetch(`/api/notifications/user/${user._id}/read-all`, {
+              const res = await fetch(`${API_BASE_URL}/notifications/user/${user._id}/read-all`, {
                 method: 'PATCH',
                 credentials: 'include'
               });
@@ -83,7 +84,7 @@ const NotificationsList = () => {
                   className="mt-2 px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
                   onClick={async () => {
                     try {
-                      const res = await fetch(`/api/notifications/${n._id}/read`, {
+                      const res = await fetch(`${API_BASE_URL}/notifications/${n._id}/read`, {
                         method: 'PATCH',
                         credentials: 'include'
                       });

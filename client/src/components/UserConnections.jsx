@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
 function UserConnections() {
   const [friends, setFriends] = useState([]);
@@ -20,10 +21,10 @@ function UserConnections() {
     const token = localStorage.getItem('token');
     try {
       if (tab === 'friends') {
-        const res = await axios.get('/api/user-connections/friends', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  const res = await axios.get(`${API_BASE_URL}/user-connections/friends`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
         setFriends(res.data.friends || []);
       } else {
-        const res = await axios.get('/api/user-connections/relatives', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  const res = await axios.get(`${API_BASE_URL}/user-connections/relatives`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
         setRelatives(res.data.relatives || []);
       }
     } catch (err) {
@@ -37,7 +38,7 @@ function UserConnections() {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.get('/api/users');
+  const res = await axios.get(`${API_BASE_URL}/users`);
       setUsers(res.data.users || []);
     } catch (err) {
       setUsers([]);
@@ -51,7 +52,7 @@ function UserConnections() {
     setError('');
     const token = localStorage.getItem('token');
     try {
-      await axios.post(`/api/user-connections/${type}/${userId}`, {}, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  await axios.post(`${API_BASE_URL}/user-connections/${type}/${userId}`, {}, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
       fetchConnections();
     } catch (err) {
       setError('Ошибка добавления');
@@ -65,7 +66,7 @@ function UserConnections() {
     setError('');
     const token = localStorage.getItem('token');
     try {
-      await axios.delete(`/api/user-connections/${type}/${userId}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  await axios.delete(`${API_BASE_URL}/user-connections/${type}/${userId}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
       fetchConnections();
     } catch (err) {
       setError('Ошибка удаления');

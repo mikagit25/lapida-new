@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getApiBaseUrl } from '../config/api';
+import { API_BASE_URL } from '../config/api';
 
 const BackgroundImageManager = ({ 
   memorial,
@@ -24,12 +24,7 @@ const BackgroundImageManager = ({
     if (!cleanPath.startsWith('/')) {
       cleanPath = '/' + cleanPath;
     }
-    const [apiBaseUrl, setApiBaseUrl] = React.useState('');
-    React.useEffect(() => {
-      getApiBaseUrl().then(setApiBaseUrl);
-    }, []);
-    if (!apiBaseUrl) return '';
-    return `${apiBaseUrl}${cleanPath}`;
+  return `${API_BASE_URL}${cleanPath}`;
   };
 
   const handleImageUpload = async (event) => {
@@ -52,8 +47,7 @@ const BackgroundImageManager = ({
       const formData = new FormData();
       formData.append('pageBackground', file);
       
-      const API_BASE_URL = await getApiBaseUrl();
-      const response = await fetch(`${API_BASE_URL}/memorials/${memorial._id}/page-background`, {
+  const response = await fetch(`${API_BASE_URL}/memorials/${memorial._id}/page-background`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token') || localStorage.getItem('authToken')}`

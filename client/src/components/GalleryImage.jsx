@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getApiBaseUrl } from '../config/api';
+import { API_BASE_URL } from '../config/api';
 
 const GalleryImage = ({ photo, index, description, onClick }) => {
   const [src, setSrc] = useState('');
@@ -13,13 +13,11 @@ const GalleryImage = ({ photo, index, description, onClick }) => {
           if (isMounted) setSrc(photo.url);
         } else if (photo.url.startsWith('/')) {
           // Любой относительный путь с / (например, /upload/, /timeline/photo/)
-          const baseUrl = await getApiBaseUrl();
-          const cleanBase = baseUrl.replace(/\/api$/, '');
+          const cleanBase = API_BASE_URL.replace(/\/api$/, '');
           if (isMounted) setSrc(cleanBase + photo.url);
         } else {
           // Относительный путь без / (например, filename)
-          const baseUrl = await getApiBaseUrl();
-          const cleanBase = baseUrl.replace(/\/api$/, '');
+          const cleanBase = API_BASE_URL.replace(/\/api$/, '');
           if (isMounted) setSrc(cleanBase + '/timeline/photo/' + photo.url);
         }
       } else {

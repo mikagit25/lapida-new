@@ -1,4 +1,4 @@
-import { getApiBaseUrl } from '../config/api';
+import { API_BASE_URL } from '../config/api';
 
 // Асинхронная версия fixImageUrl
 export async function fixImageUrl(url) {
@@ -6,7 +6,7 @@ export async function fixImageUrl(url) {
   // Получаем базовый адрес сервера без /api
   let serverBase = window.location.origin;
   try {
-    const apiBase = await getApiBaseUrl();
+    const apiBase = API_BASE_URL;
     const apiUrl = new URL(apiBase);
     serverBase = `${apiUrl.protocol}//${apiUrl.hostname}${apiUrl.port ? ':' + apiUrl.port : ''}`;
   } catch (e) { /* ignore */ }
@@ -35,3 +35,4 @@ export async function fixImageUrl(url) {
   }
   return url;
 }
+// ...existing code...

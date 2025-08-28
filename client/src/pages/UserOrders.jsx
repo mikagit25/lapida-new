@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 const UserOrders = () => {
   const { user } = useAuth();
@@ -11,7 +12,7 @@ const UserOrders = () => {
   useEffect(() => {
     if (!user?._id) return;
     setLoading(true);
-    fetch(`/api/orders/user/${user._id}`, {
+  fetch(`${API_BASE_URL}/orders/user/${user._id}`, {
       credentials: 'include',
     })
       .then(res => res.json())

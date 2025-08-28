@@ -14,7 +14,7 @@ function AsyncImage({ image, alt, className, ...props }) {
 }
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getApiBaseUrl } from '../config/api';
+import { API_BASE_URL } from '../config/api';
 import GalleryImage from './GalleryImage';
 import ModalPhotoView from './ModalPhotoView';
 // ...existing code...
@@ -27,8 +27,7 @@ export function useFullImageSrc(photo) {
     async function resolveSrc() {
       if (typeof photo?.url === 'string') {
         if (photo.url.startsWith('/upload/')) {
-          const baseUrl = await getApiBaseUrl();
-          const cleanBase = baseUrl.replace(/\/api$/, '');
+          const cleanBase = API_BASE_URL.replace(/\/api$/, '');
           if (isMounted) setSrc(cleanBase + photo.url);
         } else {
           if (isMounted) setSrc(photo.url);

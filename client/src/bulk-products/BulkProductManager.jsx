@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import BulkProductTable from './BulkProductTable';
 import BulkProductImport from './BulkProductImport';
 import BulkProductActions from './BulkProductActions';
+import { API_BASE_URL } from '../config/api';
 
 const BulkProductManager = () => {
   const [products, setProducts] = useState([]);
@@ -65,7 +66,7 @@ const BulkProductManager = () => {
     if (companySlug) {
       setLoading(true);
       setError('');
-      fetch(`/api/companies/by-slug/${companySlug}`)
+  fetch(`${API_BASE_URL}/companies/by-slug/${companySlug}`)
         .then(res => res.json())
         .then(data => {
           if (data.company && data.company._id) {
@@ -88,7 +89,7 @@ const BulkProductManager = () => {
     setError('');
     const token = localStorage.getItem('authToken');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    fetch(`/api/companies/${resolvedCompanyId}/products`, {
+  fetch(`${API_BASE_URL}/companies/${resolvedCompanyId}/products`, {
       headers,
       credentials: 'include',
     })
@@ -133,7 +134,7 @@ const BulkProductManager = () => {
       // Удалить выбранные (если есть id — запрос на сервер, иначе просто удалить из списка)
       const toDelete = selected.filter(p => p._id);
       for (const prod of toDelete) {
-        await fetch(`/api/companies/${resolvedCompanyId}/products/${prod._id}`, { method: 'DELETE' });
+  await fetch(`${API_BASE_URL}/companies/${resolvedCompanyId}/products/${prod._id}`, { method: 'DELETE' });
       }
       setProducts(products.filter((_, idx) => !selectedProducts.includes(idx)));
       setSelectedProducts([]);
@@ -157,12 +158,12 @@ const BulkProductManager = () => {
             prod.photos.forEach(file => {
               if (file instanceof File) formData.append('images', file);
             });
-            res = await fetch(`/api/companies/${resolvedCompanyId}/products`, {
+            res = await fetch(`${API_BASE_URL}/companies/${resolvedCompanyId}/products`, {
               method: 'POST',
               body: formData
             });
           } else {
-            res = await fetch(`/api/companies/${resolvedCompanyId}/products`, {
+            res = await fetch(`${API_BASE_URL}/companies/${resolvedCompanyId}/products`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(prod)
@@ -192,12 +193,12 @@ const BulkProductManager = () => {
             prod.photos.forEach(file => {
               if (file instanceof File) formData.append('images', file);
             });
-            await fetch(`/api/companies/${resolvedCompanyId}/products/${productId}`, {
+            await fetch(`${API_BASE_URL}/companies/${resolvedCompanyId}/products/${productId}`, {
               method: 'PUT',
               body: formData
             });
           } else {
-            await fetch(`/api/companies/${resolvedCompanyId}/products/${productId}`, {
+            await fetch(`${API_BASE_URL}/companies/${resolvedCompanyId}/products/${productId}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ status: 'active' })
@@ -206,7 +207,7 @@ const BulkProductManager = () => {
         }
       }
       // После публикации перезагрузить товары
-      const res = await fetch(`/api/companies/${resolvedCompanyId}/products`);
+  const res = await fetch(`${API_BASE_URL}/companies/${resolvedCompanyId}/products`);
       const data = await res.json();
       setProducts(data.products || []);
       setSelectedProducts([]);
@@ -232,12 +233,12 @@ const BulkProductManager = () => {
         prod.photos.forEach(file => {
           if (file instanceof File) formData.append('images', file);
             });
-        await fetch(`/api/companies/${resolvedCompanyId}/products`, {
+  await fetch(`${API_BASE_URL}/companies/${resolvedCompanyId}/products`, {
           method: 'POST',
           body: formData
         });
       } else {
-        await fetch(`/api/companies/${resolvedCompanyId}/products`, {
+  await fetch(`${API_BASE_URL}/companies/${resolvedCompanyId}/products`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(prod)
@@ -246,7 +247,7 @@ const BulkProductManager = () => {
     }
     // После сохранения перезагрузить товары
     setLoading(true);
-    const res = await fetch(`/api/companies/${resolvedCompanyId}/products`);
+  const res = await fetch(`${API_BASE_URL}/companies/${resolvedCompanyId}/products`);
     const data = await res.json();
     setProducts(data.products || []);
     setLoading(false);

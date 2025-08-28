@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 // Страница оформления заказа
 const Checkout = () => {
@@ -35,7 +36,7 @@ const Checkout = () => {
         quantity: item.quantity,
         companyId: item.companyId
       }));
-      const res = await fetch('/api/orders', {
+  const res = await fetch(`${API_BASE_URL}/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

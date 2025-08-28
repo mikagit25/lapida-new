@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 const DonationList = () => {
   const [donations, setDonations] = useState([]);
 
   useEffect(() => {
-    fetch('/api/payments/donations')
+    fetch(`${API_BASE_URL}/payments/donations`)
       .then(res => res.json())
       .then(data => setDonations(data.donations || []));
   }, []);

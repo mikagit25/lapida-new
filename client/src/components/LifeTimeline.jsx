@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import TimelineEvent from './TimelineEvent';
 import EventModal from './EventModal';
 import TimelineStats from './TimelineStats';
-import { getApiBaseUrl } from '../config/api';
+import { API_BASE_URL } from '../config/api';
 
 const LifeTimeline = ({ memorialId }) => {
   const [events, setEvents] = useState([]);
@@ -46,8 +46,7 @@ const LifeTimeline = ({ memorialId }) => {
         ...(selectedYear !== 'all' && { year: selectedYear })
       });
 
-      const API_BASE_URL = await getApiBaseUrl();
-      const response = await fetch(`${API_BASE_URL}/timeline/timeline?${params}`);
+  const response = await fetch(`${API_BASE_URL}/timeline/timeline?${params}`);
       
       if (response.ok) {
         const data = await response.json();
@@ -69,8 +68,7 @@ const LifeTimeline = ({ memorialId }) => {
 
   const loadStats = async () => {
     try {
-      const API_BASE_URL = await getApiBaseUrl();
-      const response = await fetch(`${API_BASE_URL}/timeline/timeline/stats?memorialId=${memorialId}`);
+  const response = await fetch(`${API_BASE_URL}/timeline/timeline/stats?memorialId=${memorialId}`);
       if (response.ok) {
         const data = await response.json();
         setStats(data);

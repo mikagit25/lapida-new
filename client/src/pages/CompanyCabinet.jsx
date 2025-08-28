@@ -21,6 +21,7 @@ import CompanyContactsForm from '../components/CompanyContactsForm';
 import CustomSlugEditor from '../components/CustomSlugEditor';
 import CompanyEditForm from '../components/CompanyEditForm';
 import { userService } from '../services/api';
+import { API_BASE_URL } from '../config/api';
 
 // Обработчик клика по карте через useMapEvents
 function MapClickHandler({ setEditForm, setMapCenter }) {
@@ -82,7 +83,7 @@ function CompanyCabinet() {
       try {
         const token = localStorage.getItem('authToken');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch(`/api/companies/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/companies/${id}`, {
           headers,
           credentials: 'include',
         });
@@ -134,7 +135,7 @@ function CompanyCabinet() {
     try {
       const token = localStorage.getItem('authToken');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(`/api/companies/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/companies/${id}`, {
         headers,
         credentials: 'include',
       });
@@ -156,7 +157,7 @@ function CompanyCabinet() {
     try {
       const token = localStorage.getItem('authToken');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(`/api/companies/${id}/products`, {
+  const res = await fetch(`${API_BASE_URL}/companies/${id}/products`, {
         headers,
         credentials: 'include',
       });
@@ -188,7 +189,7 @@ function CompanyCabinet() {
     try {
       const token = localStorage.getItem('authToken');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(`/api/companies/${id}/products/${prod._id}`, {
+  const res = await fetch(`${API_BASE_URL}/companies/${id}/products/${prod._id}`, {
         method: 'DELETE',
         headers,
         credentials: 'include',
@@ -211,7 +212,7 @@ function CompanyCabinet() {
       const token = localStorage.getItem('authToken');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const method = productEditData ? 'PUT' : 'POST';
-      const url = productEditData ? `/api/companies/${id}/products/${productEditData._id}` : `/api/companies/${id}/products`;
+  const url = productEditData ? `${API_BASE_URL}/companies/${id}/products/${productEditData._id}` : `${API_BASE_URL}/companies/${id}/products`;
       const res = await fetch(url, {
         method,
         headers: { ...headers },
@@ -250,7 +251,7 @@ function CompanyCabinet() {
     setEditSuccess('');
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`/api/companies/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/companies/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -338,7 +339,7 @@ function CompanyCabinet() {
       return;
     }
     setSlugCheckLoading(true);
-    fetch(`/api/companies/check-slug?slug=${value}`)
+  fetch(`${API_BASE_URL}/companies/check-slug?slug=${value}`)
       .then(res => res.json())
       .then(data => setSlugAvailable(data.available))
       .catch(() => setSlugAvailable(false))
@@ -348,7 +349,7 @@ function CompanyCabinet() {
   useEffect(() => {
     async function fetchUserCompanies() {
       try {
-        console.log('[CompanyCabinet] Запрос к /api/users/me...');
+  console.log(`[CompanyCabinet] Запрос к ${API_BASE_URL}/users/me...`);
         const res = await userService.getMe();
         console.log('[CompanyCabinet] userService.getMe() response:', res);
         if (res && Array.isArray(res.companies)) {

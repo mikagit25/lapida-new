@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 const SupportGroupDetails = ({ groupId, onBack }) => {
   const [group, setGroup] = useState(null);
@@ -10,7 +11,7 @@ const SupportGroupDetails = ({ groupId, onBack }) => {
   const [userName, setUserName] = useState('');
 
   const fetchGroup = () => {
-    fetch(`/api/support-groups/${groupId}`)
+  fetch(`${API_BASE_URL}/support-groups/${groupId}`)
       .then(res => res.json())
       .then(data => {
         setGroup(data);
@@ -32,7 +33,7 @@ const SupportGroupDetails = ({ groupId, onBack }) => {
     if (!newDiscussion.trim()) return;
     setAdding(true);
     try {
-      await fetch(`/api/support-groups/${groupId}/discussions`, {
+  await fetch(`${API_BASE_URL}/support-groups/${groupId}/discussions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: newDiscussion })
@@ -51,7 +52,7 @@ const SupportGroupDetails = ({ groupId, onBack }) => {
     if (!userName.trim()) return;
     setJoining(true);
     try {
-      await fetch(`/api/support-groups/${groupId}/join`, {
+  await fetch(`${API_BASE_URL}/support-groups/${groupId}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user: userName })

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import OAuthButtons from '../components/OAuthButtons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -88,7 +89,7 @@ const Register = () => {
   // Обработчик клика по кнопке Google OAuth
   const handleGoogleOAuth = () => {
     // Здесь будет логика для запуска OAuth через Google
-    window.location.href = '/api/auth/google'; // пример редиректа на серверный endpoint
+  window.location.href = `${API_BASE_URL}/auth/google`;
   };
 
   return (

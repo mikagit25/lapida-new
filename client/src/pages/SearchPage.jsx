@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import SearchFilters from '../components/SearchFilters';
 import SearchResults from '../components/SearchResults';
+import { API_BASE_URL } from '../config/api';
 
 const SearchPage = () => {
   const [filters, setFilters] = useState({});
@@ -16,7 +17,7 @@ const SearchPage = () => {
     setLoading(true);
     try {
       const params = new URLSearchParams(filters);
-      const res = await fetch(`/api/search?${params.toString()}`);
+  const res = await fetch(`${API_BASE_URL}/search?${params.toString()}`);
       const data = await res.json();
       setResults(data.results || []);
       setQuery(filters.name || filters.query || '');

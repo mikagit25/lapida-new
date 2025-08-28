@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import TimelinePhotoModal from './TimelinePhotoModal';
 import GalleryImage from './GalleryImage';
 import { fixImageUrl } from '../utils/imageUrl';
-import { getApiBaseUrl } from '../config/api';
+// ...existing code...
 
 const TimelineEvent = ({ 
   event, 

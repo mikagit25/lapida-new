@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 const DonationForm = ({ onDonate }) => {
   const [amount, setAmount] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await fetch('/api/payments/donate', {
+    await fetch(`${API_BASE_URL}/payments/donate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount })

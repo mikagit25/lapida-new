@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 const CompanyAdminPanel = () => {
   const [companies, setCompanies] = useState([]);
 
   useEffect(() => {
-    fetch('/api/companies')
+    fetch(`${API_BASE_URL}/companies`)
       .then(res => res.json())
       .then(data => setCompanies(data.companies || []));
   }, []);

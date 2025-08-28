@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../config/api';
 import Timeline from './Timeline';
 
 const TimelineManager = () => {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    fetch('/api/timeline-events')
+    fetch(`${API_BASE_URL}/timeline-events`)
       .then(res => res.json())
       .then(data => setEvents(data.events || []));
   }, []);

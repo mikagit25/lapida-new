@@ -21,6 +21,7 @@ import CompanyReviewForm from '../components/CompanyReviewForm';
 import CompanyAddressMapProfileBlock from '../components/CompanyAddressMapProfileBlock';
 import CompanyReviewsProfileBlock from '../components/CompanyReviewsProfileBlock';
 import CompanyQRCodeBlock from '../components/CompanyQRCodeBlock';
+import { API_BASE_URL } from '../config/api';
 export default function CompanyProfile({ company, userData, news, team, contacts }) {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -43,7 +44,7 @@ export default function CompanyProfile({ company, userData, news, team, contacts
       setReviewsLoading(true);
       setReviewsError('');
       try {
-        const res = await fetch(`/api/companies/${companyState._id}/reviews`);
+  const res = await fetch(`${API_BASE_URL}/companies/${companyState._id}/reviews`);
         const data = await res.json();
         if (res.ok && data.reviews) {
           setReviews(data.reviews);
@@ -59,7 +60,7 @@ export default function CompanyProfile({ company, userData, news, team, contacts
       setNewsLoading(true);
       setNewsError('');
       try {
-        const res = await fetch(`/api/companies/${companyState._id}/news`);
+  const res = await fetch(`${API_BASE_URL}/companies/${companyState._id}/news`);
         const data = await res.json();
         if (res.ok && data.news) {
           setCompanyNews(data.news);
@@ -96,8 +97,7 @@ export default function CompanyProfile({ company, userData, news, team, contacts
     try {
       const formData = new FormData();
       formData.append('headerBackground', file);
-      const API_BASE_URL = window.location.origin;
-      const response = await fetch(`${API_BASE_URL}/api/companies/${company._id}/header-background`, {
+  const response = await fetch(`${API_BASE_URL}/companies/${company._id}/header-background`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token') || localStorage.getItem('authToken')}`

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 const LikeButton = ({ initialCount = 0, itemId }) => {
   const [count, setCount] = useState(initialCount);
@@ -6,7 +7,7 @@ const LikeButton = ({ initialCount = 0, itemId }) => {
 
   const handleLike = async () => {
     if (liked) return;
-    await fetch(`/api/social/like`, {
+    await fetch(`${API_BASE_URL}/social/like`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ itemId })

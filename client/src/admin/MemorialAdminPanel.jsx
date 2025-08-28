@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 const MemorialAdminPanel = () => {
   const [memorials, setMemorials] = useState([]);
 
   useEffect(() => {
-    fetch('/api/memorials')
+    fetch(`${API_BASE_URL}/memorials`)
       .then(res => res.json())
       .then(data => setMemorials(data.memorials || []));
   }, []);

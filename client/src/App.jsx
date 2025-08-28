@@ -60,6 +60,7 @@ import MobileDemo from './pages/MobileDemo';
 import MobilePage from './pages/MobilePage';
 import SlugRouter from './pages/SlugRouter';
 import UserPublicPage from './pages/UserPublicPage';
+import { API_BASE_URL } from './config/api';
 
 function CompanyOrdersWrapper() {
   const { companyId } = useParams();
@@ -75,7 +76,7 @@ function CompanyProfileBySlug() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/companies/by-slug/${companySlug}`)
+  fetch(`${API_BASE_URL}/companies/by-slug/${companySlug}`)
       .then(res => res.json())
       .then(data => {
         setCompany(data.company);

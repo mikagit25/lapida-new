@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 const MemoryDaysCalendar = () => {
   const [days, setDays] = useState([]);
@@ -8,7 +9,7 @@ const MemoryDaysCalendar = () => {
   const [adding, setAdding] = useState(false);
 
   const fetchDays = () => {
-    fetch('/api/memory-days')
+  fetch(`${API_BASE_URL}/memory-days`)
       .then(res => res.json())
       .then(data => {
         setDays(data);
@@ -33,7 +34,7 @@ const MemoryDaysCalendar = () => {
     if (!newDay.date || !newDay.title) return;
     setAdding(true);
     try {
-      await fetch('/api/memory-days', {
+  await fetch(`${API_BASE_URL}/memory-days`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newDay)
