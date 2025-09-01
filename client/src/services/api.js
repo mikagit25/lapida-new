@@ -1,37 +1,22 @@
-import { findWorkingApiUrl, API_BASE_URL } from '../config/api-universal';
+import { API_BASE_URL } from '../config/api-universal';
 import axios from 'axios';
 
-// Асинхронно определяем рабочий API URL
 let apiInstance = null;
-let apiBaseUrlPromise = null;
 
 export function getApi() {
   if (apiInstance) return apiInstance;
-  if (!apiBaseUrlPromise) {
-    apiBaseUrlPromise = findWorkingApiUrl().catch(() => API_BASE_URL);
-  }
-  // Создаем axios instance после определения рабочего URL
-  apiInstance = apiBaseUrlPromise.then(baseUrl => {
-    // Не добавляем /api, если baseUrl уже содержит его на конце
-    let finalBaseUrl = baseUrl;
-    // Удаляем лишние /api, если их больше одного подряд
-    finalBaseUrl = finalBaseUrl.replace(/(\/api)+$/, '/api');
-    const instance = axios.create({
-      baseURL: finalBaseUrl,
-      // Можно добавить другие настройки по необходимости
-    });
-
-    // Интерцептор для автоматической передачи токена
-    instance.interceptors.request.use(config => {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        config.headers['Authorization'] = `Bearer ${token}`;
-      }
-      return config;
-    }, error => Promise.reject(error));
-
-    return instance;
+  apiInstance = axios.create({
+    baseURL: API_BASE_URL,
+    // Можно добавить другие настройки по необходимости
   });
+  // Интерцептор для автоматической передачи токена
+  apiInstance.interceptors.request.use(config => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  }, error => Promise.reject(error));
   return apiInstance;
 }
 
