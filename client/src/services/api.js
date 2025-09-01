@@ -419,7 +419,8 @@ const uploadService = {
     files.forEach(file => {
       formData.append('photos', file);
     });
-    const response = await api.post('/upload/gallery', formData);
+  const apiInstance = await getApi();
+  const response = await apiInstance.post('/upload/gallery', formData);
     return response.data;
   },
 

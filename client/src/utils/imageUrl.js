@@ -1,24 +1,15 @@
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL } from '../config/api-universal';
 
 // Асинхронная версия fixImageUrl
 export async function fixImageUrl(url) {
   if (!url) return url;
   // Получаем базовый адрес сервера без /api
-  let serverBase = window.location.origin;
-  try {
-    const apiBase = API_BASE_URL;
-    const apiUrl = new URL(apiBase);
-    serverBase = `${apiUrl.protocol}//${apiUrl.hostname}${apiUrl.port ? ':' + apiUrl.port : ''}`;
-  } catch (e) { /* ignore */ }
+  const apiBase = API_BASE_URL;
+  const apiUrl = new URL(apiBase);
+  const serverBase = `${apiUrl.protocol}//${apiUrl.hostname}`;
 
   // Абсолютный URL (http/https)
   if (/^https?:\//.test(url)) {
-    try {
-      const img = new URL(url);
-      if ((img.hostname === 'localhost' || img.hostname === '127.0.0.1') && serverBase) {
-        return `${serverBase}${img.pathname}${img.search || ''}`;
-      }
-    } catch (e) { /* ignore */ }
     return url;
   }
   // Если начинается с /upload/ или /uploads/ — всегда возвращаем serverBase + url

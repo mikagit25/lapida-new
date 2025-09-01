@@ -1,3 +1,5 @@
+import { API_BASE_URL } from '../config/api-universal';
+
 /**
  * Утилита для генерации правильных URL мемориалов
  */
@@ -15,8 +17,9 @@ export const getMemorialUrl = (memorial) => {
 };
 
 export const getMemorialShareUrl = (memorial) => {
-  // Всегда используем lapida.one
-  const base = 'https://lapida.one';
+  // Берём домен из API_BASE_URL
+  const apiUrl = new URL(API_BASE_URL);
+  const base = `${apiUrl.protocol}//${apiUrl.hostname}`;
   if (memorial.customSlug) {
     return `${base}/${memorial.customSlug}`;
   } else {
@@ -25,8 +28,9 @@ export const getMemorialShareUrl = (memorial) => {
 };
 
 export const getMemorialDisplayUrl = (memorial) => {
-  // Для отображения всегда используем lapida.one
-  const base = 'https://lapida.one';
+  // Берём домен из API_BASE_URL
+  const apiUrl = new URL(API_BASE_URL);
+  const base = `${apiUrl.protocol}//${apiUrl.hostname}`;
   if (memorial.customSlug) {
     return `${base}/${memorial.customSlug}`;
   } else {
