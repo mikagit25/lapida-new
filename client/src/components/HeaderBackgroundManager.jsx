@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { fixImageUrl } from '../utils/imageUrl';
 import headerBackgroundService from '../services/headerBackgroundService';
-import { findWorkingApiUrl } from '../config/api-universal';
 
 const HeaderBackgroundManager = ({ 
   memorial,

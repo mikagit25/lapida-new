@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { findWorkingApiUrl } from '../config/api-universal';
+import { API_BASE_URL } from '../config/api-universal';
 import { useNavigate } from 'react-router-dom';
 
 const RegisterCompany = () => {
@@ -25,7 +25,7 @@ const RegisterCompany = () => {
     setError('');
     setSuccess(false);
     try {
-      const apiUrl = await findWorkingApiUrl();
+  const apiUrl = API_BASE_URL;
       const token = localStorage.getItem('authToken');
       const res = await fetch(`${apiUrl}/companies`, {
         method: 'POST',
