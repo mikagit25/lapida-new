@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 import { useParams } from 'react-router-dom';
 import MemorialView from './MemorialView';
 import CompanyProfile from './CompanyProfile';
@@ -41,7 +42,7 @@ export default function SlugRouter() {
       } catch (e) {}
       try {
         // Пробуем найти компанию
-  const res = await fetch(`${API_BASE_URL}/companies/by-slug/${slug}`);
+        const res = await apiFetch(`${API_BASE_URL}/companies/by-slug/${slug}`);
         const data = await res.json();
         if (res.ok && data.company && data.company._id) {
           if (active) {

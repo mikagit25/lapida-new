@@ -14,7 +14,8 @@ const IntegrationManager = () => {
   const fetchStatus = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/integrations');
+  const { apiFetch } = require('../services/apiFetch');
+  const res = await apiFetch('/api/integrations');
       const data = await res.json();
       setStatus(data.status || {});
       setError('');

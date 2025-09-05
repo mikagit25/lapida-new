@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 
 const CompanyOrders = ({ companyId }) => {
   const { user } = useAuth();
@@ -11,7 +12,7 @@ const CompanyOrders = ({ companyId }) => {
   useEffect(() => {
     if (!companyId) return;
     setLoading(true);
-  fetch(`${API_BASE_URL}/orders/company/${companyId}`, {
+    apiFetch(`${API_BASE_URL}/orders/company/${companyId}`, {
       credentials: 'include',
     })
       .then(res => res.json())
@@ -25,7 +26,7 @@ const CompanyOrders = ({ companyId }) => {
 
   const handleStatusChange = async (orderId, status) => {
     try {
-  const res = await fetch(`${API_BASE_URL}/orders/${orderId}/status`, {
+      const res = await apiFetch(`${API_BASE_URL}/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),

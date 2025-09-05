@@ -258,7 +258,7 @@ memorialSchema.pre('save', async function(next) {
   if (!this.shareUrl) {
     const firstName = this.firstName.toLowerCase().replace(/[^a-zа-я0-9]/gi, '');
     const lastName = this.lastName.toLowerCase().replace(/[^a-zа-я0-9]/gi, '');
-    this.shareUrl = `${firstName}-${lastName}-${Date.now()}`;
+    this.shareUrl = `${firstName}-${lastName}`;
   }
   
   // Генерируем customSlug если его нет, но только для новых мемориалов

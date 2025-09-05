@@ -1,3 +1,4 @@
+import { apiFetch } from '../services/apiFetch';
 import React, { useState } from 'react';
 import { API_BASE_URL } from '../config/api-universal';
 import { useNavigate } from 'react-router-dom';
@@ -27,7 +28,7 @@ const RegisterCompany = () => {
     try {
   const apiUrl = API_BASE_URL;
       const token = localStorage.getItem('authToken');
-      const res = await fetch(`${apiUrl}/companies`, {
+      const res = await apiFetch(`${apiUrl}/companies`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

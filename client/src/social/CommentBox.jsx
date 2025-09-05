@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 
 const CommentBox = ({ itemId, onComment }) => {
   const [text, setText] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await fetch(`${API_BASE_URL}/social/comment`, {
+    await apiFetch(`${API_BASE_URL}/social/comment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ itemId, text })

@@ -14,7 +14,8 @@ const PaymentManager = () => {
   const fetchDonations = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/payments');
+  const { apiFetch } = require('../services/apiFetch');
+  const res = await apiFetch('/api/payments');
       const data = await res.json();
       setDonations(data.donations || []);
       setError('');
@@ -29,7 +30,8 @@ const PaymentManager = () => {
   const handleDonate = async (amount) => {
     setLoading(true);
     try {
-      const res = await fetch('/api/payments', {
+      const { apiFetch } = require('../services/apiFetch');
+      const res = await apiFetch('/api/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount })

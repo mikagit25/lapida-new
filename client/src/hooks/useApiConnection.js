@@ -1,5 +1,6 @@
+import { apiFetch } from '../services/apiFetch';
 import { useState, useEffect } from 'react';
-import { API_BASE_URL, findWorkingApiUrl } from '../config/api-universal';
+import { API_BASE_URL } from '../config/api-universal';
 
 /**
  * Хук для автоматического поиска и подключения к доступному API серверу
@@ -20,7 +21,7 @@ export function useApiConnection() {
 
             try {
                 // Сначала пробуем базовый URL
-                const testResponse = await fetch(`${API_BASE_URL}/api/health`, {
+                const testResponse = await apiFetch(`${API_BASE_URL}/api/health`, {
                     method: 'GET',
                     timeout: 3000
                 });
@@ -38,7 +39,7 @@ export function useApiConnection() {
 
             try {
                 // Если базовый не работает, ищем альтернативы
-                const workingUrl = await findWorkingApiUrl();
+                // const workingUrl = API_BASE_URL; // Используйте только API_BASE_URL или другую актуальную логику
                 
                 if (mounted) {
                     if (workingUrl !== API_BASE_URL) {
@@ -65,7 +66,7 @@ export function useApiConnection() {
             if (!mounted) return;
 
             try {
-                const response = await fetch(`${apiUrl}/api/health`, {
+                const response = await apiFetch(`${apiUrl}/api/health`, {
                     method: 'GET',
                     timeout: 5000
                 });

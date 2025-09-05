@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 import ComplaintForm from './ComplaintForm';
 import ComplaintList from './ComplaintList';
 
@@ -7,19 +8,19 @@ const ComplaintManager = () => {
   const [complaints, setComplaints] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/complaints`)
+    apiFetch(`${API_BASE_URL}/complaints`)
       .then(res => res.json())
       .then(data => setComplaints(data.complaints || []));
   }, []);
 
   const handleSubmit = async (complaint) => {
-    await fetch(`${API_BASE_URL}/complaints`, {
+    await apiFetch(`${API_BASE_URL}/complaints`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(complaint)
     });
     // Refresh list
-    const res = await fetch(`${API_BASE_URL}/complaints`);
+    const res = await apiFetch(`${API_BASE_URL}/complaints`);
     const data = await res.json();
     setComplaints(data.complaints || []);
   };

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 
 const Companies = () => {
   const [companies, setCompanies] = useState([]);
@@ -17,7 +18,7 @@ const Companies = () => {
     setLoading(true);
     setError('');
     try {
-        const res = await fetch(`${API_BASE_URL}/companies`);
+      const res = await apiFetch(`${API_BASE_URL}/companies`);
       const data = await res.json();
       setCompanies(data.companies || []);
     } catch (e) {

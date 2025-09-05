@@ -1,3 +1,4 @@
+import { apiFetch } from '../services/apiFetch';
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
@@ -30,7 +31,7 @@ export default function CompanyPage() {
       setLoading(false);
       return;
     }
-    fetch(url)
+    apiFetch(url)
       .then(res => {
         if (!res.ok) throw new Error('Компания не найдена');
         return res.json();

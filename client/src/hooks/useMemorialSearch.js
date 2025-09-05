@@ -1,3 +1,4 @@
+import { apiFetch } from '../services/apiFetch';
 import { useState, useEffect, useCallback } from 'react';
 
 const useMemorialSearch = () => {
@@ -72,7 +73,7 @@ const useMemorialSearch = () => {
         params.set('page', '1');
       }
 
-      const response = await fetch(`/api/memorials/search?${params.toString()}`, {
+      const response = await apiFetch(`/api/memorials/search?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

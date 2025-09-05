@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ProductCard from '../components/ProductCard';
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -20,7 +21,7 @@ export default function Products() {
   // Получить companyId по slug, если указан
   useEffect(() => {
     if (!companySlug) return;
-  fetch(`${API_BASE_URL}/companies/by-slug/${companySlug}`)
+    apiFetch(`${API_BASE_URL}/companies/by-slug/${companySlug}`)
       .then(res => res.json())
       .then(data => {
         if (data.company && data.company._id) setCompanyId(data.company._id);
@@ -35,7 +36,7 @@ export default function Products() {
     try {
       const params = new URLSearchParams({ search, category, sort });
       if (companyId) params.append('companyId', companyId);
-  const res = await fetch(`${API_BASE_URL}/products?${params.toString()}`);
+      const res = await apiFetch(`${API_BASE_URL}/products?${params.toString()}`);
       const data = await res.json();
       setProducts(data.products || []);
     } catch (err) {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import SupportGroupDetails from './SupportGroupDetails';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 
 const SupportGroupList = () => {
   const [groups, setGroups] = useState([]);
@@ -9,7 +10,7 @@ const SupportGroupList = () => {
   const [selectedGroupId, setSelectedGroupId] = useState(null);
 
   useEffect(() => {
-  fetch(`${API_BASE_URL}/support-groups`)
+    apiFetch(`${API_BASE_URL}/support-groups`)
       .then(res => res.json())
       .then(data => {
         setGroups(data);

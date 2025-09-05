@@ -16,7 +16,8 @@ const SocialPage = () => {
   const fetchSocial = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/social');
+  const { apiFetch } = require('../services/apiFetch');
+  const res = await apiFetch('/api/social');
       const data = await res.json();
       setComments(data.comments || []);
       setLikes(data.likes || 0);
@@ -33,7 +34,8 @@ const SocialPage = () => {
   const handleComment = async (text) => {
     setLoading(true);
     try {
-      const res = await fetch('/api/social/comment', {
+      const { apiFetch } = require('../services/apiFetch');
+      const res = await apiFetch('/api/social/comment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text })
@@ -49,7 +51,8 @@ const SocialPage = () => {
   const handleLike = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/social/like', { method: 'POST' });
+  const { apiFetch } = require('../services/apiFetch');
+  const res = await apiFetch('/api/social/like', { method: 'POST' });
       if (res.ok) fetchSocial();
     } catch (e) {
       setError('Ошибка лайка');

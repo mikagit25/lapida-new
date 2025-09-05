@@ -1,3 +1,4 @@
+import { apiFetch } from '../services/apiFetch';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config/api';
@@ -47,7 +48,7 @@ const BackgroundImageManager = ({
       const formData = new FormData();
       formData.append('pageBackground', file);
       
-  const response = await fetch(`${API_BASE_URL}/memorials/${memorial._id}/page-background`, {
+  const response = await apiFetch(`${API_BASE_URL}/memorials/${memorial._id}/page-background`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token') || localStorage.getItem('authToken')}`
@@ -104,7 +105,7 @@ const BackgroundImageManager = ({
       setIsUploading(true);
       
       const API_BASE_URL = await getApiBaseUrl();
-      const response = await fetch(`${API_BASE_URL}/memorials/${memorial._id}/page-background`, {
+      const response = await apiFetch(`${API_BASE_URL}/memorials/${memorial._id}/page-background`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token') || localStorage.getItem('authToken')}`

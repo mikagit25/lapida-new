@@ -1,3 +1,4 @@
+import { apiFetch } from '../services/apiFetch';
 // Универсальный компонент для асинхронного получения и рендера изображения
 function AsyncImage({ image, alt, className, ...props }) {
   const [imgUrl, setImgUrl] = React.useState('');
@@ -122,12 +123,11 @@ const GravePhotoGallery = ({ memorial, onUpdate }) => {
       }
 
       const API_BASE_URL = await getApiBaseUrl();
-      const response = await fetch(`${API_BASE_URL}/memorials/${memorial._id}/grave-photo`, {
-  // Единый алгоритм: используем PUT, как на сервере
-  method: 'PUT',
+      const response = await apiFetch(`${API_BASE_URL}/memorials/${memorial._id}/grave-photo`, {
+        method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
-  }, // Не указываем Content-Type для FormData!
+        },
         body: formData
       });
 
@@ -183,7 +183,7 @@ const GravePhotoGallery = ({ memorial, onUpdate }) => {
       }
 
       const API_BASE_URL = await getApiBaseUrl();
-      const response = await fetch(`${API_BASE_URL}/memorials/${memorial._id}/grave-photo/${photoIndex}`, {
+      const response = await apiFetch(`${API_BASE_URL}/memorials/${memorial._id}/grave-photo/${photoIndex}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

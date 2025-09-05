@@ -100,7 +100,7 @@ const HeaderBackgroundManager = ({
 
   const [backgroundBaseUrl, setBackgroundBaseUrl] = useState('');
   React.useEffect(() => {
-    findWorkingApiUrl().then(setBackgroundBaseUrl);
+  // setBackgroundBaseUrl(API_BASE_URL); // Используйте только API_BASE_URL или другую актуальную логику
   }, []);
 
   // Асинхронно получаем backgroundImageUrl

@@ -22,6 +22,7 @@ import CustomSlugEditor from '../components/CustomSlugEditor';
 import CompanyEditForm from '../components/CompanyEditForm';
 import { userService } from '../services/api';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 
 // Обработчик клика по карте через useMapEvents
 function MapClickHandler({ setEditForm, setMapCenter }) {
@@ -81,10 +82,7 @@ function CompanyCabinet() {
       setLoading(true);
       setError('');
       try {
-        const token = localStorage.getItem('authToken');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  const res = await fetch(`${API_BASE_URL}/companies/${id}`, {
-          headers,
+        const res = await apiFetch(`${API_BASE_URL}/companies/${id}`, {
           credentials: 'include',
         });
         const data = await res.json();
@@ -133,10 +131,7 @@ function CompanyCabinet() {
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('authToken');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  const res = await fetch(`${API_BASE_URL}/companies/${id}`, {
-        headers,
+      const res = await apiFetch(`${API_BASE_URL}/companies/${id}`, {
         credentials: 'include',
       });
       const data = await res.json();
@@ -155,10 +150,7 @@ function CompanyCabinet() {
     setProductsLoading(true);
     setProductsError('');
     try {
-      const token = localStorage.getItem('authToken');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  const res = await fetch(`${API_BASE_URL}/companies/${id}/products`, {
-        headers,
+      const res = await apiFetch(`${API_BASE_URL}/companies/${id}/products`, {
         credentials: 'include',
       });
       const data = await res.json();
@@ -187,11 +179,8 @@ function CompanyCabinet() {
     if (!window.confirm('Удалить товар?')) return;
     setProductsLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  const res = await fetch(`${API_BASE_URL}/companies/${id}/products/${prod._id}`, {
+      const res = await apiFetch(`${API_BASE_URL}/companies/${id}/products/${prod._id}`, {
         method: 'DELETE',
-        headers,
         credentials: 'include',
       });
       if (res.ok) {
@@ -209,13 +198,10 @@ function CompanyCabinet() {
     setProductsLoading(true);
     setProductsError('');
     try {
-      const token = localStorage.getItem('authToken');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const method = productEditData ? 'PUT' : 'POST';
-  const url = productEditData ? `${API_BASE_URL}/companies/${id}/products/${productEditData._id}` : `${API_BASE_URL}/companies/${id}/products`;
-      const res = await fetch(url, {
+      const url = productEditData ? `${API_BASE_URL}/companies/${id}/products/${productEditData._id}` : `${API_BASE_URL}/companies/${id}/products`;
+      const res = await apiFetch(url, {
         method,
-        headers: { ...headers },
         credentials: 'include',
         body: fd,
       });
@@ -250,12 +236,10 @@ function CompanyCabinet() {
     setEditError('');
     setEditSuccess('');
     try {
-      const token = localStorage.getItem('token');
-  const res = await fetch(`${API_BASE_URL}/companies/${id}`, {
+      const res = await apiFetch(`${API_BASE_URL}/companies/${id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
+          'Content-Type': 'application/json'
         },
         credentials: 'include',
         body: JSON.stringify({
@@ -298,10 +282,10 @@ function CompanyCabinet() {
   const geocodeAddress = async (address) => {
     if (!address) return;
     try {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
-      console.log('Поиск адреса:', url);
-      const res = await fetch(url);
-      const data = await res.json();
+  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+  console.log('Поиск адреса:', url);
+  const res = await apiFetch(url);
+  const data = await res.json();
       console.log('Ответ Nominatim:', data);
       if (data && data[0]) {
         const lat = parseFloat(data[0].lat);
@@ -339,7 +323,7 @@ function CompanyCabinet() {
       return;
     }
     setSlugCheckLoading(true);
-  fetch(`${API_BASE_URL}/companies/check-slug?slug=${value}`)
+  apiFetch(`${API_BASE_URL}/companies/check-slug?slug=${value}`)
       .then(res => res.json())
       .then(data => setSlugAvailable(data.available))
       .catch(() => setSlugAvailable(false))

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 
 const ComplaintAdminPanel = () => {
   const [complaints, setComplaints] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/complaints`)
+    apiFetch(`${API_BASE_URL}/complaints`)
       .then(res => res.json())
       .then(data => setComplaints(data.complaints || []));
   }, []);

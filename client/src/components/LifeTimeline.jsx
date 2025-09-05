@@ -1,3 +1,4 @@
+import { apiFetch } from '../services/apiFetch';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import TimelineEvent from './TimelineEvent';
@@ -46,7 +47,7 @@ const LifeTimeline = ({ memorialId }) => {
         ...(selectedYear !== 'all' && { year: selectedYear })
       });
 
-  const response = await fetch(`${API_BASE_URL}/timeline/timeline?${params}`);
+  const response = await apiFetch(`${API_BASE_URL}/timeline/timeline?${params}`);
       
       if (response.ok) {
         const data = await response.json();
@@ -68,7 +69,7 @@ const LifeTimeline = ({ memorialId }) => {
 
   const loadStats = async () => {
     try {
-  const response = await fetch(`${API_BASE_URL}/timeline/timeline/stats?memorialId=${memorialId}`);
+  const response = await apiFetch(`${API_BASE_URL}/timeline/timeline/stats?memorialId=${memorialId}`);
       if (response.ok) {
         const data = await response.json();
         setStats(data);
@@ -114,7 +115,7 @@ const LifeTimeline = ({ memorialId }) => {
     try {
       const token = localStorage.getItem('authToken');
       const API_BASE_URL = await getApiBaseUrl();
-      const response = await fetch(`${API_BASE_URL}/timeline/timeline/${eventId}`, {
+      const response = await apiFetch(`${API_BASE_URL}/timeline/timeline/${eventId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

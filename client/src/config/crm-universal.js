@@ -1,3 +1,4 @@
+import { apiFetch } from '../services/apiFetch';
 /**
  * Универсальный поиск рабочего CRM API
  * Автоматически определяет правильный URL CRM в любых условиях
@@ -8,7 +9,7 @@ export async function findWorkingCrmUrl() {
     if (window.__cachedWorkingCrmUrl) {
         try {
             const testUrl = window.__cachedWorkingCrmUrl.replace(/\/api\/v1$/, '');
-            const response = await fetch(`${testUrl}/api/v1/Account`, { method: 'OPTIONS', timeout: 2000 });
+            const response = await apiFetch(`${testUrl}/api/v1/Account`, { method: 'OPTIONS', timeout: 2000 });
             if (response.ok || response.status === 401 || response.status === 403) {
                 return window.__cachedWorkingCrmUrl;
             }
@@ -26,7 +27,7 @@ export async function findWorkingCrmUrl() {
     for (const port of portsToTry) {
         const testUrl = `${currentProtocol}//${currentHost}:${port}`;
         try {
-            const response = await fetch(`${testUrl}/api/v1/Account`, {
+            const response = await apiFetch(`${testUrl}/api/v1/Account`, {
                 method: 'OPTIONS',
                 timeout: 2000
             });

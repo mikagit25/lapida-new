@@ -1,3 +1,4 @@
+import { apiFetch } from '../services/apiFetch';
 
 const CrmCompanyOrders = () => {
   const { id } = useParams();
@@ -8,7 +9,7 @@ const CrmCompanyOrders = () => {
 
   useEffect(() => {
     // Получаем crmId компании по id сайта
-    fetch(`/api/companies/${id}`)
+    apiFetch(`/api/companies/${id}`)
       .then(res => res.json())
       .then(data => {
         console.log('Ответ API компании:', data);

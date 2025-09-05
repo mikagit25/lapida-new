@@ -14,7 +14,8 @@ const ComplaintManager = () => {
   const fetchComplaints = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/complaints');
+  const { apiFetch } = require('../services/apiFetch');
+  const res = await apiFetch('/api/complaints');
       const data = await res.json();
       setComplaints(data.complaints || []);
       setError('');
@@ -29,7 +30,8 @@ const ComplaintManager = () => {
   const handleSubmit = async (complaint) => {
     setLoading(true);
     try {
-      const res = await fetch('/api/complaints', {
+      const { apiFetch } = require('../services/apiFetch');
+      const res = await apiFetch('/api/complaints', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(complaint)

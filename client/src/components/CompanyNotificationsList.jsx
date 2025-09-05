@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 
 const CompanyNotificationsList = ({ companyId }) => {
   const { user } = useAuth();
@@ -16,7 +17,7 @@ const CompanyNotificationsList = ({ companyId }) => {
   useEffect(() => {
     if (!companyId) return;
     setLoading(true);
-  fetch(`${API_BASE_URL}/notifications/company/${companyId}?page=${page}&limit=${limit}`, { credentials: 'include' })
+    apiFetch(`${API_BASE_URL}/notifications/company/${companyId}?page=${page}&limit=${limit}`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         setNotifications(data.notifications || []);
@@ -30,7 +31,7 @@ const CompanyNotificationsList = ({ companyId }) => {
 
   const markAsRead = async (id) => {
     try {
-  const res = await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
+      const res = await apiFetch(`${API_BASE_URL}/notifications/${id}/read`, {
         method: 'PATCH',
         credentials: 'include'
       });
@@ -44,11 +45,21 @@ const CompanyNotificationsList = ({ companyId }) => {
   if (error) return <div className="p-4 text-red-600">{error}</div>;
 
   const filtered = filter === 'all' ? notifications : notifications.filter(n => n.type === filter);
+  const markAllAsRead = async () => {
+    try {
+      const res = await apiFetch(`${API_BASE_URL}/notifications/company/${companyId}/read-all`, {
+        method: 'PATCH',
+        credentials: 'include'
+      });
+      if (res.ok) {
+        setNotifications(notifications => notifications.map(n => ({ ...n, read: true })));
+      }
+    } catch {}
+  };
   return (
     <div className="max-w-xl mx-auto p-4 bg-white rounded shadow">
       <h2 className="text-lg font-bold mb-4">Уведомления компании</h2>
       <div className="mb-4 flex gap-4 items-center">
-        <label className="font-medium">Фильтр по типу:</label>
         <select value={filter} onChange={e => setFilter(e.target.value)} className="px-2 py-1 border rounded">
           <option value="all">Все</option>
           <option value="order-status">Статус заказа</option>
@@ -56,17 +67,7 @@ const CompanyNotificationsList = ({ companyId }) => {
         </select>
         <button
           className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
-          onClick={async () => {
-            try {
-              const res = await fetch(`${API_BASE_URL}/notifications/company/${companyId}/read-all`, {
-                method: 'PATCH',
-                credentials: 'include'
-              });
-              if (res.ok) {
-                setNotifications(notifications => notifications.map(n => ({ ...n, read: true })));
-              }
-            } catch {}
-          }}
+          onClick={markAllAsRead}
         >Отметить все как прочитанные</button>
       </div>
       {/* Пагинация */}

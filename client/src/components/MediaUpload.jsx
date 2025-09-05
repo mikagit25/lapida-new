@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 
 const MediaUpload = () => {
   const [file, setFile] = useState(null);
@@ -18,7 +19,7 @@ const MediaUpload = () => {
     const formData = new FormData();
     formData.append('file', file);
     try {
-  await fetch(`${API_BASE_URL}/media`, {
+      await apiFetch(`${API_BASE_URL}/media`, {
         method: 'POST',
         body: formData
       });

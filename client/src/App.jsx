@@ -1,4 +1,5 @@
 import OAuthCallback from './pages/OAuthCallback';
+import { apiFetch } from './services/apiFetch';
 import UsersCatalogPage from './pages/UsersCatalogPage';
 import AdminUsersManager from './pages/AdminUsersManager';
 import AdminPagesManager from './pages/AdminPagesManager';
@@ -76,7 +77,7 @@ function CompanyProfileBySlug() {
 
   useEffect(() => {
     setLoading(true);
-  fetch(`${API_BASE_URL}/companies/by-slug/${companySlug}`)
+  apiFetch(`${API_BASE_URL}/companies/by-slug/${companySlug}`)
       .then(res => res.json())
       .then(data => {
         setCompany(data.company);
@@ -214,7 +215,8 @@ const App = () => {
               <Route path="/memorials" element={<Memorials />} />
               <Route path="/memorial/:shareUrl" element={<MemorialView />} />
               <Route path="/memorial/:slug" element={<MemorialView />} />
-                <Route path=":slug" element={<SlugRouter />} />
+              <Route path=":shareUrl" element={<MemorialView />} />
+              <Route path=":slug" element={<SlugRouter />} />
               <Route path="/test-comments" element={<TestPhotoComments />} />
               <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path="/create-memorial" element={<PrivateRoute><MemorialCreate /></PrivateRoute>} />
@@ -380,7 +382,11 @@ const Memorials = () => {
                     <p className="text-white text-sm opacity-90">{memorial.lifespan}</p>
                   </div>
                 </div>
-                <Link to={memorial.customSlug ? `/memorial/${memorial.customSlug}` : `/memorial/${memorial.shareUrl}`} className="w-full bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 inline-block">Посетить мемориал</Link>
+                {/* Если shareUrl уникален и не конфликтует, используем короткую ссылку */}
+                <Link
+                  to={memorial.shareUrl && /^[a-zA-Z0-9\-]+$/.test(memorial.shareUrl) ? `/${memorial.shareUrl}` : (memorial.customSlug ? `/memorial/${memorial.customSlug}` : `/memorial/${memorial.shareUrl}`)}
+                  className="w-full bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 inline-block"
+                >Посетить мемориал</Link>
               </div>
             ))}
           </div>

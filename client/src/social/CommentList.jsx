@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 
 const CommentList = ({ itemId }) => {
   const [comments, setComments] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/social/comments?itemId=${itemId}`)
+    apiFetch(`${API_BASE_URL}/social/comments?itemId=${itemId}`)
       .then(res => res.json())
       .then(data => setComments(data.comments || []));
   }, [itemId]);

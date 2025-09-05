@@ -332,8 +332,11 @@ router.get('/', adminAuth, async (req, res) => {
 // Получение пользователя по ID
 router.get('/:id', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-password');
-    
+    let userId = req.params.id;
+    if (userId === 'me') {
+      userId = req.user._id;
+    }
+    const user = await User.findById(userId).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'Пользователь не найден' });
     }
@@ -431,22 +434,22 @@ router.get('/:id/public', async (req, res) => {
 // Обновление роли пользователя (только для админов)
 router.put('/:id/role', adminAuth, async (req, res) => {
   try {
+    let userId = req.params.id;
+    if (userId === 'me') {
+      userId = req.user._id;
+    }
     const { role } = req.body;
-
     if (!['user', 'admin'].includes(role)) {
       return res.status(400).json({ message: 'Неверная роль пользователя' });
     }
-
     const user = await User.findByIdAndUpdate(
-      req.params.id,
+      userId,
       { role },
       { new: true }
     ).select('-password');
-
     if (!user) {
       return res.status(404).json({ message: 'Пользователь не найден' });
     }
-
     res.json({
       message: 'Роль пользователя обновлена',
       user
@@ -460,18 +463,19 @@ router.put('/:id/role', adminAuth, async (req, res) => {
 // Блокировка/разблокировка пользователя (только для админов)
 router.put('/:id/status', adminAuth, async (req, res) => {
   try {
+    let userId = req.params.id;
+    if (userId === 'me') {
+      userId = req.user._id;
+    }
     const { isBlocked } = req.body;
-
     const user = await User.findByIdAndUpdate(
-      req.params.id,
+      userId,
       { isBlocked: Boolean(isBlocked) },
       { new: true }
     ).select('-password');
-
     if (!user) {
       return res.status(404).json({ message: 'Пользователь не найден' });
     }
-
     res.json({
       message: `Пользователь ${isBlocked ? 'заблокирован' : 'разблокирован'}`,
       user
@@ -485,22 +489,21 @@ router.put('/:id/status', adminAuth, async (req, res) => {
 // Удаление пользователя (только для админов)
 router.delete('/:id', adminAuth, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
-    
+    let userId = req.params.id;
+    if (userId === 'me') {
+      userId = req.user._id;
+    }
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'Пользователь не найден' });
     }
-
     // Нельзя удалить самого себя
     if (user._id.toString() === req.user._id.toString()) {
       return res.status(400).json({ message: 'Нельзя удалить собственную учетную запись' });
     }
-
     // Удаление или передача мемориалов
     await Memorial.deleteMany({ creator: user._id });
-
-    await User.findByIdAndDelete(req.params.id);
-
+    await User.findByIdAndDelete(userId);
     res.json({ message: 'Пользователь успешно удален' });
   } catch (error) {
     console.error('Ошибка удаления пользователя:', error);

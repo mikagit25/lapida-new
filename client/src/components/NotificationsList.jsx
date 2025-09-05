@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 
 const NotificationsList = () => {
   const { user } = useAuth();
@@ -16,7 +17,7 @@ const NotificationsList = () => {
   useEffect(() => {
     if (!user?._id) return;
     setLoading(true);
-  fetch(`${API_BASE_URL}/notifications/user/${user._id}?page=${page}&limit=${limit}`, { credentials: 'include' })
+    apiFetch(`${API_BASE_URL}/notifications/user/${user._id}?page=${page}&limit=${limit}`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         setNotifications(data.notifications || []);
@@ -32,11 +33,32 @@ const NotificationsList = () => {
   if (error) return <div className="p-4 text-red-600">{error}</div>;
 
   const filtered = filter === 'all' ? notifications : notifications.filter(n => n.type === filter);
+  const markAllAsRead = async () => {
+    try {
+      const res = await apiFetch(`${API_BASE_URL}/notifications/user/${user._id}/read-all`, {
+        method: 'PATCH',
+        credentials: 'include'
+      });
+      if (res.ok) {
+        setNotifications(notifications => notifications.map(n => ({ ...n, read: true })));
+      }
+    } catch {}
+  };
+  const markAsRead = async (notifId) => {
+    try {
+      const res = await apiFetch(`${API_BASE_URL}/notifications/${notifId}/read`, {
+        method: 'PATCH',
+        credentials: 'include'
+      });
+      if (res.ok) {
+        setNotifications(notifications => notifications.map(notif => notif._id === notifId ? { ...notif, read: true } : notif));
+      }
+    } catch {}
+  };
   return (
     <div className="max-w-xl mx-auto p-4 bg-white rounded shadow">
       <h2 className="text-lg font-bold mb-4">Уведомления</h2>
       <div className="mb-4 flex gap-4 items-center">
-        <label className="font-medium">Фильтр по типу:</label>
         <select value={filter} onChange={e => setFilter(e.target.value)} className="px-2 py-1 border rounded">
           <option value="all">Все</option>
           <option value="order-status">Статус заказа</option>
@@ -44,17 +66,7 @@ const NotificationsList = () => {
         </select>
         <button
           className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
-          onClick={async () => {
-            try {
-              const res = await fetch(`${API_BASE_URL}/notifications/user/${user._id}/read-all`, {
-                method: 'PATCH',
-                credentials: 'include'
-              });
-              if (res.ok) {
-                setNotifications(notifications => notifications.map(n => ({ ...n, read: true })));
-              }
-            } catch {}
-          }}
+          onClick={markAllAsRead}
         >Отметить все как прочитанные</button>
       </div>
       {/* Пагинация */}
@@ -82,17 +94,7 @@ const NotificationsList = () => {
               {!n.read && (
                 <button
                   className="mt-2 px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
-                  onClick={async () => {
-                    try {
-                      const res = await fetch(`${API_BASE_URL}/notifications/${n._id}/read`, {
-                        method: 'PATCH',
-                        credentials: 'include'
-                      });
-                      if (res.ok) {
-                        setNotifications(notifications => notifications.map(notif => notif._id === n._id ? { ...notif, read: true } : notif));
-                      }
-                    } catch {}
-                  }}
+                  onClick={() => markAsRead(n._id)}
                 >Прочитано</button>
               )}
             </li>

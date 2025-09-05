@@ -1,10 +1,11 @@
+import { apiFetch } from './apiFetch';
 import { API_BASE_URL } from '../config/api';
 
 const virtualItemsService = {
   // Получить все цветы для мемориала
   async getFlowers(memorialId) {
     try {
-  const response = await fetch(`${API_BASE_URL}/virtual/flowers/${memorialId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/virtual/flowers/${memorialId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -32,7 +33,7 @@ const virtualItemsService = {
         throw new Error('No authentication token found');
       }
       
-  const response = await fetch(`${API_BASE_URL}/virtual/flowers`, {
+  const response = await apiFetch(`${API_BASE_URL}/virtual/flowers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +60,7 @@ const virtualItemsService = {
   // Получить все свечи для мемориала
   async getCandles(memorialId) {
     try {
-  const response = await fetch(`${API_BASE_URL}/virtual/candles/${memorialId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/virtual/candles/${memorialId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +89,7 @@ const virtualItemsService = {
         throw new Error('No authentication token found');
       }
       
-  const response = await fetch(`${API_BASE_URL}/virtual/candles`, {
+  const response = await apiFetch(`${API_BASE_URL}/virtual/candles`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

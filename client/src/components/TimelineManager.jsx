@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiFetch } from '../services/apiFetch';
 import Timeline from './Timeline';
 
 const TimelineManager = () => {
@@ -13,7 +14,7 @@ const TimelineManager = () => {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/timeline-events');
+      const res = await apiFetch('/api/timeline-events');
       const data = await res.json();
       setEvents(data.events || []);
       setError('');

@@ -1,24 +1,58 @@
+const PORT = process.env.NODE_ENV === 'production'
+  ? 10000
+  : (process.env.PORT || process.env.npm_config_port || process.env.npm_package_config_port || 5005);
 const express = require('express');
 const passport = require('./oauth');
 const app = express();
+const mongoose = require('mongoose');
+const cors = require('cors');
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+const cookieParser = require('cookie-parser');
+
+// CORS
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'), false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+  optionsSuccessStatus: 200
+}));
+app.options('*', cors({
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'), false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+  optionsSuccessStatus: 200
+}));
+
+// Подключение роутов только после CORS!
 app.use('/api/user-connections', require('./routes/userConnections'));
 app.use('/api/memorial-editors', require('./routes/memorialEditors'));
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
-const PORT = process.env.PORT || process.env.npm_config_port || process.env.npm_package_config_port || (process.env.NODE_ENV === 'production' ? 80 : 5005);
 const cookieParser = require('cookie-parser');
 
 // CORS
 const allowedOrigins = [
-  'http://localhost:5182',
-  'http://localhost:3000',
   'https://lapida.one',
-  'https://admin.lapida.one',
-  'https://lapida.onrender.com',
-  'https://lapida-f2cv.onrender.com', // фронт на Render.com
-  'https://www.lapida.one',           // будущий основной домен
+  'https://www.lapida.one',
 ];
 app.use(cors({
   origin: function(origin, callback) {
@@ -70,9 +104,26 @@ app.use(express.static(path.join(__dirname, 'public')));
  // Фронтенд (React/Vite)
  app.use(express.static(path.join(__dirname, '../client/dist')));
  // SPA fallback: отдаём index.html для всех не-API запросов
- app.get(/^\/(?!api\/).*/, (req, res) => {
-   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
- });
+// Короткий адрес мемориала: lapida.one/(имя мемориала)
+app.get('/:shareUrl', async (req, res, next) => {
+  try {
+    const Memorial = require('./models/Memorial');
+    const memorial = await Memorial.findOne({ shareUrl: req.params.shareUrl });
+    if (memorial) {
+      // Отдаём SPA-фронтенд, который сам загрузит мемориал по shareUrl
+      return res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+    }
+    // Если не найден — 404
+    return res.status(404).send('Memorial not found');
+  } catch (err) {
+    next(err);
+  }
+});
+
+// SPA fallback: отдаём index.html для всех не-API запросов
+app.get(/^\/(?!api\/).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
 
 // Healthcheck
 app.get('/api/health', (req, res) => {
@@ -94,7 +145,9 @@ app.use('/api/comments', require('./routes/comments'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/companies', require('./routes/companies'));
 app.use('/api/orders', require('./routes/orders'));
-app.use('/api/upload', require('./routes/uploadClean'));
+// app.use('/api/upload', require('./routes/uploadClean'));
+app.use('/api/upload', require('./routes/upload'));
+app.use('/api/upload', require('./routes/upload-new'));
 app.use('/api/photo-comments', require('./routes/photoComments'));
 app.use('/api/memory-days', require('./routes/memoryDays'));
 app.use('/api/support-groups', require('./routes/supportGroups'));

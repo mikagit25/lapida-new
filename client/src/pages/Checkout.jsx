@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 
 // Страница оформления заказа
 const Checkout = () => {
@@ -36,21 +37,20 @@ const Checkout = () => {
         quantity: item.quantity,
         companyId: item.companyId
       }));
-  const res = await fetch(`${API_BASE_URL}/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({ companyId, items: orderItems, name, phone, address })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setSuccess(true);
-        localStorage.removeItem('cartItems');
-      } else {
-        setError(data.message || 'Ошибка оформления заказа');
-      }
+    const res = await apiFetch(`${API_BASE_URL}/orders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ companyId, items: orderItems, name, phone, address })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setSuccess(true);
+      localStorage.removeItem('cartItems');
+    } else {
+      setError(data.message || 'Ошибка оформления заказа');
+    }
     } catch (e) {
       setError('Ошибка оформления заказа');
     }

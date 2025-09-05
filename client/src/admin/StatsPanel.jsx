@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 
 const StatsPanel = () => {
   const [stats, setStats] = useState({ users: 0, companies: 0, memorials: 0, complaints: 0 });
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/admin/stats`)
+    apiFetch(`${API_BASE_URL}/admin/stats`)
       .then(res => res.json())
       .then(data => setStats(data));
   }, []);

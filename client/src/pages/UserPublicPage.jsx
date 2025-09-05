@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiFetch } from '../services/apiFetch';
 import { useParams } from 'react-router-dom';
 import UserAvatarBlock from '../components/UserAvatarBlock';
 import UserBioBlock from '../components/UserBioBlock';
@@ -30,7 +31,7 @@ const UserPublicPage = () => {
       setUser(null);
       return;
     }
-    fetch(`/api/users/${id}/public`)
+    apiFetch(`/api/users/${id}/public`)
       .then(res => res.json())
       .then(data => {
         console.log('User public API response:', data);

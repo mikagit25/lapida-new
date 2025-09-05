@@ -16,9 +16,9 @@ const SearchPage = () => {
   const handleSearch = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams(filters);
-  const res = await fetch(`${API_BASE_URL}/search?${params.toString()}`);
-      const data = await res.json();
+  const params = new URLSearchParams(filters);
+  const res = await apiFetch(`${API_BASE_URL}/search?${params.toString()}`);
+  const data = await res.json();
       setResults(data.results || []);
       setQuery(filters.name || filters.query || '');
     } catch (e) {

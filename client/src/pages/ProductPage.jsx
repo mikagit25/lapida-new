@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 import QRCode from 'react-qr-code';
 import { useParams, Link } from 'react-router-dom';
 
@@ -33,7 +35,7 @@ const ProductPage = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`http://localhost:5182/api/products/${slug}`);
+      const res = await apiFetch(`${API_BASE_URL}/products/${slug}`);
       const data = await res.json();
       if (data.product) {
         setProduct(data.product);

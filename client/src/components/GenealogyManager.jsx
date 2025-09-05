@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiFetch } from '../services/apiFetch';
 import GenealogyTree from './GenealogyTree';
 
 const GenealogyManager = () => {
@@ -13,7 +14,7 @@ const GenealogyManager = () => {
   const fetchTree = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/genealogy');
+      const res = await apiFetch('/api/genealogy');
       const data = await res.json();
       setTreeData(data.tree || null);
       setError('');

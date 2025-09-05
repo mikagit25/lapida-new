@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 
 const UserAdminPanel = () => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/users`)
+    apiFetch(`${API_BASE_URL}/users`)
       .then(res => res.json())
       .then(data => setUsers(data.users || []));
   }, []);
