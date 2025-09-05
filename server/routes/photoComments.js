@@ -6,8 +6,6 @@ const { auth } = require('../middleware/auth');
 
 const router = express.Router();
 
-// ...existing code...
-
 // Тестовый роут: получить все комментарии к фото (без авторизации)
 router.get('/test-all', async (req, res) => {
   try {
@@ -43,8 +41,6 @@ router.post('/test-create', async (req, res) => {
     res.status(500).json({ error: 'Ошибка сервера', details: error.message });
   }
 });
-
-
 
 // Получение всех комментариев к фото
 router.get('/memorial/:memorialId/photo', async (req, res) => {

@@ -39,7 +39,6 @@ router.put('/:id', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Ошибка обновления дерева' });
   }
 });
-module.exports = router;
 
 // DEMO: in-memory family tree
 let demoTree = {

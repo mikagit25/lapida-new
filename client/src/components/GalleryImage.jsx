@@ -7,21 +7,21 @@ const GalleryImage = ({ photo, index, description, onClick }) => {
   useEffect(() => {
     let isMounted = true;
     async function resolveSrc() {
-      if (typeof photo.url === 'string') {
-        // Если абсолютный URL
-        if (/^https?:\/\//.test(photo.url)) {
-          if (isMounted) setSrc(photo.url);
-        } else if (photo.url.startsWith('/')) {
-          // Любой относительный путь с / (например, /upload/, /timeline/photo/)
-          const cleanBase = API_BASE_URL.replace(/\/api$/, '');
-          if (isMounted) setSrc(cleanBase + photo.url);
-        } else {
-          // Относительный путь без / (например, filename)
-          const cleanBase = API_BASE_URL.replace(/\/api$/, '');
-          if (isMounted) setSrc(cleanBase + '/timeline/photo/' + photo.url);
-        }
-      } else {
+      if (!photo || typeof photo.url !== 'string' || !photo.url) {
         if (isMounted) setSrc('');
+        return;
+      }
+      // Если абсолютный URL
+      if (/^https?:\/\//.test(photo.url)) {
+        if (isMounted) setSrc(photo.url);
+      } else if (photo.url.startsWith('/')) {
+        // Любой относительный путь с / (например, /upload/, /timeline/photo/)
+        const cleanBase = API_BASE_URL.replace(/\/api$/, '');
+        if (isMounted) setSrc(cleanBase + photo.url);
+      } else {
+        // Относительный путь без / (например, filename)
+        const cleanBase = API_BASE_URL.replace(/\/api$/, '');
+        if (isMounted) setSrc(cleanBase + '/timeline/photo/' + photo.url);
       }
     }
     resolveSrc();

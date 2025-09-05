@@ -2,11 +2,15 @@ import { API_BASE_URL } from '../config/api-universal';
 
 // Асинхронная версия fixImageUrl
 export async function fixImageUrl(url) {
+
   if (!url) return url;
-  // Получаем базовый адрес сервера без /api
+  // Получаем базовый адрес сервера без /api, с портом если есть
   const apiBase = API_BASE_URL;
   const apiUrl = new URL(apiBase);
-  const serverBase = `${apiUrl.protocol}//${apiUrl.hostname}`;
+  let serverBase = `${apiUrl.protocol}//${apiUrl.hostname}`;
+  if (apiUrl.port) {
+    serverBase += `:${apiUrl.port}`;
+  }
 
   // Абсолютный URL (http/https)
   if (/^https?:\//.test(url)) {

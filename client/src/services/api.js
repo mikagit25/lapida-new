@@ -288,9 +288,9 @@ const newMemorialService = {
 
   // Смена главной фотографии мемориала
   setProfileImage: async (id, profileImage) => {
-    const api = await getApi();
-    const response = await api.patch(`/memorials/${id}/profile-image`, { profileImage });
-    return response.data;
+  const api = await getApi();
+  const response = await api.patch(`/memorials/${id}/profile-image`, { imageUrl: profileImage });
+  return response.data;
   },
 };
 

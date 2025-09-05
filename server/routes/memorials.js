@@ -1,3 +1,47 @@
+
+const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const Memorial = require('../models/Memorial');
+const Comment = require('../models/Comment');
+const authMiddleware = require('../middleware/authMiddleware');
+const { checkEditPermission } = require('../utils/permissions');
+const { auth, optionalAuth } = require('../middleware/auth');
+
+const router = express.Router();
+
+// Получение мемориала по shareUrl
+router.get('/share/:shareUrl', optionalAuth, async (req, res) => {
+  try {
+    const { shareUrl } = req.params;
+    const memorial = await Memorial.findOne({ shareUrl })
+  .populate('createdBy', 'name avatar')
+      .populate('tributes.author', 'name avatar');
+
+    if (!memorial) {
+      return res.status(404).json({ message: 'Мемориал не найден (shareUrl)' });
+    }
+
+
+    // Проверка доступа к приватному мемориалу
+    if (!memorial.isPublic) {
+      // Если пользователь не авторизован или не совпадает с владельцем
+      if (!req.user || !memorial.createdBy || req.user._id.toString() !== memorial.createdBy._id?.toString()) {
+        return res.status(403).json({ message: 'Доступ к мемориалу ограничен' });
+      }
+    }
+
+    // Увеличение просмотров
+    await memorial.incrementViews();
+
+    res.json(memorial);
+  } catch (error) {
+    console.error('Ошибка получения мемориала по shareUrl:', error);
+    res.status(500).json({ message: 'Ошибка сервера при получении мемориала по shareUrl' });
+  }
+});
+
 // Обновление статуса публичности мемориала (публикация/скрытие)
 router.patch('/:id/status', authMiddleware, async (req, res) => {
   try {
@@ -20,6 +64,35 @@ router.patch('/:id/status', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Ошибка сервера при обновлении статуса мемориала' });
   }
 });
+// Смена главного фото мемориала
+router.patch('/:id/profile-image', authMiddleware, async (req, res) => {
+  try {
+    console.log('PATCH /:id/profile-image body:', req.body);
+    console.log('PATCH /:id/profile-image user:', req.user);
+    const { imageUrl } = req.body;
+    if (!imageUrl) {
+      return res.status(400).json({ message: 'Не передан imageUrl', body: req.body });
+    }
+    const memorial = await Memorial.findById(req.params.id);
+    if (!memorial) {
+      return res.status(404).json({ message: 'Мемориал не найден' });
+    }
+    // Проверка прав
+    const userId = req.user.id || req.user._id;
+    const memorialCreatorId = memorial.createdBy?.toString() || memorial.createdBy;
+    if (memorialCreatorId !== userId.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Нет прав для смены главного фото' });
+    }
+    memorial.profileImage = imageUrl;
+    await memorial.save();
+    res.json({ message: 'Главное фото обновлено', profileImage: memorial.profileImage });
+  } catch (error) {
+    console.error('Ошибка смены главного фото мемориала:', error);
+    res.status(500).json({ message: 'Ошибка сервера при смене главного фото', error: error.message });
+  }
+});
+
+
 // --- Галерея мемориала ---
 const memorialGalleryStorage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -40,17 +113,19 @@ router.post('/:id/gallery', authMiddleware, memorialGalleryUpload.array('photos'
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: 'Файлы не загружены' });
     }
-    const imageUrls = req.files.map(f => '/upload/memorials/' + f.filename);
+  const imageUrls = req.files.map(f => ({ url: '/upload/memorials/' + f.filename }));
     const memorial = await Memorial.findById(req.params.id);
     if (!memorial) {
       return res.status(404).json({ message: 'Мемориал не найден' });
     }
     // Проверка прав
-    if (memorial.creator.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Нет прав для редактирования мемориала' });
+    if (!memorial.createdBy || memorial.createdBy.toString() !== req.user._id.toString()) {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Нет прав для редактирования мемориала' });
+      }
     }
     if (!memorial.galleryImages) memorial.galleryImages = [];
-    memorial.galleryImages.push(...imageUrls);
+  memorial.galleryImages.push(...imageUrls);
     await memorial.save();
     res.json({ message: 'Фото успешно загружены', images: memorial.galleryImages });
   } catch (error) {
@@ -58,16 +133,6 @@ router.post('/:id/gallery', authMiddleware, memorialGalleryUpload.array('photos'
     res.status(500).json({ message: 'Ошибка сервера при загрузке фото' });
   }
 });
-const express = require('express');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const Memorial = require('../models/Memorial');
-const Comment = require('../models/Comment');
-const authMiddleware = require('../middleware/authMiddleware');
-const { checkEditPermission } = require('../utils/permissions');
-
-const router = express.Router();
 
 // Получить все публичные мемориалы
 router.get('/', async (req, res) => {
@@ -106,8 +171,13 @@ router.get('/', async (req, res) => {
 // Получение мемориала по ID
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
-    const memorial = await Memorial.findById(req.params.id)
-      .populate('creator', 'name avatar')
+    const id = req.params.id;
+    // Проверка на валидный ObjectId
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(404).json({ message: 'Мемориал не найден (id не ObjectId)' });
+    }
+    const memorial = await Memorial.findById(id)
+  .populate('createdBy', 'name avatar')
       .populate('tributes.author', 'name avatar');
 
     if (!memorial) {
@@ -115,8 +185,19 @@ router.get('/:id', optionalAuth, async (req, res) => {
     }
 
     // Проверка доступа к приватному мемориалу
-    if (!memorial.isPublic && (!req.user || req.user._id.toString() !== memorial.creator._id.toString())) {
-      return res.status(403).json({ message: 'Доступ к мемориалу ограничен' });
+    if (!memorial.isPublic) {
+      if (!req.user) {
+        console.log('[ACCESS DENIED] memorial.isPublic = false, user not authorized');
+        return res.status(403).json({ message: 'Доступ к мемориалу ограничен (не авторизован)' });
+      }
+      if (!memorial.createdBy) {
+        console.log('[ACCESS DENIED] memorial.isPublic = false, memorial.createdBy is missing');
+        return res.status(403).json({ message: 'Доступ к мемориалу ограничен (нет владельца)' });
+      }
+      if (req.user._id.toString() !== (memorial.createdBy._id?.toString() || memorial.createdBy.toString())) {
+        console.log('[ACCESS DENIED] memorial.isPublic = false, user is not owner:', req.user._id, '!=', memorial.createdBy._id || memorial.createdBy);
+        return res.status(403).json({ message: 'Доступ к мемориалу ограничен (вы не владелец)' });
+      }
     }
 
     // Увеличение просмотров
@@ -172,7 +253,7 @@ router.post('/', auth, async (req, res) => {
     });
 
     await memorial.save();
-    await memorial.populate('creator', 'name');
+  await memorial.populate('createdBy', 'name');
 
     res.status(201).json({
       message: 'Мемориал успешно создан',
@@ -213,7 +294,7 @@ router.put('/:id', auth, async (req, res) => {
       req.params.id,
       updates,
       { new: true, runValidators: true }
-    ).populate('creator', 'name');
+  ).populate('createdBy', 'name');
 
     res.json({
       message: 'Мемориал успешно обновлен',

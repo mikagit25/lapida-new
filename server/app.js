@@ -14,14 +14,20 @@ const cookieParser = require('cookie-parser');
 const allowedOrigins = [
   'https://lapida.one',
   'https://www.lapida.one',
+  'http://localhost:5182',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5182',
 ];
 app.use(cors({
   origin: function(origin, callback) {
+    console.log('[CORS] Запрос с origin:', origin);
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     } else {
-      return callback(new Error('Not allowed by CORS'), false);
+      console.warn('[CORS] Отклонён origin:', origin);
+      return callback(new Error('Not allowed by CORS: ' + origin), false);
     }
   },
   credentials: true,
@@ -31,11 +37,13 @@ app.use(cors({
 }));
 app.options('*', cors({
   origin: function(origin, callback) {
+    console.log('[CORS][OPTIONS] Запрос с origin:', origin);
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     } else {
-      return callback(new Error('Not allowed by CORS'), false);
+      console.warn('[CORS][OPTIONS] Отклонён origin:', origin);
+      return callback(new Error('Not allowed by CORS: ' + origin), false);
     }
   },
   credentials: true,
@@ -115,18 +123,46 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Расширенный healthcheck для MongoDB
+app.get('/api/health/db', async (req, res) => {
+  try {
+    const dbState = mongoose.connection.readyState;
+    let dbStatus = 'unknown';
+    if (dbState === 0) dbStatus = 'disconnected';
+    if (dbState === 1) dbStatus = 'connected';
+    if (dbState === 2) dbStatus = 'connecting';
+    if (dbState === 3) dbStatus = 'disconnecting';
+    res.json({
+      mongo: dbStatus,
+      dbHost: mongoose.connection.host,
+      dbName: mongoose.connection.name,
+      dbUri: process.env.MONGODB_URI,
+      nodeEnv: process.env.NODE_ENV,
+      port: PORT
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Маршруты API
 app.use(passport.initialize());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
-app.use('/api/memorials', require('./routes/memorials-new'));
+app.use('/api/memorials', require('./routes/memorials'));
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/companies', require('./routes/companies'));
 app.use('/api/orders', require('./routes/orders'));
-// app.use('/api/upload', require('./routes/uploadClean'));
-app.use('/api/upload', require('./routes/upload'));
-app.use('/api/upload', require('./routes/upload-new'));
+// // app.use('/api/upload', require('./routes/uploadClean'));
+let uploadRouter;
+try {
+  uploadRouter = require('./routes/upload2').default || require('./routes/upload2');
+} catch (e) {
+  console.error('UPLOAD ROUTE REQUIRE ERROR:', e);
+  uploadRouter = (req, res, next) => res.status(500).json({ error: 'Upload route failed to load', details: e.message });
+}
+app.use('/api/upload', uploadRouter);
 app.use('/api/photo-comments', require('./routes/photoComments'));
 app.use('/api/memory-days', require('./routes/memoryDays'));
 app.use('/api/support-groups', require('./routes/supportGroups'));
@@ -134,23 +170,24 @@ app.use('/api/photo-comments-simple', require('./routes/photoCommentsSimple'));
 app.use('/api/timeline', require('./routes/timeline'));
 app.use('/api/virtual', require('./routes/virtual'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/test', require('./routes/testRoute'));
 app.use('/api/gallery-recovery', require('./routes/galleryRecovery'));
 app.use('/api/pages', require('./routes/pages'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/search', require('./routes/search'));
-const genealogyRouter = require('./routes/genealogy');
-app.use('/api/genealogy', genealogyRouter);
-app.use('/api/timeline-events', require('./routes/timeline-events'));
-app.use('/api/complaints', require('./routes/complaints'));
-app.use('/api/social', require('./routes/social'));
-app.use('/api/payments', require('./routes/payments'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/integrations', require('./routes/integrations'));
-app.use('/api/media', require('./routes/media'));
+// const genealogyRouter = require('./routes/genealogy');
+// app.use('/api/genealogy', genealogyRouter);
+// app.use('/api/timeline-events', require('./routes/timeline-events'));
+// app.use('/api/complaints', require('./routes/complaints'));
+// app.use('/api/social', require('./routes/social'));
+// app.use('/api/payments', require('./routes/payments'));
+// app.use('/api/admin', require('./routes/admin'));
+// app.use('/api/integrations', require('./routes/integrations'));
+// app.use('/api/media', require('./routes/media'));
 
 // Корневой маршрут
 app.get('/', (req, res) => {
-  // Корневой маршрут теперь отдаёт фронтенд через SPA fallback выше
+    // Корневой маршрут теперь отдаёт фронтенд через SPA fallback выше
   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 

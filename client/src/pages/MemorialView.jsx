@@ -74,9 +74,17 @@ const MemorialView = () => {
       }
       setMemorial(memorialData);
       // Загружаем комментарии
-      const commentsData = await commentService.getByMemorial(memorialData._id);
-      const commentsArray = commentsData.comments || commentsData;
-      setComments(Array.isArray(commentsArray) ? commentsArray : []);
+      try {
+        const commentsData = await commentService.getByMemorial(memorialData._id);
+        const commentsArray = commentsData.comments || commentsData;
+        setComments(Array.isArray(commentsArray) ? commentsArray : []);
+      } catch (commentsError) {
+        if (commentsError?.response?.status === 404) {
+          setComments([]); // Нет комментариев — не ошибка
+        } else {
+          console.error('Ошибка загрузки комментариев:', commentsError);
+        }
+      }
       // Загружаем события таймлайна
       loadTimelineEvents(memorialData._id);
     } catch (error) {
