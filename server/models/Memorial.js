@@ -254,7 +254,7 @@ const memorialSchema = new mongoose.Schema({
 
 // Генерация уникальной ссылки для шэринга (согласно ТЗ)
 memorialSchema.pre('save', async function(next) {
-  // Генерируем shareUrl если его нет
+  // Генерируем shareUrl если его нет (только имя-фамилия, без числа)
   if (!this.shareUrl) {
     const firstName = this.firstName.toLowerCase().replace(/[^a-zа-я0-9]/gi, '');
     const lastName = this.lastName.toLowerCase().replace(/[^a-zа-я0-9]/gi, '');

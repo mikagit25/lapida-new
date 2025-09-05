@@ -178,6 +178,21 @@ router.get('/slug/:slug', async (req, res) => {
 });
 
 // Получить мемориалы пользователя (требует авторизации)
+// ВРЕМЕННЫЙ debug-роут: получить список всех мемориалов с ключевыми полями
+router.get('/debug/list', async (req, res) => {
+  try {
+    const memorials = await Memorial.find({}, {
+      firstName: 1,
+      lastName: 1,
+      shareUrl: 1,
+      customSlug: 1,
+      title: 1
+    });
+    res.json({ memorials });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка при получении списка мемориалов', error: error.message });
+  }
+});
 router.get('/my', authMiddleware, async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;

@@ -11,6 +11,10 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const cookieParser = require('cookie-parser');
 
 // CORS
+const allowedOrigins = [
+  'https://lapida.one',
+  'https://www.lapida.one',
+];
 app.use(cors({
   origin: function(origin, callback) {
     if (!origin) return callback(null, true);
@@ -43,31 +47,6 @@ app.options('*', cors({
 // Подключение роутов только после CORS!
 app.use('/api/user-connections', require('./routes/userConnections'));
 app.use('/api/memorial-editors', require('./routes/memorialEditors'));
-const mongoose = require('mongoose');
-const cors = require('cors');
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
-const cookieParser = require('cookie-parser');
-
-// CORS
-const allowedOrigins = [
-  'https://lapida.one',
-  'https://www.lapida.one',
-];
-app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error('Not allowed by CORS'), false);
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
-  optionsSuccessStatus: 200
-}));
 app.options('*', cors({
   origin: function(origin, callback) {
     if (!origin) return callback(null, true);
