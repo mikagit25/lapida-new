@@ -1,3 +1,5 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const PORT = process.env.NODE_ENV === 'production'
   ? 10000
   : (process.env.PORT || process.env.npm_config_port || process.env.npm_package_config_port || 5005);
@@ -6,8 +8,6 @@ const passport = require('./oauth');
 const app = express();
 const mongoose = require('mongoose');
 const cors = require('cors');
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
 const cookieParser = require('cookie-parser');
 
 // CORS
