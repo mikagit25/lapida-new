@@ -1,5 +1,6 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
+console.log('MONGODB_URI:', process.env.MONGODB_URI);
 const PORT = process.env.NODE_ENV === 'production'
   ? 10000
   : (process.env.PORT || process.env.npm_config_port || process.env.npm_package_config_port || 5005);
@@ -149,7 +150,7 @@ app.get('/api/health/db', async (req, res) => {
 app.use(passport.initialize());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
-app.use('/api/memorials', require('./routes/memorials'));
+app.use('/api/memorials', require('./routes/memorials-new'));
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/companies', require('./routes/companies'));
