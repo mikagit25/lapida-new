@@ -87,10 +87,10 @@ app.use('/upload/gallery', express.static(path.join(__dirname, 'upload/gallery')
 app.use('/upload/memorials', express.static(path.join(__dirname, 'upload/memorials')));
 app.use('/upload/media', express.static(path.join(__dirname, 'upload/media')));
 app.use('/upload', express.static(path.join(__dirname, 'upload')));
-app.use(express.static(path.join(__dirname, 'public')));
+
  
  // Фронтенд (React/Vite)
- app.use(express.static(path.join(__dirname, '../client/dist')));
+app.use(express.static(path.join(__dirname, '../client/dist')));
  // SPA fallback: отдаём index.html для всех не-API запросов
 // Короткий адрес мемориала: lapida.one/(имя мемориала)
 app.get('/:shareUrl', async (req, res, next) => {

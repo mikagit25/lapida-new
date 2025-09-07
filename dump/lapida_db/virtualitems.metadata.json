@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"memorialId":{"$numberInt":"1"},"type":{"$numberInt":"1"}},"name":"memorialId_1_type_1","background":true}],"uuid":"919989eb7dd04496a114c1e2ff24352a","collectionName":"virtualitems","type":"collection"}
