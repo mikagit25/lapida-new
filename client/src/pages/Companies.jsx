@@ -88,7 +88,7 @@ const Companies = () => {
                   )}
                 </div>
                 <Link
-                  to={company.customSlug ? `/${company.customSlug}` : `/companies/${company._id}`}
+                  to={company.customSlug ? `/companies/${company.customSlug}` : `/companies/${company._id}`}
                   className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center"
                 >
                   Подробнее

@@ -52,40 +52,41 @@ router.get('/:id/reviews', async (req, res) => {
   }
 });
 
-// Временно отключено: Получить компанию по customSlug (короткий адрес)
-// router.get('/by-slug/:customSlug', async (req, res) => {
-//   try {
-//     const company = await Company.findOne({ customSlug: req.params.customSlug });
-//     if (!company) return res.status(404).json({ message: 'Компания не найдена' });
-//     let isOwner = false;
-//     try {
-//       const authHeader = req.header('Authorization');
-//       const cookieToken = req.cookies?.token;
-//       let token = null;
-//       if (authHeader && authHeader.startsWith('Bearer ')) {
-//         token = authHeader.replace('Bearer ', '');
-//       } else if (cookieToken) {
-//         token = cookieToken;
-//       }
-//       if (token) {
-//         const jwt = require('jsonwebtoken');
-//         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//         if (decoded && decoded.userId && company.owner && company.owner.toString() === decoded.userId.toString()) {
-//           isOwner = true;
-//         }
-//       }
-//     } catch (e) {}
-//     const companyObj = company.toObject();
-//     companyObj.isOwner = isOwner;
-//     companyObj.phones = Array.isArray(company.phones) ? company.phones : [];
-//     companyObj.emails = Array.isArray(company.emails) ? company.emails : [];
-//     const products = await Product.find({ company: company._id });
-//     companyObj.products = products;
-//     res.json({ company: companyObj });
-//   } catch (error) {
-//     res.status(500).json({ message: 'Ошибка сервера при получении компании' });
-//   }
-// });
+// Получить компанию по customSlug (короткий адрес)
+router.get('/by-slug/:customSlug', async (req, res) => {
+  try {
+    const company = await Company.findOne({ customSlug: req.params.customSlug });
+    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+    let isOwner = false;
+    try {
+      const authHeader = req.header('Authorization');
+      const cookieToken = req.cookies?.token;
+      let token = null;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.replace('Bearer ', '');
+      } else if (cookieToken) {
+        token = cookieToken;
+      }
+      if (token) {
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded && decoded.userId && company.owner && company.owner.toString() === decoded.userId.toString()) {
+          isOwner = true;
+        }
+      }
+    } catch (e) {}
+    const companyObj = company.toObject();
+    companyObj.isOwner = isOwner;
+    companyObj.phones = Array.isArray(company.phones) ? company.phones : [];
+    companyObj.emails = Array.isArray(company.emails) ? company.emails : [];
+    const products = await Product.find({ company: company._id });
+    companyObj.products = products;
+    res.json({ company: companyObj });
+  } catch (error) {
+    console.error('Ошибка в /by-slug/:customSlug:', error);
+    res.status(500).json({ message: 'Ошибка сервера при получении компании' });
+  }
+});
 // Временно отключено: Получить компанию по customSlug (короткий адрес)
 // router.get('/slug/:customSlug', async (req, res) => {
 //   try {
@@ -596,12 +597,41 @@ router.post('/', auth, async (req, res) => {
     if (!name || !address || !inn) {
       return res.status(400).json({ message: 'Заполните все обязательные поля' });
     }
+    // Генерация customSlug
+    function translit(str) {
+      const ru = ['а','б','в','г','д','е','ё','ж','з','и','й','к','л','м','н','о','п','р','с','т','у','ф','х','ц','ч','ш','щ','ъ','ы','ь','э','ю','я'];
+      const en = ['a','b','v','g','d','e','e','zh','z','i','y','k','l','m','n','o','p','r','s','t','u','f','h','ts','ch','sh','sch','','y','','e','yu','ya'];
+      return str.split('').map(s => {
+        const lower = s.toLowerCase();
+        const idx = ru.indexOf(lower);
+        if (idx >= 0) return en[idx];
+        if (/^[a-z0-9]$/i.test(s)) return s.toLowerCase();
+        if (s === ' ' || s === '_' || s === '-') return '-';
+        return '';
+      }).join('').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+    }
+    let baseSlug = translit(name);
+    let tempId = Math.random().toString(36).slice(2, 8);
+    let customSlug = baseSlug + '-' + tempId;
+    // Проверка уникальности customSlug
+    let exists = await Company.findOne({ customSlug });
+    let tryCount = 0;
+    while (exists && tryCount < 5) {
+      tempId = Math.random().toString(36).slice(2, 8);
+      customSlug = baseSlug + '-' + tempId;
+      exists = await Company.findOne({ customSlug });
+      tryCount++;
+    }
+    if (exists) {
+      return res.status(500).json({ message: 'Не удалось сгенерировать уникальный адрес компании' });
+    }
     const company = new Company({
       name,
       address,
       inn,
       description,
-      owner: req.user._id
+      owner: req.user._id,
+      customSlug
     });
     await company.save();
     res.status(201).json({ company });

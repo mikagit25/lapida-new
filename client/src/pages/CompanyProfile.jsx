@@ -120,9 +120,7 @@ export default function CompanyProfile({ company, userData, news, team, contacts
 
   if (!companyState) return <div>Компания не найдена</div>;
 
-  const companyUrl = companyState.customSlug
-    ? `${window.location.origin}/company/${companyState.customSlug}`
-    : `${window.location.origin}/companies/${companyState._id}`;
+  const companyUrl = `${window.location.origin}/companies/${companyState._id}`;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">

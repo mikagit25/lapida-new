@@ -17,20 +17,11 @@ export default function CompanyPage() {
 
   useEffect(() => {
     setLoading(true);
-    // Определяем, есть ли customSlug в URL
-    const pathParts = location.pathname.split('/').filter(Boolean);
-    const possibleSlug = pathParts.length === 1 ? pathParts[0] : null;
-    let url = '';
-    if (possibleSlug) {
-      url = `/api/companies/by-slug/${possibleSlug}`;
-    } else if (id) {
-      url = `/api/companies/${id}`;
-    }
-    if (!url) {
-      setError('Некорректный адрес компании');
-      setLoading(false);
-      return;
-    }
+    // Если id похож на ObjectId (24 hex символа) — ищем по id, иначе по customSlug
+    const isObjectId = /^[a-f\d]{24}$/i.test(id);
+    const url = isObjectId
+      ? `/api/companies/${id}`
+      : `/api/companies/by-slug/${id}`;
     apiFetch(url)
       .then(res => {
         if (!res.ok) throw new Error('Компания не найдена');
@@ -48,7 +39,7 @@ export default function CompanyPage() {
         setError('Компания не найдена');
         setLoading(false);
       });
-  }, [id, location.pathname]);
+  }, [id]);
 
   if (loading || isLoading || !isAuthenticated || !user || !user._id) {
     return (

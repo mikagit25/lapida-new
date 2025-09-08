@@ -27,27 +27,13 @@ export default function SlugRouter() {
       setLoading(true);
       setType(null);
       setMemorial(null);
-      setCompany(null);
+      // Only try to find memorials by slug
       try {
-        // Пробуем найти мемориал
         const memorialData = await newMemorialService.getBySlug(slug);
         if (memorialData && memorialData._id) {
           if (active) {
             setType('memorial');
             setMemorial(memorialData);
-            setLoading(false);
-            return;
-          }
-        }
-      } catch (e) {}
-      try {
-        // Пробуем найти компанию
-        const res = await apiFetch(`${API_BASE_URL}/companies/by-slug/${slug}`);
-        const data = await res.json();
-        if (res.ok && data.company && data.company._id) {
-          if (active) {
-            setType('company');
-            setCompany(data.company);
             setLoading(false);
             return;
           }
@@ -64,6 +50,5 @@ export default function SlugRouter() {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Загрузка...</div>;
   if (type === 'memorial') return <MemorialView memorial={memorial} />;
-  if (type === 'company') return <CompanyProfile company={company} userData={userData} />;
   return <div className="min-h-screen flex items-center justify-center text-red-600">Страница не найдена</div>;
 }

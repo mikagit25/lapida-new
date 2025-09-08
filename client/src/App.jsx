@@ -1,3 +1,30 @@
+// --- Временно не используемый компонент для company по слагу ---
+// Можно быстро вернуть в роутинг при необходимости
+function CompanyProfileBySlug() {
+  const { companySlug } = useParams();
+  const [company, setCompany] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const { user } = useAuth();
+
+  useEffect(() => {
+    setLoading(true);
+    apiFetch(`${API_BASE_URL}/companies/by-slug/${companySlug}`)
+      .then(res => res.json())
+      .then(data => {
+        setCompany(data.company);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError('Компания не найдена');
+        setLoading(false);
+      });
+  }, [companySlug]);
+
+  if (loading) return <div className="p-8">Загрузка...</div>;
+  if (error || !company) return <div className="p-8 text-red-600">{error || 'Компания не найдена'}</div>;
+  return <CompanyProfile company={company} userData={user} />;
+}
 import OAuthCallback from './pages/OAuthCallback';
 import { apiFetch } from './services/apiFetch';
 import UsersCatalogPage from './pages/UsersCatalogPage';
@@ -68,31 +95,6 @@ function CompanyOrdersWrapper() {
   return <CompanyOrders companyId={companyId} />;
 }
 
-function CompanyProfileBySlug() {
-  const { companySlug } = useParams();
-  const [company, setCompany] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const { user } = useAuth();
-
-  useEffect(() => {
-    setLoading(true);
-  apiFetch(`${API_BASE_URL}/companies/by-slug/${companySlug}`)
-      .then(res => res.json())
-      .then(data => {
-        setCompany(data.company);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError('Компания не найдена');
-        setLoading(false);
-      });
-  }, [companySlug]);
-
-  if (loading) return <div className="p-8">Загрузка...</div>;
-  if (error || !company) return <div className="p-8 text-red-600">{error || 'Компания не найдена'}</div>;
-  return <CompanyProfile company={company} userData={user} />;
-}
 
 function AsyncImage({ url, alt, className, onError }) {
   const [imgUrl, setImgUrl] = React.useState('');
@@ -222,7 +224,6 @@ const App = () => {
               <Route path="/create-memorial" element={<PrivateRoute><MemorialCreate /></PrivateRoute>} />
               <Route path="/companies" element={<Companies />} />
               <Route path="/companies/:id" element={<CompanyPage />} />
-              <Route path=":companySlug" element={<CompanyProfileBySlug />} />
               <Route path="/companies/:id/cabinet" element={<CompanyCabinet />} />
               <Route path="/order/:orderId" element={<OrderDetails />} />
               <Route path="/cart" element={<Cart />} />
@@ -235,9 +236,9 @@ const App = () => {
               <Route path="/products" element={<Products />} />
               <Route path="/products/:slug" element={<ProductPage />} />
               <Route path="/bulk-products" element={<BulkProductPage />} />
-              <Route path="/company/:companySlug/bulk-products" element={<BulkProductPage />} />
+              {/* <Route path="/company/:companySlug/bulk-products" element={<BulkProductPage />} /> */}
               <Route path="/company/:companyId/bulk-products" element={<BulkProductPage />} />
-              <Route path="/company/:companySlug" element={<CompanyProfileBySlug />} />
+              {/* <Route path="/company/:companySlug" element={<CompanyProfileBySlug />} /> */}
               <Route path="/user/:id" element={<UserPublicPage />} />
               <Route path="/users-catalog" element={<UsersCatalogPage />} />
               <Route path="*" element={<NotFound />} />

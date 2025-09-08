@@ -3,7 +3,7 @@ import React from 'react';
 const OrderCard = ({ order, onCancel, onRepeat }) => {
   if (!order) return null;
   const companyName = order.companyId?.name || 'Компания';
-  const companySlug = order.companyId?.customSlug;
+  // const companySlug = order.companyId?.customSlug;
   const statusColors = {
     new: 'bg-blue-100 text-blue-800',
     pending: 'bg-yellow-100 text-yellow-800',
@@ -27,7 +27,7 @@ const OrderCard = ({ order, onCancel, onRepeat }) => {
         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[order.status] || 'bg-gray-100 text-gray-800'}`}>{statusLabel[order.status] || order.status}</span>
         {order.companyId ? (
           <a
-            href={companySlug ? `/company/${companySlug}` : `/companies/${order.companyId._id}`}
+            href={`/companies/${order.companyId._id}`}
             target="_blank"
             rel="noopener noreferrer"
             className="font-bold text-lg text-blue-700 hover:underline cursor-pointer transition"
