@@ -13,7 +13,7 @@ try {
 } catch (e) {
   console.log('Ошибка при чтении .env файлов:', e.message);
 }
-const PORT = process.env.PORT || process.env.npm_config_port || process.env.npm_package_config_port || 5005;
+const PORT = process.env.PORT || process.env.npm_config_port || process.env.npm_package_config_port || 10000;
 const express = require('express');
 const passport = require('./oauth');
 const app = express();
