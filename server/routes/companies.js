@@ -83,7 +83,6 @@ router.get('/by-slug/:customSlug', async (req, res) => {
     companyObj.products = products;
     res.json({ company: companyObj });
   } catch (error) {
-    console.error('Ошибка в /by-slug/:customSlug:', error);
     res.status(500).json({ message: 'Ошибка сервера при получении компании' });
   }
 });
@@ -597,7 +596,7 @@ router.post('/', auth, async (req, res) => {
     if (!name || !address || !inn) {
       return res.status(400).json({ message: 'Заполните все обязательные поля' });
     }
-    // Генерация customSlug
+    // Генерация customSlug (транслит + уникальный хвост)
     function translit(str) {
       const ru = ['а','б','в','г','д','е','ё','ж','з','и','й','к','л','м','н','о','п','р','с','т','у','ф','х','ц','ч','ш','щ','ъ','ы','ь','э','ю','я'];
       const en = ['a','b','v','g','d','e','e','zh','z','i','y','k','l','m','n','o','p','r','s','t','u','f','h','ts','ch','sh','sch','','y','','e','yu','ya'];
@@ -611,27 +610,21 @@ router.post('/', auth, async (req, res) => {
       }).join('').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
     }
     let baseSlug = translit(name);
-    let tempId = Math.random().toString(36).slice(2, 8);
-    let customSlug = baseSlug + '-' + tempId;
+    let slug = baseSlug;
+    let i = 1;
     // Проверка уникальности customSlug
-    let exists = await Company.findOne({ customSlug });
-    let tryCount = 0;
-    while (exists && tryCount < 5) {
-      tempId = Math.random().toString(36).slice(2, 8);
-      customSlug = baseSlug + '-' + tempId;
-      exists = await Company.findOne({ customSlug });
-      tryCount++;
+    while (await Company.findOne({ customSlug: slug })) {
+      slug = baseSlug + '-' + i;
+      i++;
     }
-    if (exists) {
-      return res.status(500).json({ message: 'Не удалось сгенерировать уникальный адрес компании' });
-    }
+
     const company = new Company({
       name,
       address,
       inn,
       description,
       owner: req.user._id,
-      customSlug
+      customSlug: slug
     });
     await company.save();
     res.status(201).json({ company });

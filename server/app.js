@@ -1,9 +1,19 @@
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+const fs = require('fs');
+const envPath = path.join(__dirname, '.env');
+require('dotenv').config({ path: envPath });
+console.log('--- DIAGNOSTICS ---');
+console.log('process.cwd():', process.cwd());
+console.log('__dirname:', __dirname);
+console.log('.env path:', envPath);
 console.log('MONGODB_URI:', process.env.MONGODB_URI);
-const PORT = process.env.NODE_ENV === 'production'
-  ? 10000
-  : (process.env.PORT || process.env.npm_config_port || process.env.npm_package_config_port || 5005);
+try {
+  const envFiles = fs.readdirSync(__dirname).filter(f => f.endsWith('.env'));
+  console.log('Все .env файлы в папке server:', envFiles);
+} catch (e) {
+  console.log('Ошибка при чтении .env файлов:', e.message);
+}
+const PORT = process.env.PORT || process.env.npm_config_port || process.env.npm_package_config_port || 5005;
 const express = require('express');
 const passport = require('./oauth');
 const app = express();
@@ -82,11 +92,14 @@ app.use((req, res, next) => {
   next();
 });
 
+
 // Статика
 app.use('/upload/gallery', express.static(path.join(__dirname, 'upload/gallery')));
 app.use('/upload/memorials', express.static(path.join(__dirname, 'upload/memorials')));
 app.use('/upload/media', express.static(path.join(__dirname, 'upload/media')));
 app.use('/upload', express.static(path.join(__dirname, 'upload')));
+// Для изображений компаний, галерей и т.д. из server/public/uploads
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
  
  // Фронтенд (React/Vite)
@@ -228,8 +241,19 @@ app.use((err, req, res, next) => {
 // Подключение к базе данных MongoDB
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lapida_db');
-    console.log('MongoDB подключена успешно');
+    // Диагностика: выводим все секреты и переменные окружения, связанные с авторизацией
+    console.log('MONGODB_URI:', process.env.MONGODB_URI);
+    console.log('JWT_SECRET:', process.env.JWT_SECRET);
+    console.log('SESSION_SECRET:', process.env.SESSION_SECRET);
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    // Можно добавить вывод других важных переменных:
+    Object.keys(process.env).filter(k => k.toLowerCase().includes('secret') || k.toLowerCase().includes('jwt')).forEach(k => {
+      console.log(`${k}:`, process.env[k]);
+    });
+    // Подключение к базе по переменной окружения
+    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/lapida_db';
+    await mongoose.connect(uri);
+    console.log('MongoDB подключена успешно (URI из process.env)');
   } catch (error) {
     console.error('Ошибка подключения к MongoDB:', error);
     process.exit(1);

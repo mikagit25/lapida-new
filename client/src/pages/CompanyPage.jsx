@@ -17,11 +17,19 @@ export default function CompanyPage() {
 
   useEffect(() => {
     setLoading(true);
-    // Если id похож на ObjectId (24 hex символа) — ищем по id, иначе по customSlug
-    const isObjectId = /^[a-f\d]{24}$/i.test(id);
-    const url = isObjectId
-      ? `/api/companies/${id}`
-      : `/api/companies/by-slug/${id}`;
+    let url = '';
+    if (id) {
+      // Если id похож на ObjectId (24 hex символа) — ищем по id, иначе по customSlug
+      if (/^[a-f\d]{24}$/i.test(id)) {
+        url = `/api/companies/${id}`;
+      } else {
+        url = `/api/companies/by-slug/${id}`;
+      }
+    } else {
+      setError('Некорректный адрес компании');
+      setLoading(false);
+      return;
+    }
     apiFetch(url)
       .then(res => {
         if (!res.ok) throw new Error('Компания не найдена');
@@ -39,15 +47,12 @@ export default function CompanyPage() {
         setError('Компания не найдена');
         setLoading(false);
       });
-  }, [id]);
+  }, [id, location.pathname]);
 
   if (loading || isLoading || !isAuthenticated || !user || !user._id) {
     return (
       <div className="p-8">
         <div>Загрузка пользователя...</div>
-        <div>user: {JSON.stringify(user)}</div>
-        <div>user._id: {user?._id?.toString()} (type: {typeof user?._id})</div>
-        <div>isAuthenticated: {String(isAuthenticated)}</div>
       </div>
     );
   }
@@ -64,21 +69,11 @@ export default function CompanyPage() {
     return (
       <div className="p-8">
         <div>Загрузка пользователя...</div>
-        <div>user: {JSON.stringify(user)}</div>
-        <div>user._id: {user?._id?.toString()} (type: {typeof user?._id})</div>
-        <div>isAuthenticated: {String(isAuthenticated)}</div>
       </div>
     );
   }
   return (
-    <>
-      <div style={{fontSize:'12px',color:'#888',marginBottom:'8px'}}>
-        <div>user: {JSON.stringify(user)}</div>
-        <div>user._id: {user._id?.toString()} (type: {typeof user._id})</div>
-        <div>isAuthenticated: {String(isAuthenticated)}</div>
-      </div>
-      <CompanyProfile company={company} userData={user} news={news} team={team} contacts={contacts} />
-    </>
+    <CompanyProfile company={company} userData={user} news={news} team={team} contacts={contacts} />
   );
 }
 

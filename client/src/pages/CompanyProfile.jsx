@@ -22,6 +22,7 @@ import CompanyAddressMapProfileBlock from '../components/CompanyAddressMapProfil
 import CompanyReviewsProfileBlock from '../components/CompanyReviewsProfileBlock';
 import CompanyQRCodeBlock from '../components/CompanyQRCodeBlock';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 export default function CompanyProfile({ company, userData, news, team, contacts }) {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -120,7 +121,7 @@ export default function CompanyProfile({ company, userData, news, team, contacts
 
   if (!companyState) return <div>Компания не найдена</div>;
 
-  const companyUrl = `${window.location.origin}/companies/${companyState._id}`;
+
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -137,6 +138,8 @@ export default function CompanyProfile({ company, userData, news, team, contacts
         </div>
       )}
       <CompanyInfo company={companyState} />
+      {/* Галерея компании */}
+      <CompanyGallery images={companyState.gallery} isOwner={isOwner} companyId={companyState._id} />
       {/* Мини-каталог товаров компании */}
       <CompanyProductsProfileBlock products={companyState.products} />
       <CompanyNewsProfileBlock news={companyNews} />
@@ -177,31 +180,6 @@ export default function CompanyProfile({ company, userData, news, team, contacts
           <iframe src={companyState.map} title="Карта" width="100%" height="200" style={{ border: 0 }} allowFullScreen="" loading="lazy"></iframe>
         </div>
       )}
-      <CompanyInfo company={companyState} />
-      {/* Мини-каталог товаров компании */}
-      <CompanyProductsProfileBlock products={companyState.products} />
-      <CompanyNewsProfileBlock news={companyNews} />
-      {newsLoading && <div className="text-gray-500">Загрузка новостей...</div>}
-      {newsError && <div className="text-red-600 mb-2">{newsError}</div>}
-      <CompanyDocumentsProfileBlock documents={companyState.documents} />
-      {/* <CompanyReviews reviews={companyState.reviews} /> */}
-      <CompanyTeamProfileBlock team={team} />
-      <CompanyContactsProfileBlock contacts={companyState.contacts} phones={companyState.phones} emails={companyState.emails} />
-      {/* Show address and map if present (OpenStreetMap) - теперь ниже контактов */}
-      {(companyState.address || (companyState.lat && companyState.lng)) && (
-        <CompanyAddressMapProfileBlock
-          address={companyState.address}
-          lat={companyState.lat}
-          lng={companyState.lng}
-        />
-      )}
-      <CompanyReviewsProfileBlock
-        companyId={companyState._id}
-        reviews={reviews}
-        reviewsLoading={reviewsLoading}
-        reviewsError={reviewsError}
-        onReviewAdded={review => setReviews(r => [review, ...r])}
-      />
     </div>
   );
 }
