@@ -323,7 +323,7 @@ function CompanyCabinet() {
       return;
     }
     setSlugCheckLoading(true);
-  apiFetch(`${API_BASE_URL}/companies/check-slug?slug=${value}`)
+    apiFetch(`${API_BASE_URL}/companies/check-slug?slug=${value}`)
       .then(res => res.json())
       .then(data => setSlugAvailable(data.available))
       .catch(() => setSlugAvailable(false))
@@ -437,19 +437,29 @@ function CompanyCabinet() {
             />
           )}
           {tab === 'products' && (
-            <CompanyProductsBlock
-              products={products}
-              productsLoading={productsLoading}
-              productsError={productsError}
-              productFormOpen={productFormOpen}
-              isOwner={isOwner}
-              handleAddProduct={handleAddProduct}
-              handleEditProduct={handleEditProduct}
-              handleDeleteProduct={handleDeleteProduct}
-              handleSaveProduct={handleSaveProduct}
-              productEditData={productEditData}
-              setProductFormOpen={setProductFormOpen}
-            />
+            <>
+              <div className="mb-4 flex justify-end">
+                <Link
+                  to={`/company/${company.customSlug || company._id}/bulk-products`}
+                  className="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm font-semibold"
+                >
+                  Массовый импорт товаров (таблица)
+                </Link>
+              </div>
+              <CompanyProductsBlock
+                products={products}
+                productsLoading={productsLoading}
+                productsError={productsError}
+                productFormOpen={productFormOpen}
+                isOwner={isOwner}
+                handleAddProduct={handleAddProduct}
+                handleEditProduct={handleEditProduct}
+                handleDeleteProduct={handleDeleteProduct}
+                handleSaveProduct={handleSaveProduct}
+                productEditData={productEditData}
+                setProductFormOpen={setProductFormOpen}
+              />
+            </>
           )}
           {tab === 'documents' && (
             <CompanyDocumentsBlock

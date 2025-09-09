@@ -3,6 +3,7 @@ import { API_BASE_URL } from '../config/api';
 import { apiFetch } from '../services/apiFetch';
 import QRCode from 'react-qr-code';
 import { useParams, Link } from 'react-router-dom';
+import SimilarProducts from '../components/SimilarProducts';
 
 const ProductPage = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -137,6 +138,26 @@ const ProductPage = () => {
               <p className="mb-2 text-gray-500">Ед. изм.: {product.unit}</p>
             )}
           </div>
+          {/* Ссылка на страницу компании */}
+          {product.company && (
+            <div className="mb-4">
+              <div className="text-sm text-gray-500">Продавец:</div>
+              <h2 className="text-lg font-semibold mb-1">
+                <Link
+                  to={product.company.customSlug ? `/company/${product.company.customSlug}` : `/company/${product.company._id}`}
+                  className="text-blue-700 hover:underline"
+                >
+                  {product.company.name}
+                </Link>
+              </h2>
+              <button
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+                onClick={() => window.location.href = product.company.customSlug ? `/company/${product.company.customSlug}` : `/company/${product.company._id}`}
+              >
+                Посмотреть страницу компании
+              </button>
+            </div>
+          )}
         </div>
         {/* QR-код и URL внизу страницы */}
         <div className="mt-8 flex flex-col items-center">
@@ -144,6 +165,8 @@ const ProductPage = () => {
           <div className="text-xs text-gray-500 mt-2">QR-код для быстрой передачи ссылки на товар</div>
           <div className="mt-2 text-sm text-gray-700 font-mono break-all">https://lapida.one/product/{product.slug || slug}</div>
         </div>
+        {/* Аналогичные товары */}
+        <SimilarProducts product={product} />
       </div>
     </div>
   );

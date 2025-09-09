@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../config/api';
 import { apiFetch } from '../services/apiFetch';
+import CompanyRegionSearch from '../components/CompanyRegionSearch';
 
 const Companies = () => {
   const [companies, setCompanies] = useState([]);
@@ -9,6 +10,9 @@ const Companies = () => {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [region, setRegion] = useState('');
+  const [sort, setSort] = useState('newest'); // newest, oldest, nearest
+  const [userCoords, setUserCoords] = useState(null);
 
   useEffect(() => {
     fetchCompanies();
@@ -28,10 +32,67 @@ const Companies = () => {
     }
   };
 
-  const filtered = companies.filter(c => {
+  // Геокодирование адреса (используем Nominatim)
+  const geocodeRegion = async (address) => {
+    if (!address) return null;
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data && data[0]) {
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+    }
+    return null;
+  };
+
+  // Поиск ближайших компаний к региону
+  const handleGeoSearch = async () => {
+    if (!region) return;
+    const coords = await geocodeRegion(region);
+    if (coords) setUserCoords(coords);
+  };
+
+  // Получить координаты пользователя через браузер
+  const handleDetectMe = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => alert('Не удалось определить местоположение')
+      );
+    }
+  };
+
+  // Функция для вычисления расстояния между двумя точками (Haversine)
+  function getDistance(lat1, lon1, lat2, lon2) {
+    function toRad(x) { return x * Math.PI / 180; }
+    const R = 6371; // km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  // Сортировка компаний
+  let sorted = [...companies];
+  if (sort === 'newest') {
+    sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else if (sort === 'oldest') {
+    sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  } else if (sort === 'nearest' && userCoords) {
+    sorted = sorted
+      .filter(c => typeof c.lat === 'number' && typeof c.lng === 'number')
+      .map(c => ({ ...c, _distance: getDistance(userCoords.lat, userCoords.lng, c.lat, c.lng) }))
+      .sort((a, b) => a._distance - b._distance);
+  }
+
+  // Фильтрация
+  const filtered = sorted.filter(c => {
     if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
     if (filter === 'verified' && c.status !== 'verified') return false;
     if (filter === 'pending' && c.status !== 'pending') return false;
+    if (region && c.address && !c.address.toLowerCase().includes(region.toLowerCase())) return false;
     return true;
   });
 
@@ -39,7 +100,7 @@ const Companies = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold mb-6">Каталог компаний</h1>
-        <div className="flex flex-wrap gap-4 mb-6">
+        <div className="flex flex-wrap gap-4 mb-6 items-center">
           <input
             type="text"
             placeholder="Поиск по названию..."
@@ -56,6 +117,21 @@ const Companies = () => {
             <option value="verified">Проверенные</option>
             <option value="pending">На проверке</option>
           </select>
+          <CompanyRegionSearch region={region} setRegion={setRegion} onGeoSearch={handleGeoSearch} />
+          <button
+            className="bg-gray-200 px-3 py-2 rounded hover:bg-gray-300 text-sm"
+            onClick={() => setSort(sort === 'newest' ? 'oldest' : 'newest')}
+            type="button"
+          >
+            {sort === 'newest' ? 'Сначала новые' : 'Сначала старые'}
+          </button>
+          <button
+            className="bg-gray-200 px-3 py-2 rounded hover:bg-gray-300 text-sm"
+            onClick={handleDetectMe}
+            type="button"
+          >
+            Ближайшие ко мне
+          </button>
         </div>
         {loading ? (
           <div>Загрузка...</div>
@@ -90,8 +166,6 @@ const Companies = () => {
                 <Link
                   to={company.customSlug ? `/company/${company.customSlug}` : `/company/${company._id}`}
                   className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center"
-                  target="_blank"
-                  rel="noopener noreferrer"
                 >
                   Подробнее
                 </Link>
