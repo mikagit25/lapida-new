@@ -160,8 +160,8 @@ export default function CompanyProfile({ company, userData, news, team, contacts
       {/* QR-код компании теперь под картой */}
       <CompanyQRCodeBlock
         url={companyState.customSlug
-          ? `${window.location.origin}/${companyState.customSlug}`
-          : `${window.location.origin}/companies/${companyState._id}`}
+          ? `${window.location.origin}/company/${companyState.customSlug}`
+          : `${window.location.origin}/company/${companyState._id}`}
       />
       <CompanyReviewsProfileBlock
         companyId={companyState._id}

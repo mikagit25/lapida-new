@@ -23,8 +23,8 @@ export default function CompanyHeader({ company, canEdit, onHeaderBgUpload }) {
           {/* Имя компании теперь кликабельно для перехода в личный кабинет */}
           <div
             className="font-bold text-2xl text-white drop-shadow-lg cursor-pointer hover:underline"
-              onClick={() => navigate(`/company-cabinet/${company._id}`)}
-              title="Перейти в личный кабинет компании"
+              onClick={() => navigate(company.customSlug ? `/company/${company.customSlug}` : `/company/${company._id}`)}
+              title="Перейти в профиль компании"
           >
             {company.name}
           </div>

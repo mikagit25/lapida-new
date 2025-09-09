@@ -12,10 +12,10 @@ const GoToCompanyCabinetButton = ({ companies }) => {
   const company = companies[0];
   return (
     <Link
-      to={`/company-cabinet/${company._id}`}
+      to={company.customSlug ? `/company/${company.customSlug}` : `/company/${company._id}`}
       className="bg-blue-600 text-white px-4 py-2 rounded mb-2 inline-block"
     >
-      {company.name ? `Перейти в кабинет компании: ${company.name}` : 'Перейти в кабинет компании'}
+      {company.name ? `Перейти в профиль компании: ${company.name}` : 'Перейти в профиль компании'}
     </Link>
   );
 };

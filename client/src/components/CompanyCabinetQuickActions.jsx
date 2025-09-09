@@ -12,10 +12,10 @@ const CompanyCabinetQuickActions = ({ companies }) => {
       {Array.isArray(companies) && companies.length > 0 && companies.map((company) => (
         <Link
           key={company._id}
-          to={`/company-cabinet/${company._id}`}
+          to={company.customSlug ? `/company/${company.customSlug}` : `/company/${company._id}`}
           className="bg-blue-600 text-white px-4 py-2 rounded mb-2 inline-block"
         >
-          {company.name ? `Личный кабинет: ${company.name}` : 'Личный кабинет компании'}
+          {company.name ? `Профиль: ${company.name}` : 'Профиль компании'}
         </Link>
       ))}
       <GoToConnectionsButton />
