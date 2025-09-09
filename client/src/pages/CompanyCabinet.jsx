@@ -372,7 +372,7 @@ function CompanyCabinet() {
         <div className="bg-white rounded-lg shadow p-6">
           {/* QR-код компании с актуальным адресом */}
           <CompanyQRCodeBlock
-            url={company.customSlug ? `${window.location.origin}/${company.customSlug}` : `${window.location.origin}/companies/${company._id}`}
+            url={company.customSlug ? `${window.location.origin}/companies/${company.customSlug}` : `${window.location.origin}/companies/${company._id}`}
           />
           {tab === 'info' && (
             <div>
