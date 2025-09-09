@@ -26,7 +26,7 @@ const RegisterCompany = () => {
     setError('');
     setSuccess(false);
     try {
-  const apiUrl = API_BASE_URL;
+      const apiUrl = API_BASE_URL;
       const token = localStorage.getItem('authToken');
       const res = await apiFetch(`${apiUrl}/companies`, {
         method: 'POST',
@@ -41,7 +41,9 @@ const RegisterCompany = () => {
       if (data.company) {
         setSuccess(true);
         setCompanySlug(data.company.customSlug || '');
-        setTimeout(() => navigate(`/company/${data.company.customSlug}`), 1500);
+        // Для отладки: логируем ответ
+        console.log('Company created:', data.company);
+        setTimeout(() => navigate(`/company-cabinet/${data.company._id}`), 1500);
       } else {
         setError(data.error || 'Ошибка регистрации');
       }
