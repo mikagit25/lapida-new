@@ -91,7 +91,7 @@ export default function CustomSlugEditor({ companyId, initialSlug, isOwner, onSl
     return (
       <div className="mb-4">
         <label className="block font-medium mb-1">Адрес компании (URL)</label>
-        <div className="mb-2 text-sm text-gray-600">lapida.one/{slug}</div>
+        <div className="mb-2 text-sm text-gray-600">lapida.one/company/{slug}</div>
       </div>
     );
   }
@@ -120,7 +120,7 @@ export default function CustomSlugEditor({ companyId, initialSlug, isOwner, onSl
         </button>
       </div>
       {status === 'checking' && <span className="text-gray-500 text-sm">Проверка...</span>}
-      {status === 'available' && slug && <span className="text-green-600 text-sm">Доступно: lapida.one/{slug}</span>}
+  {status === 'available' && slug && <span className="text-green-600 text-sm">Доступно: lapida.one/company/{slug}</span>}
       {status === 'taken' && <span className="text-red-600 text-sm">Занято: выберите другое имя</span>}
       {error && <div className="text-red-600 text-sm mt-1">{error}</div>}
     </div>

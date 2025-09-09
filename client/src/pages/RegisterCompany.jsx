@@ -40,8 +40,8 @@ const RegisterCompany = () => {
       const data = await res.json();
       if (data.company) {
         setSuccess(true);
-  setCompanySlug(data.company.customSlug || '');
-  setTimeout(() => navigate(`/companies/${data.company.customSlug}`), 1500);
+        setCompanySlug(data.company.customSlug || '');
+        setTimeout(() => navigate(`/company/${data.company.customSlug}`), 1500);
       } else {
         setError(data.error || 'Ошибка регистрации');
       }
@@ -77,7 +77,7 @@ const RegisterCompany = () => {
           {success && (
             <div className="text-green-600">
               Компания успешно зарегистрирована!<br />
-              Ваш адрес: <span className="font-mono">lapida.one/{companySlug}</span>
+              Ваш адрес: <span className="font-mono">lapida.one/company/{companySlug}</span>
             </div>
           )}
           <button type="submit" disabled={loading} className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-semibold w-full">
