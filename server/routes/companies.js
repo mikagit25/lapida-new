@@ -651,10 +651,17 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Получить одну компанию
+// Получить одну компанию по id или customSlug
 router.get('/:id', async (req, res) => {
   try {
-    const company = await Company.findById(req.params.id);
+    const { id } = req.params;
+    let company = null;
+    // Если id похож на ObjectId (24 hex символа) — ищем по id, иначе по customSlug
+    if (/^[a-f\d]{24}$/i.test(id)) {
+      company = await Company.findById(id);
+    } else {
+      company = await Company.findOne({ customSlug: id });
+    }
     if (!company) return res.status(404).json({ message: 'Компания не найдена' });
 
     let isOwner = false;
@@ -677,15 +684,15 @@ router.get('/:id', async (req, res) => {
       }
     } catch (e) {}
 
-  // Вставляем isOwner и контакты в ответ
-  const companyObj = company.toObject();
-  companyObj.isOwner = isOwner;
-  companyObj.phones = Array.isArray(company.phones) ? company.phones : [];
-  companyObj.emails = Array.isArray(company.emails) ? company.emails : [];
-  // Получить актуальные товары из коллекции Product
-  const products = await Product.find({ company: company._id });
-  companyObj.products = products;
-  res.json({ company: companyObj });
+    // Вставляем isOwner и контакты в ответ
+    const companyObj = company.toObject();
+    companyObj.isOwner = isOwner;
+    companyObj.phones = Array.isArray(company.phones) ? company.phones : [];
+    companyObj.emails = Array.isArray(company.emails) ? company.emails : [];
+    // Получить актуальные товары из коллекции Product
+    const products = await Product.find({ company: company._id });
+    companyObj.products = products;
+    res.json({ company: companyObj });
   } catch (error) {
     console.error('Ошибка получения компании:', error);
     res.status(500).json({ message: 'Ошибка сервера при получении компании' });
