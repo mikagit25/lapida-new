@@ -238,7 +238,7 @@ const App = () => {
               <Route path="/bulk-products" element={<BulkProductPage />} />
               {/* <Route path="/company/:companySlug/bulk-products" element={<BulkProductPage />} /> */}
               <Route path="/company/:companyId/bulk-products" element={<BulkProductPage />} />
-              {/* <Route path="/company/:companySlug" element={<CompanyProfileBySlug />} /> */}
+              <Route path="/company/:companySlug" element={<CompanyProfileBySlug />} />
               <Route path="/user/:id" element={<UserPublicPage />} />
               <Route path="/users-catalog" element={<UsersCatalogPage />} />
               <Route path="*" element={<NotFound />} />
