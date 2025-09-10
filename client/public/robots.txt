@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://lapida.ru/sitemap.xml
