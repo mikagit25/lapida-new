@@ -1,3 +1,5 @@
+import SeoIndex from './pages/SeoIndex';
+              <Route path="/seo-index" element={<SeoIndex />} />
 // --- Временно не используемый компонент для company по слагу ---
 // Можно быстро вернуть в роутинг при необходимости
 function CompanyProfileBySlug() {
@@ -68,7 +70,6 @@ import OrderDetails from './pages/OrderDetails';
 import CompanyOrders from './pages/CompanyOrders';
 import CompanyOrdersPage from './orders/CompanyOrdersPage';
 import ClientOrdersPage from './orders/ClientOrdersPage';
-import HomeTest from './pages/HomeTest';
 import DemoFeatures from './pages/DemoFeatures';
 import SearchDemo from './pages/SearchDemo';
 import SearchPage from './pages/SearchPage';
@@ -198,7 +199,6 @@ const App = () => {
               <Route path="/admin/memorials" element={<PrivateRoute><AdminMemorialsManager /></PrivateRoute>} />
               <Route path="/admin/reports" element={<PrivateRoute><AdminReportsManager /></PrivateRoute>} />
               <Route path="/" element={<Home />} />
-              <Route path="/home-test" element={<HomeTest />} />
               <Route path="/demo-features" element={<DemoFeatures />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/genealogy" element={<GenealogyPage />} />

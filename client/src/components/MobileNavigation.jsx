@@ -24,8 +24,10 @@ const MobileNavigation = () => {
 
   const navigationItems = [
     { path: '/', label: 'Главная', icon: '🏠', public: true },
-    { path: '/dashboard', label: 'Дашборд', icon: '📊', auth: true },
+    { path: '/companies', label: 'Компании', icon: '🏢', public: true },
+    { path: '/products', label: 'Товары', icon: '�', public: true },
     { path: '/memorials', label: 'Мемориалы', icon: '🏛️', public: true },
+    { path: '/dashboard', label: 'Дашборд', icon: '📊', auth: true },
     { path: '/create-memorial', label: 'Создать мемориал', icon: '➕', auth: true },
     { path: '/profile', label: 'Профиль', icon: '👤', auth: true },
   ];

@@ -1,107 +1,140 @@
 import React from 'react';
 
-// Временный логотип
 const Logo = () => (
   <div className="flex items-center space-x-2">
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-      <circle cx="16" cy="16" r="16" fill="#2563eb" />
-      <text x="16" y="21" textAnchor="middle" fontSize="16" fill="#fff" fontFamily="Arial">L</text>
-    </svg>
+    <img src={require('../assets/home/company1.jpg')} alt="Lapida" className="w-10 h-10 rounded-full object-cover" />
     <span className="text-2xl font-bold text-blue-700">Lapida</span>
   </div>
 );
 
+const products = [
+  { id: 1, name: 'Гранитный памятник', desc: 'Классический памятник из гранита', img: require('../assets/home/product1.jpg') },
+  { id: 2, name: 'Мемориальная табличка', desc: 'Индивидуальный дизайн', img: require('../assets/home/product2.jpg') },
+  { id: 3, name: 'Ваза для цветов', desc: 'Каменная ваза для мемориалов', img: require('../assets/home/product3.jpg') },
+  { id: 4, name: 'Ограда', desc: 'Кованая ограда для участка', img: require('../assets/home/product4.jpg') },
+];
+
+const companies = [
+  { id: 1, name: 'Мемориал-Сервис', desc: 'Изготовление памятников', img: require('../assets/home/company1.jpg') },
+  { id: 2, name: 'Вечная Память', desc: 'Ритуальные услуги', img: require('../assets/home/company2.jpg') },
+  { id: 3, name: 'Гранит-Мастер', desc: 'Гранитные изделия', img: require('../assets/home/company3.jpg') },
+];
+
+const reviews = [
+  { id: 1, name: 'Анна', text: 'Очень удобно! Заказ оформила за 5 минут, всё привезли вовремя.' },
+  { id: 2, name: 'Иван', text: 'Большой выбор и честные цены. Спасибо за сервис!' },
+  { id: 3, name: 'Мария', text: 'Нашла нужную компанию и быстро заказала памятник.' },
+];
+
 const HomeTest = () => {
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <header className="bg-white shadow py-6 mb-8">
+    <div className="relative min-h-screen bg-gray-50">
+      {/* Фоновое изображение */}
+      <div className="absolute inset-0 -z-10">
+        <img src={require('../assets/home/hero-bg.jpg')} alt="Фон" className="w-full h-full object-cover opacity-30" />
+      </div>
+      <header className="bg-white/80 shadow py-6 mb-8 sticky top-0 z-20 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
           <Logo />
-          {/* Верхнее меню не трогаем, оно в App.jsx */}
         </div>
       </header>
       <main className="max-w-7xl mx-auto px-4">
         {/* Hero-блок */}
-        <section className="flex flex-col md:flex-row items-center py-12 gap-8">
+        <section className="flex flex-col md:flex-row items-center py-16 gap-8">
           <div className="flex-1">
-            <h1 className="text-4xl font-extrabold mb-4 text-gray-900">Всё для мемориалов и компаний</h1>
-            <p className="text-lg text-gray-700 mb-6">Платформа для поиска, заказа и управления товарами и услугами для мемориалов, компаний и частных лиц.</p>
+            <h1 className="text-5xl font-extrabold mb-6 text-gray-900 drop-shadow">Всё для мемориалов и компаний</h1>
+            <p className="text-xl text-gray-700 mb-8">Платформа для поиска, заказа и управления товарами и услугами для мемориалов, компаний и частных лиц.</p>
             <div className="flex gap-4">
-              <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">Посмотреть товары</button>
-              <button className="bg-white border border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50">Компании</button>
+              <button className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow hover:bg-blue-700 transition">Посмотреть товары</button>
+              <button className="bg-white border border-blue-600 text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-50 transition">Компании</button>
             </div>
           </div>
           <div className="flex-1 flex justify-center">
-            <img src="/public/vite.svg" alt="Мемориалы" className="w-64 h-64 object-contain" />
+            <img src={require('../assets/home/product1.jpg')} alt="Мемориалы" className="w-80 h-80 object-cover rounded-2xl shadow-lg border-4 border-white" />
           </div>
         </section>
         {/* Блок товаров */}
-        <section className="py-10">
-          <h2 className="text-2xl font-bold mb-6">Популярные товары</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {/* Пример карточек товара */}
-            {[1,2,3,4].map(i => (
-              <div key={i} className="bg-white rounded-lg shadow p-4 flex flex-col items-center">
-                <img src="/public/vite.svg" alt="Товар" className="w-24 h-24 mb-3" />
-                <div className="font-semibold mb-1">Товар {i}</div>
-                <div className="text-gray-500 mb-2">Описание товара</div>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">В корзину</button>
+        <section className="py-12">
+          <h2 className="text-3xl font-bold mb-8 text-center">Популярные товары</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+            {products.map(p => (
+              <div key={p.id} className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition">
+                <img src={p.img} alt={p.name} className="w-28 h-28 mb-4 rounded-lg object-cover" />
+                <div className="font-semibold mb-1 text-lg">{p.name}</div>
+                <div className="text-gray-500 mb-3 text-center">{p.desc}</div>
+                <button className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700">В корзину</button>
               </div>
             ))}
           </div>
-          <div className="text-center mt-6">
-            <button className="text-blue-600 hover:underline">Смотреть все товары</button>
+          <div className="text-center mt-8">
+            <button className="text-blue-600 hover:underline text-lg">Смотреть все товары</button>
           </div>
         </section>
         {/* Блок компаний */}
-        <section className="py-10">
-          <h2 className="text-2xl font-bold mb-6">Компании-партнёры</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {[1,2,3].map(i => (
-              <div key={i} className="bg-white rounded-lg shadow p-4 flex flex-col items-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3">
-                  <span className="text-xl font-bold text-blue-700">C{i}</span>
-                </div>
-                <div className="font-semibold mb-1">Компания {i}</div>
-                <div className="text-gray-500 mb-2">Описание компании</div>
-                <button className="bg-blue-50 text-blue-700 px-4 py-2 rounded hover:bg-blue-100">Подробнее</button>
+        <section className="py-12">
+          <h2 className="text-3xl font-bold mb-8 text-center">Компании-партнёры</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            {companies.map(c => (
+              <div key={c.id} className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition">
+                <img src={c.img} alt={c.name} className="w-20 h-20 mb-4 rounded-full object-cover border-2 border-blue-200" />
+                <div className="font-semibold mb-1 text-lg">{c.name}</div>
+                <div className="text-gray-500 mb-3 text-center">{c.desc}</div>
+                <button className="bg-blue-50 text-blue-700 px-5 py-2 rounded hover:bg-blue-100">Подробнее</button>
               </div>
             ))}
           </div>
-          <div className="text-center mt-6">
-            <button className="text-blue-600 hover:underline">Все компании</button>
+          <div className="text-center mt-8">
+            <button className="text-blue-600 hover:underline text-lg">Все компании</button>
           </div>
         </section>
         {/* Блок преимуществ */}
-        <section className="py-10">
-          <h2 className="text-2xl font-bold mb-6">Почему выбирают нас?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
-              <span className="text-3xl mb-2">🔒</span>
-              <div className="font-semibold mb-1">Безопасность</div>
-              <div className="text-gray-500">Данные и платежи под защитой</div>
+        <section className="py-12">
+          <h2 className="text-3xl font-bold mb-8 text-center">Почему выбирают нас?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center">
+              <span className="text-4xl mb-3">🔒</span>
+              <div className="font-semibold mb-2 text-lg">Безопасность</div>
+              <div className="text-gray-500 text-center">Данные и платежи под защитой</div>
             </div>
-            <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
-              <span className="text-3xl mb-2">⚡</span>
-              <div className="font-semibold mb-1">Удобство</div>
-              <div className="text-gray-500">Быстрый поиск и заказ</div>
+            <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center">
+              <span className="text-4xl mb-3">⚡</span>
+              <div className="font-semibold mb-2 text-lg">Удобство</div>
+              <div className="text-gray-500 text-center">Быстрый поиск и заказ</div>
             </div>
-            <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
-              <span className="text-3xl mb-2">💬</span>
-              <div className="font-semibold mb-1">Поддержка</div>
-              <div className="text-gray-500">Всегда на связи</div>
+            <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center">
+              <span className="text-4xl mb-3">💬</span>
+              <div className="font-semibold mb-2 text-lg">Поддержка</div>
+              <div className="text-gray-500 text-center">Всегда на связи</div>
             </div>
           </div>
         </section>
+        {/* Блок отзывов */}
+        <section className="py-12">
+          <h2 className="text-3xl font-bold mb-8 text-center">Отзывы клиентов</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {reviews.map(r => (
+              <div key={r.id} className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center">
+                <span className="text-2xl font-bold text-blue-600 mb-2">{r.name}</span>
+                <div className="text-gray-700 text-center">{r.text}</div>
+              </div>
+            ))}
+          </div>
+        </section>
         {/* SEO-блок */}
-        <section className="py-10">
-          <h2 className="text-xl font-bold mb-4">О проекте Lapida</h2>
-          <p className="text-gray-700 mb-2">Lapida — современная платформа для поиска, заказа и управления товарами и услугами для мемориалов и компаний. Мы объединяем лучших поставщиков и предлагаем удобные инструменты для клиентов и бизнеса.</p>
-          <p className="text-gray-700">Наши преимущества: широкий выбор, честные цены, поддержка 24/7, удобный интерфейс и быстрая доставка.</p>
+        <section className="py-12">
+          <h2 className="text-2xl font-bold mb-6">О проекте Lapida</h2>
+          <p className="text-gray-700 mb-2 text-lg">Lapida — современная платформа для поиска, заказа и управления товарами и услугами для мемориалов и компаний. Мы объединяем лучших поставщиков и предлагаем удобные инструменты для клиентов и бизнеса.</p>
+          <p className="text-gray-700 text-lg">Наши преимущества: широкий выбор, честные цены, поддержка 24/7, удобный интерфейс и быстрая доставка.</p>
+        </section>
+        {/* Call to action */}
+        <section className="py-12 text-center">
+          <h2 className="text-3xl font-bold mb-4">Присоединяйтесь к Lapida!</h2>
+          <p className="text-lg text-gray-700 mb-6">Зарегистрируйте свою компанию или найдите нужный товар прямо сейчас.</p>
+          <button className="bg-blue-600 text-white px-10 py-4 rounded-lg font-semibold text-xl shadow hover:bg-blue-700 transition">Начать</button>
         </section>
       </main>
+      <footer className="bg-white/80 py-8 mt-12 border-t border-gray-200 text-center text-gray-500 text-sm">
+        &copy; {new Date().getFullYear()} Lapida. Все права защищены.
+      </footer>
     </div>
-  );
-};
 
-export default HomeTest;
