@@ -233,7 +233,7 @@ const VirtualCandles = ({ memorialId, memorial, canEdit = false }) => {
       {canEdit && (
         <button
           onClick={() => setShowGallery(true)}
-          className="fixed bottom-6 right-6 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 z-30 transform hover:scale-110 group"
+          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 z-30 transform hover:scale-110 group"
           title="Зажечь свечу памяти"
         >
           <div className="flex items-center justify-center">

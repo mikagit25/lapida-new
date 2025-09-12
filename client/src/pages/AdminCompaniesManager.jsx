@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 // TODO: заменить на реальный API для компаний
 const mockCompanies = [
@@ -7,7 +8,9 @@ const mockCompanies = [
   { _id: '2', name: 'ЗАО "Лютик"', inn: '0987654321', owner: 'Петров П.П.', isHidden: false },
 ];
 
+
 const AdminCompaniesManager = () => {
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -21,7 +24,7 @@ const AdminCompaniesManager = () => {
         const response = await companyService.getAll();
         setCompanies(Array.isArray(response) ? response : response.companies || []);
       } catch (err) {
-        setError('Ошибка загрузки компаний');
+  setError(t('admin_companies_error_loading'));
       } finally {
         setLoading(false);
       }
@@ -35,7 +38,7 @@ const AdminCompaniesManager = () => {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Удалить компанию?')) {
+  if (window.confirm(t('admin_companies_confirm_delete'))) {
       setCompanies(cs => cs.filter(c => c._id !== id));
       // TODO: DELETE /api/companies/:id
     }
@@ -43,20 +46,20 @@ const AdminCompaniesManager = () => {
 
   return (
     <div className="bg-white rounded-lg shadow p-6 mt-8">
-      <h2 className="text-xl font-semibold mb-4">Компании</h2>
+      <h2 className="text-xl font-semibold mb-4">{t('admin_companies_title')}</h2>
       {loading ? (
-        <div>Загрузка...</div>
+        <div>{t('admin_companies_loading')}</div>
       ) : error ? (
         <div className="text-red-600">{error}</div>
       ) : (
         <table className="w-full text-left border">
           <thead>
             <tr>
-              <th className="border px-2 py-1">Название</th>
-              <th className="border px-2 py-1">ИНН</th>
-              <th className="border px-2 py-1">Владелец</th>
-              <th className="border px-2 py-1">Статус</th>
-              <th className="border px-2 py-1">Действия</th>
+              <th className="border px-2 py-1">{t('admin_companies_col_name')}</th>
+              <th className="border px-2 py-1">{t('admin_companies_col_inn')}</th>
+              <th className="border px-2 py-1">{t('admin_companies_col_owner')}</th>
+              <th className="border px-2 py-1">{t('admin_companies_col_status')}</th>
+              <th className="border px-2 py-1">{t('admin_companies_col_actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -65,13 +68,13 @@ const AdminCompaniesManager = () => {
                 <td className="border px-2 py-1">{c.name}</td>
                 <td className="border px-2 py-1">{c.inn}</td>
                 <td className="border px-2 py-1">{c.owner}</td>
-                <td className="border px-2 py-1">{c.isHidden ? 'Скрыта' : 'Активна'}</td>
+                <td className="border px-2 py-1">{c.isHidden ? t('admin_companies_hidden') : t('admin_companies_active')}</td>
                 <td className="border px-2 py-1">
                   <button className="text-yellow-600 hover:underline mr-2" onClick={() => handleHide(c._id)}>
-                    {c.isHidden ? 'Показать' : 'Скрыть'}
+                    {c.isHidden ? t('admin_companies_show') : t('admin_companies_hide')}
                   </button>
-                  <Link className="text-blue-600 hover:underline mr-2" to={`/company-cabinet/${c._id}`}>Открыть</Link>
-                  <button className="text-red-600 hover:underline" onClick={() => handleDelete(c._id)}>Удалить</button>
+                  <Link className="text-blue-600 hover:underline mr-2" to={`/company-cabinet/${c._id}`}>{t('admin_companies_open')}</Link>
+                  <button className="text-red-600 hover:underline" onClick={() => handleDelete(c._id)}>{t('admin_companies_delete')}</button>
                 </td>
               </tr>
             ))}

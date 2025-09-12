@@ -225,7 +225,7 @@ const VirtualFlowers = ({ memorialId, memorial, canEdit = false }) => {
       {canEdit && (
         <button
           onClick={() => setShowGallery(true)}
-          className="fixed bottom-20 right-6 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 z-30 transform hover:scale-110 group"
+          className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 z-30 transform hover:scale-110 group"
           title="Оставить цветы памяти"
         >
           <div className="flex items-center justify-center">

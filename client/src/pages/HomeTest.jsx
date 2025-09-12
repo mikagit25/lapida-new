@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const Logo = () => (
   <div className="flex items-center space-x-2">
@@ -8,25 +9,26 @@ const Logo = () => (
 );
 
 const products = [
-  { id: 1, name: 'Гранитный памятник', desc: 'Классический памятник из гранита', img: require('../assets/home/product1.jpg') },
-  { id: 2, name: 'Мемориальная табличка', desc: 'Индивидуальный дизайн', img: require('../assets/home/product2.jpg') },
-  { id: 3, name: 'Ваза для цветов', desc: 'Каменная ваза для мемориалов', img: require('../assets/home/product3.jpg') },
-  { id: 4, name: 'Ограда', desc: 'Кованая ограда для участка', img: require('../assets/home/product4.jpg') },
+  { id: 1, nameKey: 'home_product1_name', descKey: 'home_product1_desc', img: require('../assets/home/product1.jpg') },
+  { id: 2, nameKey: 'home_product2_name', descKey: 'home_product2_desc', img: require('../assets/home/product2.jpg') },
+  { id: 3, nameKey: 'home_product3_name', descKey: 'home_product3_desc', img: require('../assets/home/product3.jpg') },
+  { id: 4, nameKey: 'home_product4_name', descKey: 'home_product4_desc', img: require('../assets/home/product4.jpg') },
 ];
 
 const companies = [
-  { id: 1, name: 'Мемориал-Сервис', desc: 'Изготовление памятников', img: require('../assets/home/company1.jpg') },
-  { id: 2, name: 'Вечная Память', desc: 'Ритуальные услуги', img: require('../assets/home/company2.jpg') },
-  { id: 3, name: 'Гранит-Мастер', desc: 'Гранитные изделия', img: require('../assets/home/company3.jpg') },
+  { id: 1, nameKey: 'home_company1_name', descKey: 'home_company1_desc', img: require('../assets/home/company1.jpg') },
+  { id: 2, nameKey: 'home_company2_name', descKey: 'home_company2_desc', img: require('../assets/home/company2.jpg') },
+  { id: 3, nameKey: 'home_company3_name', descKey: 'home_company3_desc', img: require('../assets/home/company3.jpg') },
 ];
 
 const reviews = [
-  { id: 1, name: 'Анна', text: 'Очень удобно! Заказ оформила за 5 минут, всё привезли вовремя.' },
-  { id: 2, name: 'Иван', text: 'Большой выбор и честные цены. Спасибо за сервис!' },
-  { id: 3, name: 'Мария', text: 'Нашла нужную компанию и быстро заказала памятник.' },
+  { id: 1, nameKey: 'home_review1_name', textKey: 'home_review1_text' },
+  { id: 2, nameKey: 'home_review2_name', textKey: 'home_review2_text' },
+  { id: 3, nameKey: 'home_review3_name', textKey: 'home_review3_text' },
 ];
 
 const HomeTest = () => {
+  const { t } = useTranslation();
   return (
     <div className="relative min-h-screen bg-gray-50">
       {/* Фоновое изображение */}
@@ -42,11 +44,11 @@ const HomeTest = () => {
         {/* Hero-блок */}
         <section className="flex flex-col md:flex-row items-center py-16 gap-8">
           <div className="flex-1">
-            <h1 className="text-5xl font-extrabold mb-6 text-gray-900 drop-shadow">Всё для мемориалов и компаний</h1>
-            <p className="text-xl text-gray-700 mb-8">Платформа для поиска, заказа и управления товарами и услугами для мемориалов, компаний и частных лиц.</p>
+            <h1 className="text-5xl font-extrabold mb-6 text-gray-900 drop-shadow">{t('home_hero_title')}</h1>
+            <p className="text-xl text-gray-700 mb-8">{t('home_hero_desc')}</p>
             <div className="flex gap-4">
-              <button className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow hover:bg-blue-700 transition">Посмотреть товары</button>
-              <button className="bg-white border border-blue-600 text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-50 transition">Компании</button>
+              <button className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow hover:bg-blue-700 transition">{t('home_hero_btn_products')}</button>
+              <button className="bg-white border border-blue-600 text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-50 transition">{t('home_hero_btn_companies')}</button>
             </div>
           </div>
           <div className="flex-1 flex justify-center">
@@ -55,30 +57,30 @@ const HomeTest = () => {
         </section>
         {/* Блок товаров */}
         <section className="py-12">
-          <h2 className="text-3xl font-bold mb-8 text-center">Популярные товары</h2>
+          <h2 className="text-3xl font-bold mb-8 text-center">{t('home_popular_products')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
             {products.map(p => (
               <div key={p.id} className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition">
                 <img src={p.img} alt={p.name} className="w-28 h-28 mb-4 rounded-lg object-cover" />
-                <div className="font-semibold mb-1 text-lg">{p.name}</div>
-                <div className="text-gray-500 mb-3 text-center">{p.desc}</div>
-                <button className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700">В корзину</button>
+                <div className="font-semibold mb-1 text-lg">{t(p.nameKey)}</div>
+                <div className="text-gray-500 mb-3 text-center">{t(p.descKey)}</div>
+                <button className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700">{t('add_to_cart')}</button>
               </div>
             ))}
           </div>
           <div className="text-center mt-8">
-            <button className="text-blue-600 hover:underline text-lg">Смотреть все товары</button>
+            <button className="text-blue-600 hover:underline text-lg">{t('see_all_products')}</button>
           </div>
         </section>
         {/* Блок компаний */}
         <section className="py-12">
-          <h2 className="text-3xl font-bold mb-8 text-center">Компании-партнёры</h2>
+          <h2 className="text-3xl font-bold mb-8 text-center">{t('home_partner_companies')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             {companies.map(c => (
               <div key={c.id} className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition">
                 <img src={c.img} alt={c.name} className="w-20 h-20 mb-4 rounded-full object-cover border-2 border-blue-200" />
-                <div className="font-semibold mb-1 text-lg">{c.name}</div>
-                <div className="text-gray-500 mb-3 text-center">{c.desc}</div>
+                <div className="font-semibold mb-1 text-lg">{t(c.nameKey)}</div>
+                <div className="text-gray-500 mb-3 text-center">{t(c.descKey)}</div>
                 <button className="bg-blue-50 text-blue-700 px-5 py-2 rounded hover:bg-blue-100">Подробнее</button>
               </div>
             ))}

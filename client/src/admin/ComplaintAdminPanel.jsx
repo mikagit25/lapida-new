@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from '../config/api';
 import { apiFetch } from '../services/apiFetch';
+import { useTranslation } from 'react-i18next';
 
 const ComplaintAdminPanel = () => {
+  const { t } = useTranslation();
   const [complaints, setComplaints] = useState([]);
 
   useEffect(() => {
@@ -13,7 +15,7 @@ const ComplaintAdminPanel = () => {
 
   return (
     <div>
-      <h3>Жалобы</h3>
+      <h3>{t('admin_complaints_title')}</h3>
       <ul>
         {complaints.map((c, idx) => (
           <li key={idx}>{c.type}: {c.text} — {c.status}</li>

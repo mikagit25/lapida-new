@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { authService, userService } from '../services/api';
 import { fixImageUrl } from '../utils/imageUrl';
@@ -34,6 +35,7 @@ import GoToConnectionsButton from '../components/GoToConnectionsButton';
 import DemoFeaturesBlock from '../components/DemoFeaturesBlock';
 
 const Profile = () => {
+  const { t } = useTranslation();
 
   const { user, updateProfile } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -85,7 +87,7 @@ const Profile = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Загрузка профиля...</p>
+          <p className="mt-4 text-gray-600">{t('profile_loading')}</p>
         </div>
       </div>
     );
@@ -110,11 +112,11 @@ const Profile = () => {
                 )}
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{user.name || 'Пользователь'}</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{user.name || t('user')}</h1>
                 <p className="text-gray-600">{user.email}</p>
                 {user.role === 'admin' && (
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                    Администратор
+                    {t('admin')}
                   </span>
                 )}
               </div>
@@ -127,18 +129,18 @@ const Profile = () => {
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8 px-6" aria-label="Tabs">
               {[
-                { id: 'overview', name: 'Обзор', icon: '👤' },
-                { id: 'personal', name: 'Личные данные', icon: '📝' },
-                { id: 'activity', name: 'История активности', icon: '📊' },
-                { id: 'preferences', name: 'Предпочтения', icon: '🎛️' },
-                { id: 'memorials', name: 'Мои мемориалы', icon: '🏛️' },
-                { id: 'my-activity', name: 'Мои комментарии', icon: '💬' },
-                { id: 'settings', name: 'Настройки', icon: '⚙️' }
+                { id: 'overview', name: t('tab_overview'), icon: '👤' },
+                { id: 'personal', name: t('tab_personal'), icon: '📝' },
+                { id: 'activity', name: t('tab_activity'), icon: '📊' },
+                { id: 'preferences', name: t('tab_preferences'), icon: '🎛️' },
+                { id: 'memorials', name: t('tab_memorials'), icon: '🏛️' },
+                { id: 'my-activity', name: t('tab_my_activity'), icon: '💬' },
+                { id: 'settings', name: t('tab_settings'), icon: '⚙️' }
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`${
+                  className={`$
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -171,37 +173,37 @@ const Profile = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2">
                     <div className="bg-gray-50 rounded-lg p-6 mb-6">
-                      <h2 className="text-lg font-semibold text-gray-900 mb-4">Информация о профиле</h2>
+                      <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('profile_info')}</h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Имя</h3>
-                          <p className="mt-1 text-lg text-gray-900">{user.name || 'Не указано'}</p>
+                          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">{t('name')}</h3>
+                          <p className="mt-1 text-lg text-gray-900">{user.name || t('not_specified')}</p>
                         </div>
                         <div>
                           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Email</h3>
-                          <p className="mt-1 text-lg text-gray-900">{user.email || 'Не указано'}</p>
+                          <p className="mt-1 text-lg text-gray-900">{user.email || t('not_specified')}</p>
                         </div>
                         <div>
-                          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Телефон</h3>
-                          <p className="mt-1 text-lg text-gray-900">{user.phone || 'Не указано'}</p>
+                          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">{t('phone')}</h3>
+                          <p className="mt-1 text-lg text-gray-900">{user.phone || t('not_specified')}</p>
                         </div>
                         <div>
-                          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Дата регистрации</h3>
+                          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">{t('registration_date')}</h3>
                           <p className="mt-1 text-lg text-gray-900">
-                            {user.createdAt ? new Date(user.createdAt).toLocaleDateString('ru-RU') : 'Не указано'}
+                            {user.createdAt ? new Date(user.createdAt).toLocaleDateString('ru-RU') : t('not_specified')}
                           </p>
                         </div>
                       </div>
                       {user.bio && (
                         <div className="mt-4">
-                          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">О себе</h3>
+                          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">{t('about_me')}</h3>
                           <p className="mt-1 text-lg text-gray-900 whitespace-pre-wrap">{user.bio}</p>
                         </div>
                       )}
                     </div>
                     {/* Новый раздел галереи пользователя */}
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
-                      <h2 className="text-lg font-semibold text-gray-900 mb-4">Галерея пользователя</h2>
+                      <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('user_gallery')}</h2>
                       <Gallery
                         images={user.gallery}
                         canEdit={true}
@@ -212,19 +214,19 @@ const Profile = () => {
                   </div>
                   <div>
                     <div className="bg-gray-50 rounded-lg p-6">
-                      <h2 className="text-lg font-semibold text-gray-900 mb-4">Статистика</h2>
+                      <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('statistics')}</h2>
                       <div className="space-y-4">
                         <div className="text-center">
                           <div className="text-2xl font-bold text-blue-600">{stats.memorialsCreated || 0}</div>
-                          <div className="text-sm text-gray-600">Созданных мемориалов</div>
+                          <div className="text-sm text-gray-600">{t('memorials_created')}</div>
                         </div>
                         <div className="text-center">
                           <div className="text-2xl font-bold text-green-600">{stats.flowersLeft || 0}</div>
-                          <div className="text-sm text-gray-600">Оставленных цветов</div>
+                          <div className="text-sm text-gray-600">{t('flowers_left')}</div>
                         </div>
                         <div className="text-center">
                           <div className="text-2xl font-bold text-purple-600">{stats.commentsLeft || 0}</div>
-                          <div className="text-sm text-gray-600">Комментариев</div>
+                          <div className="text-sm text-gray-600">{t('comments_left')}</div>
                         </div>
                       </div>
                     </div>

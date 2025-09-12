@@ -111,6 +111,55 @@ const virtualItemsService = {
       console.error('Error adding candle:', error);
       throw error;
     }
+  },
+
+  // Получить все предметы определённого типа (gift, prayer, note, dove)
+  async getItems(type, memorialId) {
+    try {
+      const response = await apiFetch(`${API_BASE_URL}/virtual/${type}/${memorialId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      return result.items || [];
+    } catch (error) {
+      console.error(`Error fetching ${type}:`, error);
+      return [];
+    }
+  },
+
+  // Добавить предмет определённого типа (gift, prayer, note, dove)
+  async addItem(type, memorialId, itemData) {
+    try {
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      const response = await apiFetch(`${API_BASE_URL}/virtual/${type}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          memorialId,
+          ...itemData
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      return result.item;
+    } catch (error) {
+      console.error(`Error adding ${type}:`, error);
+      throw error;
+    }
   }
 };
 

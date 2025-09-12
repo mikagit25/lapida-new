@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../config/api';
 import { apiFetch } from '../services/apiFetch';
 import CompanyRegionSearch from '../components/CompanyRegionSearch';
 
 const Companies = () => {
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -99,11 +101,11 @@ const Companies = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold mb-6">Каталог компаний</h1>
+  <h1 className="text-3xl font-bold mb-6">{t('companies_title')}</h1>
         <div className="flex flex-wrap gap-4 mb-6 items-center">
           <input
             type="text"
-            placeholder="Поиск по названию..."
+            placeholder={t('search_by_name')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="border px-3 py-2 rounded-md"
@@ -113,9 +115,9 @@ const Companies = () => {
             onChange={e => setFilter(e.target.value)}
             className="border px-3 py-2 rounded-md"
           >
-            <option value="all">Все</option>
-            <option value="verified">Проверенные</option>
-            <option value="pending">На проверке</option>
+            <option value="all">{t('all')}</option>
+            <option value="verified">{t('verified')}</option>
+            <option value="pending">{t('pending')}</option>
           </select>
           <CompanyRegionSearch region={region} setRegion={setRegion} onGeoSearch={handleGeoSearch} />
           <button
@@ -123,22 +125,22 @@ const Companies = () => {
             onClick={() => setSort(sort === 'newest' ? 'oldest' : 'newest')}
             type="button"
           >
-            {sort === 'newest' ? 'Сначала новые' : 'Сначала старые'}
+            {sort === 'newest' ? t('sort_newest') : t('sort_oldest')}
           </button>
           <button
             className="bg-gray-200 px-3 py-2 rounded hover:bg-gray-300 text-sm"
             onClick={handleDetectMe}
             type="button"
           >
-            Ближайшие ко мне
+            {t('nearest_to_me')}
           </button>
         </div>
         {loading ? (
-          <div>Загрузка...</div>
+          <div>{t('loading')}</div>
         ) : error ? (
           <div className="text-red-600">{error}</div>
         ) : filtered.length === 0 ? (
-          <div>Нет компаний по вашему запросу.</div>
+          <div>{t('no_companies_found')}</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map(company => (
@@ -152,22 +154,22 @@ const Companies = () => {
                 )}
                 <h2 className="text-xl font-semibold mb-2">{company.name}</h2>
                 <p className="text-gray-600 mb-2">{company.address}</p>
-                <p className="text-gray-500 mb-2">ИНН: {company.inn}</p>
+                <p className="text-gray-500 mb-2">{t('inn')}: {company.inn}</p>
                 <p className="text-sm mb-2">{company.description}</p>
                 <div className="flex-1" />
                 <div className="flex items-center gap-2 mt-2">
                   {company.status === 'verified' && (
-                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Проверенная</span>
+                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">{t('verified')}</span>
                   )}
                   {company.status === 'pending' && (
-                    <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">На проверке</span>
+                    <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">{t('pending')}</span>
                   )}
                 </div>
                 <Link
                   to={company.customSlug ? `/company/${company.customSlug}` : `/company/${company._id}`}
                   className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center"
                 >
-                  Подробнее
+                  {t('more_details')}
                 </Link>
               </div>
             ))}

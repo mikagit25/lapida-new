@@ -9,7 +9,7 @@ const virtualItemSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ['flower', 'candle']
+    enum: ['flower', 'candle', 'gift', 'prayer', 'note', 'dove'] // расширено для новых типов
   },
   itemType: {
     type: String,
@@ -17,15 +17,24 @@ const virtualItemSchema = new mongoose.Schema({
   },
   icon: {
     type: String,
-    required: true
+    required: function() {
+      // icon обязателен только для flower и candle
+      return this.type === 'flower' || this.type === 'candle';
+    }
   },
   name: {
     type: String,
-    required: true
+    required: function() {
+      // name обязателен только для flower и candle
+      return this.type === 'flower' || this.type === 'candle';
+    }
   },
   color: {
     type: String,
-    required: true
+    required: function() {
+      // color обязателен только для flower и candle
+      return this.type === 'flower' || this.type === 'candle';
+    }
   },
   comment: {
     type: String,

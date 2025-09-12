@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const PsychologistSessions = () => {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,19 +21,19 @@ const PsychologistSessions = () => {
         setLoading(false);
       })
       .catch(e => {
-        setError('Ошибка загрузки истории');
+        setError(t('sessions_load_error'));
         setLoading(false);
       });
-  }, [isAuthenticated]);
+  }, [isAuthenticated, t]);
 
-  if (!isAuthenticated) return <div className="max-w-xl mx-auto py-10 px-4 text-red-600">Только для авторизованных пользователей</div>;
+  if (!isAuthenticated) return <div className="max-w-xl mx-auto py-10 px-4 text-red-600">{t('auth_only')}</div>;
 
   return (
     <div className="max-w-xl mx-auto py-10 px-4">
-      <h1 className="text-2xl font-bold mb-4">История сессий AI-психолога</h1>
-      {loading && <div>Загрузка...</div>}
+      <h1 className="text-2xl font-bold mb-4">{t('psychologist_sessions_title')}</h1>
+      {loading && <div>{t('loading')}</div>}
       {error && <div className="text-red-600">{error}</div>}
-      {!loading && sessions.length === 0 && <div>Нет сохранённых сессий.</div>}
+      {!loading && sessions.length === 0 && <div>{t('no_sessions')}</div>}
       <ul className="space-y-4">
         {sessions.map(session => (
           <li key={session._id} className="border rounded p-3 bg-gray-50">
@@ -40,10 +42,10 @@ const PsychologistSessions = () => {
               {session.messages && session.messages.length > 0
                 ? session.messages.slice(-2).map((m, i) => (
                     <div key={i} className={m.role === 'user' ? 'text-blue-700' : 'text-green-700'}>
-                      <b>{m.role === 'user' ? 'Вы' : 'AI'}:</b> {m.content}
+                      <b>{m.role === 'user' ? t('you') : 'AI'}:</b> {m.content}
                     </div>
                   ))
-                : 'Нет сообщений'}
+                : t('no_messages')}
             </div>
           </li>
         ))}

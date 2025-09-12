@@ -3,6 +3,7 @@
  * Не подключён к основному приложению, использовать только после тестирования!
  */
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const PsychologistVoiceInput = ({ onResult, disabled }) => {
   const [listening, setListening] = useState(false);
@@ -10,7 +11,7 @@ const PsychologistVoiceInput = ({ onResult, disabled }) => {
 
   const startRecognition = () => {
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-      alert('Ваш браузер не поддерживает голосовой ввод');
+  alert(t('voice_not_supported'));
       return;
     }
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -42,7 +43,7 @@ const PsychologistVoiceInput = ({ onResult, disabled }) => {
       disabled={disabled}
       type="button"
     >
-      {listening ? 'Стоп' : 'Голосом'}
+  {listening ? t('stop') : t('voice_input')}
     </button>
   );
 };

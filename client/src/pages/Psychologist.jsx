@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 // Модальное окно экстренной помощи
 function EmergencyHelpModal({ open, onClose, lang = 'ru' }) {
   const closeBtnRef = useRef(null);
@@ -83,17 +84,10 @@ import ExportChatEmailModal from '../components/ExportChatEmailModal';
 const MAX_MESSAGES = 10;
 
 
-const SYSTEM_MESSAGES = {
-  ru: 'Здравствуйте! Я виртуальный психолог-консультант. Можете рассказать о своей проблеме или просто поделиться чувствами. Помните: этот сервис не заменяет профессиональную помощь.',
-  en: 'Hello! I am a virtual psychologist. You can share your feelings or describe your problem. Please note: this service does not replace professional help.',
-  de: 'Hallo! Ich bin ein virtueller Psychologe. Sie können Ihre Gefühle mitteilen oder Ihr Problem beschreiben. Bitte beachten Sie: Dieser Service ersetzt keine professionelle Hilfe.',
-  es: '¡Hola! Soy un psicólogo virtual. Puedes compartir tus sentimientos или describir tu problema. Ten en cuenta: este servicio no sustituye la ayuda profesional.'
-};
-
 const initialMessages = [
   {
     role: 'system',
-    content: SYSTEM_MESSAGES['ru']
+    content: '' // will be set in useEffect
   }
 ];
 
@@ -101,6 +95,7 @@ const initialMessages = [
 import { useAuth } from '../context/AuthContext';
 
 const Psychologist = () => {
+  const { t, i18n } = useTranslation();
   const { user, isAuthenticated } = useAuth();
   const [helpOpen, setHelpOpen] = useState(false);
   // Фокус на поле ввода после закрытия модального окна экстренной помощи
@@ -109,7 +104,7 @@ const Psychologist = () => {
       inputRef.current.focus();
     }
   }, [helpOpen]);
-  const [lang, setLang] = useState('ru');
+  const [lang, setLang] = useState(i18n.language || 'ru');
   const paid = user?.paid;
   // Сохраняем историю в localStorage для анонимных (24ч)
   const LOCAL_KEY = 'psychologist_chat_history';
@@ -123,7 +118,7 @@ const Psychologist = () => {
         }
       }
     } catch {}
-    return [{ role: 'system', content: SYSTEM_MESSAGES[lang] }];
+    return [{ role: 'system', content: t('psychologist_system_message', { lng: lang }) }];
   });
   const [input, setInput] = useState('');
   const inputRef = useRef(null);
@@ -209,7 +204,7 @@ const Psychologist = () => {
   };
 
   const handleNewSession = () => {
-    setMessages([{ role: 'system', content: SYSTEM_MESSAGES[lang] }]);
+    setMessages([{ role: 'system', content: t('psychologist_system_message', { lng: lang }) }]);
     setInput('');
     setLimitReached(false);
     if (!user || !user._id) {
@@ -293,19 +288,17 @@ const Psychologist = () => {
           className="bg-gray-100 text-gray-700 px-3 py-1 rounded text-xs font-semibold hover:bg-gray-200 ml-0 sm:ml-2 mt-2 sm:mt-0"
           onClick={handleNewSession}
         >
-          Новая сессия
+          {t('new_session')}
         </button>
   <EmergencyHelpModal open={helpOpen} onClose={() => setHelpOpen(false)} lang={lang} />
         <button
           className="bg-red-100 text-red-700 px-3 py-1 rounded text-xs font-semibold hover:bg-red-200 relative group"
           onClick={() => setHelpOpen(true)}
-          aria-label={lang==='ru' ? 'Экстренная помощь — телефоны доверия и службы поддержки' : 'Emergency help — helplines and support'}
+          aria-label={t('emergency_help_aria')}
         >
-          Экстренная помощь
+          {t('emergency_help')}
           <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1 w-max max-w-xs bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity" role="tooltip">
-            {lang==='ru'
-              ? 'Если вам срочно нужна поддержка, нажмите для телефонов доверия и служб помощи.'
-              : 'If you urgently need support, click for helplines and emergency contacts.'}
+            {t('emergency_help_tooltip')}
           </span>
         </button>
         <div>
@@ -314,7 +307,8 @@ const Psychologist = () => {
             value={lang}
             onChange={e => {
               setLang(e.target.value);
-              setMessages([{ role: 'system', content: SYSTEM_MESSAGES[e.target.value] }]);
+              i18n.changeLanguage(e.target.value);
+              setMessages([{ role: 'system', content: t('psychologist_system_message', { lng: e.target.value }) }]);
             }}
           >
             <option value="ru">Русский</option>
@@ -330,13 +324,13 @@ const Psychologist = () => {
           className="bg-red-100 text-red-700 px-3 py-1 rounded text-xs font-semibold hover:bg-red-200"
           onClick={() => setHelpOpen(true)}
         >
-          Экстренная помощь
+          {t('emergency_help')}
         </button>
       </div>
-  <h1 className="text-xl sm:text-2xl font-bold mb-4 text-center">AI-психолог-консультант</h1>
+  <h1 className="text-xl sm:text-2xl font-bold mb-4 text-center">{t('psychologist_title')}</h1>
       <div className="mb-2 flex justify-center">
         <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${paid ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-          {paid ? 'Платный аккаунт: безлимит' : `Бесплатно: ${MAX_MESSAGES - userMessagesCount} сообщений осталось`}
+          {paid ? t('paid_account') : t('free_left', { count: MAX_MESSAGES - userMessagesCount })}
         </span>
       </div>
       <PsychologistWarningBlock />
@@ -379,8 +373,8 @@ const Psychologist = () => {
   {/* Кнопки экспорта и уведомления теперь внутри блока истории чата */}
       {!paid && limitReached && (
         <div className="text-red-500 text-xs sm:text-sm mt-2 text-center">
-          Достигнут лимит бесплатных сообщений.<br />
-          <a href="/psychologist-subscription" className="underline text-blue-600">Оформить подписку</a> или зарегистрируйтесь для продолжения.
+          {t('limit_reached')}<br />
+          <a href="/psychologist-subscription" className="underline text-blue-600">{t('subscribe_link')}</a> {t('or_register')}
         </div>
       )}
       </div>

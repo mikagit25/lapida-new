@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Модальное окно для экспорта истории чата на email
@@ -10,12 +11,13 @@ import React, { useState } from 'react';
 const ExportChatEmailModal = ({ open, onClose, messages }) => {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('');
+  const { t } = useTranslation();
   if (!open) return null;
 
   const handleSend = async () => {
     setStatus('');
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-      setStatus('Введите корректный email');
+      setStatus(t('input_email'));
       return;
     }
     let txt = '';
@@ -24,7 +26,7 @@ const ExportChatEmailModal = ({ open, onClose, messages }) => {
       const who = m.role === 'user' ? 'Пользователь' : m.role === 'ai' ? 'AI' : 'Система';
       txt += `[${time}] ${who}:\n${m.content}\n\n`;
     });
-    setStatus('Отправка...');
+  setStatus(t('send'));
     try {
       const res = await fetch('/api/psychologist/send-chat-history', {
         method: 'POST',
@@ -32,13 +34,13 @@ const ExportChatEmailModal = ({ open, onClose, messages }) => {
         body: JSON.stringify({ email, text: txt })
       });
       if (res.ok) {
-        setStatus('История отправлена!');
+        setStatus(t('sent'));
         setTimeout(() => { onClose(); setStatus(''); setEmail(''); }, 2000);
       } else {
-        setStatus('Ошибка отправки');
+        setStatus(t('send_error'));
       }
     } catch {
-      setStatus('Ошибка сети');
+      setStatus(t('network_error'));
     }
   };
 
@@ -46,11 +48,11 @@ const ExportChatEmailModal = ({ open, onClose, messages }) => {
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg max-w-xs w-full p-6 relative">
         <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={onClose} aria-label="Закрыть">&times;</button>
-        <h2 className="text-lg font-bold mb-2">Отправить историю на email</h2>
+  <h2 className="text-lg font-bold mb-2">{t('send_to_email')}</h2>
         <input
           type="email"
           className="border rounded px-2 py-1 w-full mb-2"
-          placeholder="Ваш email"
+          placeholder={t('your_email')}
           value={email}
           onChange={e=>setEmail(e.target.value)}
           autoFocus
@@ -60,7 +62,7 @@ const ExportChatEmailModal = ({ open, onClose, messages }) => {
           onClick={handleSend}
           disabled={!email}
         >
-          Отправить
+          {t('send')}
         </button>
         {status && <div className="text-xs text-center mt-1" style={{color:status.includes('ошиб')?'#c00':'#090'}}>{status}</div>}
       </div>

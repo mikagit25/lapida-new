@@ -1,11 +1,12 @@
-import { apiFetch } from '../services/apiFetch';
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import CompanyProfile from './CompanyProfile';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 export default function CompanyPage() {
+  const { t } = useTranslation();
   const { id, slug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -13,7 +14,6 @@ export default function CompanyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { user, isLoading, isAuthenticated } = useAuth();
-  console.log('CompanyPage useAuth user:', user);
 
   useEffect(() => {
     setLoading(true);
@@ -26,25 +26,25 @@ export default function CompanyPage() {
         url = `/api/companies/by-slug/${id}`;
       }
     } else {
-      setError('Некорректный адрес компании');
+  setError(t('company_invalid_address'));
       setLoading(false);
       return;
     }
     apiFetch(url)
       .then(res => {
-        if (!res.ok) throw new Error('Компания не найдена');
+  if (!res.ok) throw new Error(t('company_not_found'));
         return res.json();
       })
       .then(data => {
         if (data.company) {
           setCompany(data.company);
         } else {
-          setError('Компания не найдена');
+          setError(t('company_not_found'));
         }
         setLoading(false);
       })
       .catch(() => {
-        setError('Компания не найдена');
+        setError(t('company_not_found'));
         setLoading(false);
       });
   }, [id, location.pathname]);
@@ -52,13 +52,13 @@ export default function CompanyPage() {
   if (loading || isLoading || !isAuthenticated || !user || !user._id) {
     return (
       <div className="p-8">
-        <div>Загрузка пользователя...</div>
+        <div>{t('loading_user')}</div>
       </div>
     );
   }
 
   if (error) return <div className="p-8 text-red-600">{error}</div>;
-  if (!company) return <div className="p-8">Компания не найдена</div>;
+  if (!company) return <div className="p-8">{t('company_not_found')}</div>;
 
   const news = company.news || [];
   const team = company.team || [];

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 // TODO: заменить на реальный API для мемориалов
 const mockMemorials = [
@@ -7,7 +8,9 @@ const mockMemorials = [
   { _id: 'm2', title: 'Петров Петр Петрович', createdBy: 'user2', isPublic: false, isHidden: false },
 ];
 
+
 const AdminMemorialsManager = () => {
+  const { t } = useTranslation();
   const [memorials, setMemorials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -21,7 +24,7 @@ const AdminMemorialsManager = () => {
         const response = await newMemorialService.getAll();
         setMemorials(response);
       } catch (err) {
-        setError('Ошибка загрузки мемориалов');
+  setError(t('admin_memorials_error_loading'));
       } finally {
         setLoading(false);
       }
@@ -35,14 +38,14 @@ const AdminMemorialsManager = () => {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Удалить мемориал?')) {
+  if (window.confirm(t('admin_memorials_confirm_delete'))) {
       const deleteMemorial = async () => {
         try {
           const { newMemorialService } = await import('../services/api');
           await newMemorialService.remove(id);
           setMemorials(ms => ms.filter(m => m._id !== id));
         } catch (err) {
-          alert('Ошибка удаления мемориала');
+          alert(t('admin_memorials_error_delete'));
         }
       };
       deleteMemorial();
@@ -52,23 +55,23 @@ const AdminMemorialsManager = () => {
   return (
     <div className="bg-white rounded-lg shadow p-6 mt-8">
       <h2 className="text-xl font-semibold mb-4">
-        Мемориалы
+        {t('admin_memorials_title')}
         {memorials.length === 1 && memorials[0].title ? `: ${memorials[0].title}` : ''}
       </h2>
       {loading ? (
-        <div>Загрузка...</div>
+        <div>{t('admin_memorials_loading')}</div>
       ) : error ? (
         <div className="text-red-600">{error}</div>
       ) : (
         <table className="w-full text-left border">
           <thead>
             <tr>
-              <th className="border px-2 py-1">Имя мемориала</th>
-              <th className="border px-2 py-1">Заголовок</th>
-              <th className="border px-2 py-1">Автор</th>
-              <th className="border px-2 py-1">Публичный</th>
-              <th className="border px-2 py-1">Статус</th>
-              <th className="border px-2 py-1">Действия</th>
+              <th className="border px-2 py-1">{t('admin_memorials_col_name')}</th>
+              <th className="border px-2 py-1">{t('admin_memorials_col_title')}</th>
+              <th className="border px-2 py-1">{t('admin_memorials_col_author')}</th>
+              <th className="border px-2 py-1">{t('admin_memorials_col_public')}</th>
+              <th className="border px-2 py-1">{t('admin_memorials_col_status')}</th>
+              <th className="border px-2 py-1">{t('admin_memorials_col_actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -81,11 +84,11 @@ const AdminMemorialsManager = () => {
                     ? (m.createdBy.name || m.createdBy.email || m.createdBy._id)
                     : m.createdBy}
                 </td>
-                <td className="border px-2 py-1">{m.isPublic ? 'Да' : 'Нет'}</td>
-                <td className="border px-2 py-1">{m.isHidden ? 'Скрыт' : 'Активен'}</td>
+                <td className="border px-2 py-1">{m.isPublic ? t('admin_memorials_yes') : t('admin_memorials_no')}</td>
+                <td className="border px-2 py-1">{m.isHidden ? t('admin_memorials_hidden') : t('admin_memorials_active')}</td>
                 <td className="border px-2 py-1">
                   <button className="text-yellow-600 hover:underline mr-2" onClick={() => handleHide(m._id)}>
-                    {m.isHidden ? 'Показать' : 'Скрыть'}
+                    {m.isHidden ? t('admin_memorials_show') : t('admin_memorials_hide')}
                   </button>
                   <Link
                     className="text-blue-600 hover:underline mr-2"
@@ -96,8 +99,8 @@ const AdminMemorialsManager = () => {
                           ? `/memorial/${m.shareUrl}`
                           : `/memorial/${m._id}`
                     }
-                  >Открыть</Link>
-                  <button className="text-red-600 hover:underline" onClick={() => handleDelete(m._id)}>Удалить</button>
+                  >{t('admin_memorials_open')}</Link>
+                  <button className="text-red-600 hover:underline" onClick={() => handleDelete(m._id)}>{t('admin_memorials_delete')}</button>
                 </td>
               </tr>
             ))}

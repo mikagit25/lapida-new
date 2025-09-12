@@ -1,7 +1,9 @@
 /** Компонент поля ввода и кнопки отправки для AI-психолога */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const PsychologistChatInput = ({ input, setInput, onSend, loading, limitReached, inputRef }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex gap-2 items-end">
       <textarea
@@ -20,7 +22,7 @@ const PsychologistChatInput = ({ input, setInput, onSend, loading, limitReached,
           }
         }}
         disabled={loading || limitReached}
-        placeholder={limitReached ? 'Лимит сообщений исчерпан' : 'Введите сообщение...'}
+        placeholder={limitReached ? t('chat_limit_reached') : t('chat_input_placeholder')}
       />
       <button
         className={`ml-2 px-4 py-1 rounded bg-blue-600 text-white font-semibold text-sm disabled:bg-gray-300 disabled:text-gray-500 flex items-center justify-center min-w-[90px]`}
@@ -31,7 +33,7 @@ const PsychologistChatInput = ({ input, setInput, onSend, loading, limitReached,
           }
         }}
         disabled={loading || limitReached || !input.trim()}
-        aria-label="Отправить сообщение"
+        aria-label={t('send_message')}
       >
         {loading ? (
           <svg className="animate-spin h-5 w-5 mr-1 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -39,7 +41,7 @@ const PsychologistChatInput = ({ input, setInput, onSend, loading, limitReached,
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
           </svg>
         ) : null}
-        {loading ? '...' : 'Отправить'}
+        {loading ? '...' : t('send')}
       </button>
     </div>
   );

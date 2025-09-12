@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { fixImageUrl } from '../utils/imageUrl';
+import { API_BASE_URL } from '../config/api';
 
 function ImageWithAsyncUrl({ image, alt, className }) {
   const [imgUrl, setImgUrl] = React.useState('');
@@ -13,7 +14,6 @@ function ImageWithAsyncUrl({ image, alt, className }) {
   }, [image]);
   return <img src={imgUrl} alt={alt} className={className} />;
 }
-import { getApiBaseUrl } from '../config/api';
 
 const AvatarBackgroundManager = ({ 
   memorial,
@@ -51,18 +51,10 @@ const AvatarBackgroundManager = ({
       
       console.log('AvatarBackgroundManager: Загружаем фон аватара для мемориала:', memorial._id);
       
-      const API_BASE_URL = await getApiBaseUrl();
-      const [apiBaseUrl, setApiBaseUrl] = React.useState('');
-      React.useEffect(() => {
-        getApiBaseUrl().then(setApiBaseUrl);
-      }, []);
-      if (!apiBaseUrl) return '';
-      const response = await fetch(`${apiBaseUrl}/memorials/${memorial._id}/avatar-background`, {
+      const response = await fetch(`${API_BASE_URL}/memorials/${memorial._id}/avatar-background`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token') || localStorage.getItem('authToken')}`
-        },
-        body: formData
+        body: formData,
+        credentials: 'include',
       });
 
       console.log('AvatarBackgroundManager: Ответ сервера:', response.status, response.statusText);
@@ -107,11 +99,6 @@ const AvatarBackgroundManager = ({
     if (!cleanPath.startsWith('/')) {
       cleanPath = '/' + cleanPath;
     }
-    const [apiBaseUrlForGet, setApiBaseUrlForGet] = React.useState('');
-    React.useEffect(() => {
-      getApiBaseUrl().then(setApiBaseUrlForGet);
-    }, []);
-    if (!apiBaseUrlForGet) return '';
     return `${API_BASE_URL}${cleanPath}`;
   };
 

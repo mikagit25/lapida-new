@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import ProductCard from '../components/ProductCard';
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../config/api';
 import { apiFetch } from '../services/apiFetch';
 
 export default function Products() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
@@ -51,40 +53,40 @@ export default function Products() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold mb-6">Каталог товаров</h1>
+  <h1 className="text-3xl font-bold mb-6">{t('products_title')}</h1>
         <div className="flex flex-wrap gap-4 mb-6">
           <input
             type="text"
-            placeholder="Поиск по названию или описанию..."
+            placeholder={t('search_by_name_or_desc')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="border px-3 py-2 rounded w-64"
           />
           <input
             type="text"
-            placeholder="Короткий адрес компании (например, comp1)"
+            placeholder={t('company_short_slug')}
             value={companySlug}
             onChange={e => setCompanySlug(e.target.value)}
             className="border px-3 py-2 rounded w-64"
           />
           <select value={category} onChange={e => setCategory(e.target.value)} className="border px-3 py-2 rounded">
-            <option value="">Все категории</option>
+            <option value="">{t('all_categories')}</option>
             {categories.map(cat => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
           <select value={sort} onChange={e => setSort(e.target.value)} className="border px-3 py-2 rounded">
-            <option value="new">Сначала новые</option>
-            <option value="price-asc">Цена по возрастанию</option>
-            <option value="price-desc">Цена по убыванию</option>
+            <option value="new">{t('sort_newest')}</option>
+            <option value="price-asc">{t('sort_price_asc')}</option>
+            <option value="price-desc">{t('sort_price_desc')}</option>
           </select>
         </div>
         {loading ? (
-          <div>Загрузка...</div>
+          <div>{t('loading')}</div>
         ) : error ? (
           <div className="text-red-600">{error}</div>
         ) : products.length === 0 ? (
-          <div>Нет товаров по вашему запросу.</div>
+          <div>{t('no_products_found')}</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {products.map(product => (

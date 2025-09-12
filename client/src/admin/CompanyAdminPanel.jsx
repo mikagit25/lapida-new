@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from '../config/api';
 import { apiFetch } from '../services/apiFetch';
+import { useTranslation } from 'react-i18next';
 
 const CompanyAdminPanel = () => {
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState([]);
 
   useEffect(() => {
@@ -13,7 +15,7 @@ const CompanyAdminPanel = () => {
 
   return (
     <div>
-      <h3>Компании</h3>
+      <h3>{t('admin_companies_title')}</h3>
       <ul>
         {companies.map((c, idx) => (
           <li key={idx}>{c.name}</li>

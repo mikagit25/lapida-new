@@ -3,13 +3,15 @@
  * Не подключён к основному приложению, использовать только после тестирования!
  */
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const PsychologistVoiceOutput = ({ text, lang = 'ru-RU', disabled }) => {
+  const { t } = useTranslation();
   const [speaking, setSpeaking] = useState(false);
 
   const speak = () => {
     if (!('speechSynthesis' in window)) {
-      alert('Ваш браузер не поддерживает озвучку');
+      alert(t('voice_output_not_supported'));
       return;
     }
     const utter = new window.SpeechSynthesisUtterance(text);
@@ -32,7 +34,7 @@ const PsychologistVoiceOutput = ({ text, lang = 'ru-RU', disabled }) => {
       disabled={disabled || !text}
       type="button"
     >
-      {speaking ? 'Стоп' : 'Озвучить'}
+      {speaking ? t('stop') : t('voice_output')}
     </button>
   );
 };

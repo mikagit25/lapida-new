@@ -120,7 +120,9 @@ function AsyncImage({ url, alt, className, onError }) {
   return <img src={imgUrl} alt={alt} className={className} onError={onError} />;
 }
 
+import { useTranslation } from 'react-i18next';
 const Navigation = () => {
+  const { t } = useTranslation();
   const { user, isAuthenticated, logout } = useAuth();
   useEffect(() => {
     if (user?.avatar) {
@@ -134,19 +136,18 @@ const Navigation = () => {
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 text-xl font-bold text-gray-900">Lapida</Link>
             <div className="hidden md:ml-6 md:flex md:space-x-8">
-              {/* <Link to="/" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">Главная</Link> */}
-              {/* Ссылка 'Личный кабинет' скрыта, переход теперь только по имени пользователя */}
-              <Link to="/memorials" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">Мемориалы</Link>
-              <Link to="/companies" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">Компании</Link>
-              <Link to="/users-catalog" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">Пользователи</Link>
-              <Link to="/business" className="text-blue-700 hover:text-blue-900 px-3 py-2 rounded-md text-sm font-medium font-semibold">Для бизнеса</Link>
-              <Link to="/products" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">Товары</Link>
-              <Link to="/cart" className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium font-semibold">Корзина</Link>
+              {/* <Link to="/" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">{t('nav_home')}</Link> */}
+              <Link to="/memorials" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">{t('nav_memorials')}</Link>
+              <Link to="/companies" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">{t('nav_companies')}</Link>
+              <Link to="/users-catalog" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">{t('nav_users')}</Link>
+              <Link to="/business" className="text-blue-700 hover:text-blue-900 px-3 py-2 rounded-md text-sm font-medium font-semibold">{t('nav_business')}</Link>
+              <Link to="/products" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">{t('nav_products')}</Link>
+              <Link to="/cart" className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium font-semibold">{t('nav_cart')}</Link>
             </div>
           </div>
           <div className="hidden md:flex flex-1 justify-center px-6 lg:px-8">
             <div className="max-w-lg w-full">
-              <Search className="w-full" placeholder="Поиск мемориалов..." />
+              <Search className="w-full" placeholder={t('search_memorials_placeholder')} />
             </div>
           </div>
           <div className="flex items-center space-x-4">
@@ -162,14 +163,14 @@ const Navigation = () => {
                     </svg>
                   </div>
                 )}
-                <Link to="/cabinet" className="text-gray-700 cursor-pointer hover:underline" title="Перейти в личный кабинет">Привет, {user?.name}</Link>
-                <Link to="/create-memorial" className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium">Создать мемориал</Link>
-                <button onClick={logout} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium">Выйти</button>
+                <Link to="/cabinet" className="text-gray-700 cursor-pointer hover:underline" title={t('nav_cabinet_title')}>{t('nav_hello')}, {user?.name}</Link>
+                <Link to="/create-memorial" className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium">{t('nav_create_memorial')}</Link>
+                <button onClick={logout} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium">{t('nav_logout')}</button>
               </>
             ) : (
               <>
-                <Link to="/login" className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Войти</Link>
-                <Link to="/register" className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium">Регистрация</Link>
+                <Link to="/login" className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">{t('nav_login')}</Link>
+                <Link to="/register" className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium">{t('nav_register')}</Link>
               </>
             )}
           </div>
@@ -179,15 +180,18 @@ const Navigation = () => {
   );
 };
 
-const NotFound = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="text-center">
-      <h1 className="text-2xl font-bold text-red-600 mb-4">Страница не найдена</h1>
-      <p className="text-gray-600">Проверьте адрес или воспользуйтесь навигацией выше.</p>
-      <Link to="/" className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded">На главную</Link>
+const NotFound = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-red-600 mb-4">{t('notfound_title')}</h1>
+        <p className="text-gray-600">{t('notfound_message')}</p>
+        <Link to="/" className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded">{t('notfound_home')}</Link>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const App = () => {
   return (

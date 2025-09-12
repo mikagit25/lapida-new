@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
+
 
 const AdminPaidUsers = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [email, setEmail] = useState('');
   const [paid, setPaid] = useState(true);
@@ -15,7 +18,7 @@ const AdminPaidUsers = () => {
       // Получить пользователя по email
       const resUser = await fetch(`/api/users/by-email/${encodeURIComponent(email)}`);
       const dataUser = await resUser.json();
-      if (!dataUser.user || !dataUser.user._id) throw new Error('Пользователь не найден');
+  if (!dataUser.user || !dataUser.user._id) throw new Error(t('admin_paid_user_not_found'));
       // Установить paid
       const res = await fetch('/api/admin-paid/set-paid', {
         method: 'POST',
@@ -26,8 +29,8 @@ const AdminPaidUsers = () => {
         body: JSON.stringify({ userId: dataUser.user._id, paid })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Ошибка');
-      setResult({ success: true, message: 'Статус обновлён', user: data.user });
+  if (!res.ok) throw new Error(data.message || t('admin_paid_user_error'));
+  setResult({ success: true, message: t('admin_paid_user_status_updated'), user: data.user });
     } catch (e) {
       setResult({ success: false, message: e.message });
     }
@@ -35,27 +38,27 @@ const AdminPaidUsers = () => {
   };
 
   if (!user || user.role !== 'admin') {
-    return <div className="max-w-xl mx-auto py-10 px-4 text-red-600">Нет доступа</div>;
+  return <div className="max-w-xl mx-auto py-10 px-4 text-red-600">{t('admin_paid_user_no_access')}</div>;
   }
 
   return (
     <div className="max-w-xl mx-auto py-10 px-4">
-      <h1 className="text-2xl font-bold mb-4">Управление платным статусом пользователей</h1>
+      <h1 className="text-2xl font-bold mb-4">{t('admin_paid_user_title')}</h1>
       <div className="mb-4">
         <input
           type="email"
           className="border px-3 py-2 rounded w-full mb-2"
-          placeholder="Email пользователя"
+          placeholder={t('admin_paid_user_email_placeholder')}
           value={email}
           onChange={e => setEmail(e.target.value)}
         />
         <label className="inline-flex items-center mr-4">
           <input type="radio" checked={paid} onChange={() => setPaid(true)} />
-          <span className="ml-2">Сделать платным</span>
+          <span className="ml-2">{t('admin_paid_user_make_paid')}</span>
         </label>
         <label className="inline-flex items-center">
           <input type="radio" checked={!paid} onChange={() => setPaid(false)} />
-          <span className="ml-2">Сделать бесплатным</span>
+          <span className="ml-2">{t('admin_paid_user_make_free')}</span>
         </label>
       </div>
       <button
@@ -63,7 +66,7 @@ const AdminPaidUsers = () => {
         onClick={handleSetPaid}
         disabled={loading || !email}
       >
-        {loading ? 'Обновление...' : 'Обновить статус'}
+        {loading ? t('admin_paid_user_updating') : t('admin_paid_user_update_status')}
       </button>
       {result && (
         <div className={`mt-4 p-2 rounded ${result.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>

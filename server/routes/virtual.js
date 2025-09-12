@@ -113,6 +113,51 @@ router.post('/candles', auth, async (req, res) => {
   }
 });
 
+// Получить все виртуальные предметы определённого типа для мемориала
+router.get('/:type/:memorialId', async (req, res) => {
+  try {
+    const { type, memorialId } = req.params;
+    if (!['gift', 'prayer', 'note', 'dove'].includes(type)) {
+      return res.status(400).json({ message: 'Недопустимый тип предмета' });
+    }
+    const items = await VirtualItem.find({ memorialId, type }).sort({ createdAt: -1 });
+    res.json({ items });
+  } catch (error) {
+    console.error('Error fetching virtual items:', error);
+    res.status(500).json({ message: 'Ошибка при загрузке предметов' });
+  }
+});
+
+// Добавить виртуальный предмет (gift, prayer, note, dove)
+router.post('/:type', auth, async (req, res) => {
+  try {
+    const { type } = req.params;
+    if (!['gift', 'prayer', 'note', 'dove'].includes(type)) {
+      return res.status(400).json({ message: 'Недопустимый тип предмета' });
+    }
+    const { memorialId, icon, name, color, comment, duration } = req.body;
+    const authorName = req.user.name || req.user.email || 'Аноним';
+    const item = new VirtualItem({
+      memorialId,
+      type,
+      itemType: name || type,
+      icon: icon || '',
+      name: name || '',
+      color: color || '',
+      comment: comment || '',
+      authorName,
+      authorId: req.user.id,
+      duration: duration || 7 * 24 * 60 * 60 * 1000,
+      createdAt: new Date()
+    });
+    await item.save();
+    res.status(201).json({ item });
+  } catch (error) {
+    console.error('Error adding virtual item:', error);
+    res.status(500).json({ message: 'Ошибка при добавлении предмета' });
+  }
+});
+
 // Удалить виртуальный элемент (только автор или владелец мемориала)
 router.delete('/:itemId', auth, async (req, res) => {
   try {

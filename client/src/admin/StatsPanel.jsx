@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from '../config/api';
 import { apiFetch } from '../services/apiFetch';
+import { useTranslation } from 'react-i18next';
 
 const StatsPanel = () => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState({ users: 0, companies: 0, memorials: 0, complaints: 0 });
 
   useEffect(() => {
@@ -13,12 +15,12 @@ const StatsPanel = () => {
 
   return (
     <div>
-      <h3>Статистика</h3>
+      <h3>{t('admin_stats_title')}</h3>
       <ul>
-        <li>Пользователей: {stats.users}</li>
-        <li>Компаний: {stats.companies}</li>
-        <li>Мемориалов: {stats.memorials}</li>
-        <li>Жалоб: {stats.complaints}</li>
+        <li>{t('admin_stats_users')}: {stats.users}</li>
+        <li>{t('admin_stats_companies')}: {stats.companies}</li>
+        <li>{t('admin_stats_memorials')}: {stats.memorials}</li>
+        <li>{t('admin_stats_complaints')}: {stats.complaints}</li>
       </ul>
     </div>
   );

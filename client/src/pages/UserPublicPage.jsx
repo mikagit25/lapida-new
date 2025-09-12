@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiFetch } from '../services/apiFetch';
 import { useParams } from 'react-router-dom';
 import UserAvatarBlock from '../components/UserAvatarBlock';
@@ -11,6 +12,7 @@ import UserStatsBlock from '../components/UserStatsBlock';
 import UserPrivacyToggle from '../components/UserPrivacyToggle';
 
 const UserPublicPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const [user, setUser] = useState(null);
   const [error, setError] = useState('');
@@ -27,7 +29,7 @@ const UserPublicPage = () => {
 
   useEffect(() => {
     if (!id || id === 'undefined') {
-      setError('Некорректный адрес пользователя. Публичная страница не может быть загружена.');
+      setError(t('user_public_invalid_url'));
       setUser(null);
       return;
     }
@@ -51,12 +53,12 @@ const UserPublicPage = () => {
             bio: data.user.bio || data.user.biography || '',
           });
         } else {
-          setError(data?.message || 'Пользователь не найден или профиль скрыт.');
+          setError(data?.message || t('user_not_found_or_hidden'));
           setUser(null);
         }
       })
       .catch(() => {
-        setError('Ошибка загрузки публичных данных пользователя.');
+        setError(t('user_public_load_error'));
         setUser(null);
       });
   }, [id]);
@@ -66,11 +68,11 @@ const UserPublicPage = () => {
   };
 
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
-  if (!user) return <div className="p-8 text-center">Загрузка...</div>;
+  if (!user) return <div className="p-8 text-center">{t('loading')}</div>;
 
   return (
     <div className="max-w-2xl mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-4">Личная страница пользователя</h1>
+      <h1 className="text-2xl font-bold mb-4">{t('user_public_title')}</h1>
       {isOwner && <UserPrivacyToggle user={user} />}
       <div className="space-y-6">
         {visibleBlocks.avatar && <UserAvatarBlock user={user} onToggle={() => handleToggleBlock('avatar')} isOwner={isOwner} />}

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import OAuthButtons from '../components/OAuthButtons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config/api';
 
 const Register = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -96,15 +98,15 @@ const Register = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Создание аккаунта
+          {t('register_title')}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Или{' '}
+          {t('or')}{' '}
           <Link
             to="/login"
             className="font-medium text-indigo-600 hover:text-indigo-500"
           >
-            войдите в существующий аккаунт
+            {t('login_existing_account')}
           </Link>
         </p>
       </div>
@@ -123,7 +125,7 @@ const Register = () => {
 
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Полное имя
+                {t('full_name')}
               </label>
               <div className="mt-1">
                 <input
@@ -137,7 +139,7 @@ const Register = () => {
                   className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
                     validationErrors.name ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Введите ваше имя"
+                  placeholder={t('enter_name')}
                 />
                 {validationErrors.name && (
                   <p className="mt-1 text-sm text-red-600">{validationErrors.name}</p>
@@ -147,7 +149,7 @@ const Register = () => {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email адрес
+                {t('email_address')}
               </label>
               <div className="mt-1">
                 <input
@@ -161,7 +163,7 @@ const Register = () => {
                   className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
                     validationErrors.email ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Введите email"
+                  placeholder={t('enter_email')}
                 />
                 {validationErrors.email && (
                   <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
@@ -171,7 +173,7 @@ const Register = () => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Пароль
+                {t('password')}
               </label>
               <div className="mt-1">
                 <input
@@ -185,7 +187,7 @@ const Register = () => {
                   className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
                     validationErrors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Введите пароль"
+                  placeholder={t('enter_password')}
                 />
                 {validationErrors.password && (
                   <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
@@ -195,7 +197,7 @@ const Register = () => {
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Подтверждение пароля
+                {t('confirm_password')}
               </label>
               <div className="mt-1">
                 <input
@@ -209,7 +211,7 @@ const Register = () => {
                   className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
                     validationErrors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Повторите пароль"
+                  placeholder={t('repeat_password')}
                 />
                 {validationErrors.confirmPassword && (
                   <p className="mt-1 text-sm text-red-600">{validationErrors.confirmPassword}</p>
@@ -226,10 +228,10 @@ const Register = () => {
                 {isSubmitting ? (
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Регистрация...
+                    {t('registering')}
                   </div>
                 ) : (
-                  'Создать аккаунт'
+                  t('create_account')
                 )}
               </button>
             </div>
@@ -241,7 +243,7 @@ const Register = () => {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Или</span>
+                <span className="px-2 bg-white text-gray-500">{t('or')}</span>
               </div>
             </div>
 
@@ -250,7 +252,7 @@ const Register = () => {
                 to="/"
                 className="text-sm text-indigo-600 hover:text-indigo-500"
               >
-                Вернуться на главную
+                {t('back_to_home')}
               </Link>
             </div>
           </div>

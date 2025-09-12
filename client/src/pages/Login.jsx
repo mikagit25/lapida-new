@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -42,15 +44,15 @@ const Login = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Вход в систему
+          {t('login_title')}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Или{' '}
+          {t('or')}{' '}
           <Link
             to="/register"
             className="font-medium text-indigo-600 hover:text-indigo-500"
           >
-            создайте новый аккаунт
+            {t('create_account')}
           </Link>
         </p>
       </div>
@@ -66,7 +68,7 @@ const Login = () => {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email адрес
+                {t('email_address')}
               </label>
               <div className="mt-1">
                 <input
@@ -78,14 +80,14 @@ const Login = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Введите email"
+                  placeholder={t('enter_email')}
                 />
               </div>
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Пароль
+                {t('password')}
               </label>
               <div className="mt-1">
                 <input
@@ -97,7 +99,7 @@ const Login = () => {
                   value={formData.password}
                   onChange={handleChange}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Введите пароль"
+                  placeholder={t('enter_password')}
                 />
               </div>
             </div>
@@ -111,13 +113,13 @@ const Login = () => {
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                  Запомнить меня
+                  {t('remember_me')}
                 </label>
               </div>
 
               <div className="text-sm">
                 <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
-                  Забыли пароль?
+                  {t('forgot_password')}
                 </a>
               </div>
             </div>
@@ -131,10 +133,10 @@ const Login = () => {
                 {isSubmitting ? (
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Вход...
+                    {t('logging_in')}
                   </div>
                 ) : (
-                  'Войти'
+                  t('login')
                 )}
               </button>
             </div>
@@ -146,7 +148,7 @@ const Login = () => {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Или</span>
+                <span className="px-2 bg-white text-gray-500">{t('or')}</span>
               </div>
             </div>
 
@@ -157,7 +159,7 @@ const Login = () => {
                 to="/"
                 className="text-sm text-indigo-600 hover:text-indigo-500"
               >
-                Вернуться на главную
+                {t('back_to_home')}
               </Link>
             </div>
           </div>

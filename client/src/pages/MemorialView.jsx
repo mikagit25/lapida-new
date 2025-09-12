@@ -16,10 +16,22 @@ import LocationView from '../components/LocationView';
 import EpitaphSection from '../components/EpitaphSection';
 import VirtualFlowers from '../components/VirtualFlowers';
 import VirtualCandles from '../components/VirtualCandles';
+import GiftFab from '../components/GiftFab';
+import PrayerFab from '../components/PrayerFab';
+import DoveFab from '../components/DoveFab';
+import NoteFab from '../components/NoteFab';
+import VirtualGifts from '../components/VirtualGifts';
+import VirtualPrayers from '../components/VirtualPrayers';
 import BackgroundImageManager from '../components/BackgroundImageManager';
 import HeaderBackgroundManager from '../components/HeaderBackgroundManager';
+import AvatarBackgroundManager from '../components/AvatarBackgroundManager';
 import { fixImageUrl } from '../utils/imageUrl';
 import MemorialEditorsManager from '../components/MemorialEditorsManager';
+import VirtualNotes from '../components/VirtualNotes';
+import VirtualDoves from '../components/VirtualDoves';
+import VirtualItemBlock from '../components/VirtualItemBlock';
+import VirtualItemsOnAvatar from '../components/VirtualItemsOnAvatar';
+import { virtualItemsService } from '../services/virtualItems';
 
 const MemorialView = () => {
   const { shareUrl, slug } = useParams();
@@ -27,6 +39,24 @@ const MemorialView = () => {
   const [memorial, setMemorial] = useState(null);
   const [comments, setComments] = useState([]);
   const [virtualCandles, setVirtualCandles] = useState([]);
+  const [virtualGifts, setVirtualGifts] = useState([]);
+  const [virtualPrayers, setVirtualPrayers] = useState([]);
+  const [virtualNotes, setVirtualNotes] = useState([]);
+  const [virtualDoves, setVirtualDoves] = useState([]);
+  // Загружаем новые виртуальные предметы для аватара
+  // Универсальная функция загрузки всех виртуальных предметов
+  const loadAllVirtualItems = async (memId) => {
+    const id = memId || memorial?._id;
+    if (!id) return;
+    setVirtualGifts(await virtualItemsService.getItems('gift', id));
+    setVirtualPrayers(await virtualItemsService.getItems('prayer', id));
+    setVirtualNotes(await virtualItemsService.getItems('note', id));
+    setVirtualDoves(await virtualItemsService.getItems('dove', id));
+  };
+
+  useEffect(() => {
+    loadAllVirtualItems();
+  }, [memorial?._id]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [timelineEvents, setTimelineEvents] = useState([]);
@@ -226,35 +256,36 @@ const MemorialView = () => {
 
   return (
     <div className="min-h-screen relative bg-gray-50">
-      {/* Background image manager - renders at z-index -1 */}
+      {/* Аватар и контейнер для свечей/цветов */}
+      <AvatarBackgroundManager 
+        memorial={memorial}
+        onUpdate={setMemorial}
+      />
+      {/* Фон мемориала */}
       <BackgroundImageManager 
         memorial={memorial}
         onUpdate={setMemorial}
         canEdit={true}
       />
-
       {/* Контент с повышенным z-index */}
       <div className="relative" style={{ zIndex: 1 }}>
         {/* Виртуальные цветы - под именем и датами */}
-        <VirtualFlowers 
-          memorialId={memorial?._id}
-          memorial={memorial}
-          canEdit={true}
-        />
+        {/* FAB-кнопки для всех виртуальных предметов в одну линию справа внизу */}
+        <div className="fixed bottom-6 right-6 z-30 flex flex-row items-end gap-4">
+          <VirtualCandles memorialId={memorial?._id} memorial={memorial} canEdit={true} />
+          <VirtualFlowers memorialId={memorial?._id} memorial={memorial} canEdit={true} />
+    <GiftFab memorialId={memorial?._id} onGiftAdded={() => loadAllVirtualItems()} />
+    <PrayerFab memorialId={memorial?._id} onPrayerAdded={() => loadAllVirtualItems()} />
+    <DoveFab memorialId={memorial?._id} onDoveAdded={() => loadAllVirtualItems()} />
+    <NoteFab memorialId={memorial?._id} onNoteAdded={() => loadAllVirtualItems()} />
+        </div>
+        {/* Новые виртуальные предметы на аватаре */}
+        <VirtualItemsOnAvatar items={virtualGifts} iconFallback="🎁" type="gift" side="right" />
+        <VirtualItemsOnAvatar items={virtualPrayers} iconFallback="🙏" type="prayer" side="right" />
+        <VirtualItemsOnAvatar items={virtualNotes} iconFallback="📝" type="note" side="right" />
+        <VirtualItemsOnAvatar items={virtualDoves} iconFallback="🕊️" type="dove" side="right" />
+  {/* Удалены горизонтальные блоки VirtualItemBlock для gifts, prayers, notes, doves */}
 
-        {/* Шапка мемориала с возможностью смены фона */}
-        <HeaderBackgroundManager 
-          memorial={memorial}
-          onUpdate={handleMemorialUpdate}
-          canEdit={true}
-        />
-
-        {/* Виртуальные свечи - кнопка и отображение */}
-        <VirtualCandles 
-          memorialId={memorial?._id}
-          memorial={memorial}
-          canEdit={true}
-        />
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
