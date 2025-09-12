@@ -1,3 +1,8 @@
+import PsychologistSessions from './pages/PsychologistSessions';
+import AdminPaidUsers from './pages/AdminPaidUsers';
+import PsychologistSubscription from './pages/PsychologistSubscription';
+import Psychologist from './pages/Psychologist';
+import PsychologistVoiceTest from './pages/PsychologistVoiceTest';
 import SeoIndex from './pages/SeoIndex';
               <Route path="/seo-index" element={<SeoIndex />} />
 // --- Временно не используемый компонент для company по слагу ---
@@ -192,6 +197,11 @@ const App = () => {
           <Navigation />
           <main className="pb-16 lg:pb-0">
             <Routes>
+              <Route path="/psychologist-sessions" element={<PsychologistSessions />} />
+              <Route path="/admin/paid-users" element={<AdminPaidUsers />} />
+              <Route path="/psychologist-subscription" element={<PsychologistSubscription />} />
+              <Route path="/psychologist" element={<Psychologist />} />
+              <Route path="/psychologistvoicetest" element={<PsychologistVoiceTest />} />
               <Route path="/admin" element={<PrivateRoute><AdminPage /></PrivateRoute>} />
               <Route path="/admin/users" element={<PrivateRoute><AdminUsersManager /></PrivateRoute>} />
               <Route path="/admin/pages" element={<PrivateRoute><AdminPagesManager /></PrivateRoute>} />

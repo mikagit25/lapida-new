@@ -189,6 +189,7 @@ app.use('/api/gallery-recovery', require('./routes/galleryRecovery'));
 app.use('/api/pages', require('./routes/pages'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/search', require('./routes/search'));
+app.use('/api/psychologist', require('./routes/psychologist'));
 // const genealogyRouter = require('./routes/genealogy');
 // app.use('/api/genealogy', genealogyRouter);
 // app.use('/api/timeline-events', require('./routes/timeline-events'));
@@ -197,6 +198,7 @@ app.use('/api/search', require('./routes/search'));
 // app.use('/api/payments', require('./routes/payments'));
 // app.use('/api/admin', require('./routes/admin'));
 // app.use('/api/integrations', require('./routes/integrations'));
+app.use('/api/admin-paid', require('./routes/adminPaid'));
 // app.use('/api/media', require('./routes/media'));
 
 // Корневой маршрут

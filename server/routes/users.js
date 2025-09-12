@@ -1,3 +1,4 @@
+
 const express = require('express');
 const multer = require('multer');
 const User = require('../models/User');
@@ -9,6 +10,18 @@ const path = require('path');
 const fs = require('fs');
 
 const router = express.Router();
+
+// Получить пользователя по email (для админ-интерфейса управления подпиской)
+router.get('/by-email/:email', async (req, res) => {
+  try {
+    const email = decodeURIComponent(req.params.email);
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'Пользователь не найден' });
+    res.json({ user });
+  } catch (e) {
+    res.status(500).json({ message: 'Ошибка сервера', error: e.message });
+  }
+});
 
 // Публичный каталог пользователей (для всех)
 router.get('/public', async (req, res) => {

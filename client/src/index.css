@@ -5,6 +5,14 @@
 @tailwind utilities;
 
 /* Дополнительные стили */
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.animate-fadein {
+  animation: fadein 0.4s;
+}
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;

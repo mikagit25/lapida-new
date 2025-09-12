@@ -1,0 +1,97 @@
+.chat-bubble-row {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 0.7rem;
+}
+.chat-bubble-row.justify-end {
+  justify-content: flex-end;
+}
+.chat-bubble-row.justify-start {
+  justify-content: flex-start;
+}
+.chat-bubble-avatar {
+  width: 38px;
+  height: 38px;
+  margin: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.chat-bubble-avatar-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e0e7ef;
+  background: #fff;
+}
+.chat-bubble-avatar-default {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background: #e0e7ef;
+  color: #6b7280;
+  border: 2px solid #e0e7ef;
+}
+.chat-bubble-avatar-default.ai {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+.chat-bubble-avatar-default.user {
+  background: #fef9c3;
+  color: #b45309;
+}
+.chat-bubble-avatar-default.system {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+.chat-bubble {
+  max-width: 70vw;
+  padding: 0.7em 1.1em;
+  border-radius: 1.3em;
+  font-size: 1.05em;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+  word-break: break-word;
+  position: relative;
+  min-width: 40px;
+}
+.chat-bubble.ai {
+  background: linear-gradient(120deg, #e0f2fe 60%, #bae6fd 100%);
+  color: #0a2540;
+  border-bottom-left-radius: 0.4em;
+}
+.chat-bubble.user {
+  background: linear-gradient(120deg, #fef9c3 60%, #fde68a 100%);
+  color: #78350f;
+  border-bottom-right-radius: 0.4em;
+}
+.chat-bubble.system {
+  background: #f3f4f6;
+  color: #6b7280;
+  border-radius: 1.3em;
+}
+/* Волна для говорящего AI */
+.chat-bubble-wave {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-left: 2px;
+  background: radial-gradient(circle at 8px 8px, #38bdf8 60%, transparent 70%);
+  border-radius: 50%;
+  animation: chat-bubble-wave-pulse 1.2s infinite;
+}
+@keyframes chat-bubble-wave-pulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.7; }
+}
+/* Фон для всей страницы чата */
+.psychologist-chat-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e0f2fe 100%);
+  background-attachment: fixed;
+}

@@ -121,6 +121,7 @@ router.post('/login', async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        paid: user.paid,
         avatar: user.avatar,
         gallery: user.gallery,
         phone: user.phone,
@@ -145,6 +146,7 @@ router.get('/profile', auth, async (req, res) => {
         name: req.user.name,
         email: req.user.email,
         role: req.user.role,
+        paid: req.user.paid,
         avatar: req.user.avatar,
         createdAt: req.user.createdAt
       }

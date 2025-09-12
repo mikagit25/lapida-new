@@ -126,6 +126,11 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user'
   },
+  paid: {
+    type: Boolean,
+    default: false,
+    description: 'Платный пользователь (подписка или разовая оплата)'
+  },
   isVerified: {
     type: Boolean,
     default: false
