@@ -1,11 +1,252 @@
-const path = require('path');
 const express = require('express');
 const router = express.Router();
+const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const Company = require('../models/Company');
 const { auth } = require('../middleware/auth');
 const Product = require('../models/Product');
+// ...existing code...
+// Сохранить/обновить ERPNext API-токен (только owner)
+router.put('/:id/erpnext-token', require('../middleware/auth').auth, async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id);
+    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+    if (company.owner.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Нет доступа' });
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ message: 'Требуется токен' });
+    company.erpnextToken = token;
+    await company.save();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка сохранения токена', error: error.message });
+  }
+});
+
+// Проверить соединение с ERPNext (только owner)
+router.post('/:id/erpnext-test', require('../middleware/auth').auth, async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id);
+    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+    if (company.owner.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Нет доступа' });
+    const token = company.erpnextToken;
+    if (!token) return res.status(400).json({ message: 'Токен не задан' });
+    // Пример запроса к ERPNext (Sales Order)
+    const axios = require('axios');
+    const ERP_API = process.env.ERPNEXT_API_URL || 'http://localhost:8080/api/resource/Sales Order';
+    try {
+      const erpRes = await axios.get(ERP_API, { headers: { Authorization: `token ${token}` } });
+      if (erpRes.data && erpRes.data.data) {
+        res.json({ success: true, count: erpRes.data.data.length });
+      } else {
+        res.status(400).json({ success: false, message: 'Нет данных' });
+      }
+    } catch (e) {
+      res.status(400).json({ success: false, message: 'Ошибка соединения с ERPNext', error: e.message });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка проверки ERPNext', error: error.message });
+  }
+});
+const CompanyView = require('../models/CompanyView');
+const Order = require('../models/Order');
+// --- Аналитика компании ---
+// GET /companies/:id/analytics
+router.get('/:id/analytics', async (req, res) => {
+  try {
+    const companyId = req.params.id;
+    // Просмотры всего
+    const totalViewsAgg = await CompanyView.aggregate([
+      { $match: { companyId: mongoose.Types.ObjectId(companyId) } },
+      { $group: { _id: null, total: { $sum: '$count' } } }
+    ]);
+    const views = totalViewsAgg[0]?.total || 0;
+
+    // Просмотры по дням (последние 14 дней)
+    const today = new Date();
+    const fromDate = new Date(today.getTime() - 13 * 24 * 60 * 60 * 1000);
+    const fromStr = fromDate.toISOString().slice(0, 10);
+    const viewsByDay = await CompanyView.find({
+      companyId,
+      date: { $gte: fromStr }
+    }).sort({ date: 1 });
+    const viewsByDayArr = [];
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(fromDate.getTime() + i * 24 * 60 * 60 * 1000);
+      const dateStr = d.toISOString().slice(0, 10);
+      const found = viewsByDay.find(v => v.date === dateStr);
+      viewsByDayArr.push({ date: dateStr, count: found ? found.count : 0 });
+    }
+
+    // Заказы
+    const ordersCount = await Order.countDocuments({ companyId });
+    // Отзывы
+    const company = await Company.findById(companyId).select('reviews');
+    const reviewsCount = company && company.reviews ? company.reviews.length : 0;
+
+    res.json({ stats: {
+      views,
+      orders: ordersCount,
+      reviews: reviewsCount,
+      viewsByDay: viewsByDayArr
+    }});
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка получения аналитики', error: error.message });
+  }
+});
+// --- История компании ---
+const historyDir = path.join(__dirname, '../public/uploads/company-history');
+if (!fs.existsSync(historyDir)) {
+  fs.mkdirSync(historyDir, { recursive: true });
+}
+const historyStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, historyDir);
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const filename = `${Date.now()}-${Math.round(Math.random()*1e9)}${ext}`;
+    cb(null, filename);
+  }
+});
+const uploadHistory = multer({ storage: historyStorage });
+
+// Получить историю компании
+router.get('/:id/history', async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id);
+    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+    res.json({ history: company.history || [] });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка получения истории', error: error.message });
+  }
+});
+
+// Добавить этап в историю (только владелец)
+router.post('/:id/history', auth, uploadHistory.single('image'), async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id);
+    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+    if (company.owner.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Нет доступа' });
+    const { date, title, description } = req.body;
+    if (!date || !title) return res.status(400).json({ message: 'Требуется дата и заголовок' });
+    const imageUrl = req.file ? `/uploads/company-history/${req.file.filename}` : '';
+    const stage = { date, title, description: description || '', image: imageUrl };
+    company.history.push(stage);
+    await company.save();
+    res.json({ history: company.history });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка добавления этапа', error: error.message });
+  }
+});
+
+// Удалить этап из истории (по индексу, только владелец)
+router.delete('/:id/history/:idx', auth, async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id);
+    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+    if (company.owner.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Нет доступа' });
+    const idx = parseInt(req.params.idx, 10);
+    if (isNaN(idx) || idx < 0 || idx >= company.history.length) return res.status(400).json({ message: 'Некорректный индекс' });
+    company.history.splice(idx, 1);
+    await company.save();
+    res.json({ history: company.history });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка удаления этапа', error: error.message });
+  }
+});
+// Рекомендации/похожие компании по категории (исключая текущую)
+router.get('/recommendations', async (req, res) => {
+  try {
+    const { category, exclude } = req.query;
+    if (!category) return res.json({ companies: [] });
+    const query = { _id: { $ne: exclude }, ...(category ? { 'products.category': category } : {}) };
+    // Находим компании, у которых есть товары с такой категорией
+    const companies = await Company.find(query).limit(8).select('name customSlug description address');
+    res.json({ companies });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка получения рекомендаций', error: error.message });
+  }
+});
+// Контактная форма: отправить сообщение владельцу компании
+router.post('/:id/contact', async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id);
+    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+    const { name, email, message } = req.body;
+    if (!name || !email || !message) return res.status(400).json({ message: 'Все поля обязательны' });
+    // Здесь можно отправить email владельцу компании или сохранить сообщение в БД
+    // Пока просто логируем
+    console.log(`[CONTACT FORM] Компания: ${company.name} (${company._id}) | От: ${name} <${email}> | Сообщение: ${message}`);
+    res.json({ message: 'Сообщение отправлено' });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка отправки сообщения', error: error.message });
+  }
+});
+// Удалить работу из портфолио (по индексу, только владелец)
+router.delete('/:id/portfolio/:idx', auth, async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id);
+    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+    if (company.owner.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Нет доступа' });
+    const idx = parseInt(req.params.idx, 10);
+    if (isNaN(idx) || idx < 0 || idx >= company.portfolio.length) return res.status(400).json({ message: 'Некорректный индекс' });
+    company.portfolio.splice(idx, 1);
+    await company.save();
+    res.json({ portfolio: company.portfolio });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка удаления работы', error: error.message });
+  }
+});
+// --- Portfolio (работы компании) ---
+const portfolioDir = path.join(__dirname, '../public/uploads/company-portfolio');
+if (!fs.existsSync(portfolioDir)) {
+  fs.mkdirSync(portfolioDir, { recursive: true });
+}
+const portfolioStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, portfolioDir);
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const filename = `${Date.now()}-${Math.round(Math.random()*1e9)}${ext}`;
+    cb(null, filename);
+  }
+});
+const uploadPortfolio = multer({ storage: portfolioStorage });
+
+// Получить работы компании
+router.get('/:id/portfolio', async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id);
+    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+    res.json({ portfolio: company.portfolio || [] });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка получения портфолио', error: error.message });
+  }
+});
+
+// Добавить работу в портфолио (только владелец)
+router.post('/:id/portfolio', auth, uploadPortfolio.single('image'), async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id);
+    if (!company) return res.status(404).json({ message: 'Компания не найдена' });
+    if (company.owner.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Нет доступа' });
+    const { title, description, date } = req.body;
+    if (!title || !req.file) return res.status(400).json({ message: 'Требуется изображение и заголовок' });
+    const imageUrl = `/uploads/company-portfolio/${req.file.filename}`;
+    const work = { image: imageUrl, title, description: description || '', date: date || '' };
+    if (!Array.isArray(company.portfolio)) {
+      company.portfolio = [];
+    }
+    company.portfolio.push(work);
+    await company.save();
+    res.json({ portfolio: company.portfolio });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка добавления работы', error: error.message });
+  }
+});
+// ...existing code...
 
 // Удалить компанию
 router.delete('/:id', auth, async (req, res) => {
@@ -75,6 +316,17 @@ router.get('/by-slug/:customSlug', async (req, res) => {
         }
       }
     } catch (e) {}
+    // Инкрементировать просмотры
+    try {
+      const CompanyView = require('../models/CompanyView');
+      const todayStr = new Date().toISOString().slice(0, 10);
+      await CompanyView.findOneAndUpdate(
+        { companyId: company._id, date: todayStr },
+        { $inc: { count: 1 } },
+        { upsert: true }
+      );
+    } catch (e) { console.error('Ошибка записи CompanyView:', e); }
+
     const companyObj = company.toObject();
     companyObj.isOwner = isOwner;
     companyObj.phones = Array.isArray(company.phones) ? company.phones : [];
@@ -232,6 +484,16 @@ router.post('/:id/products', auth, upload.array('images', 10), async (req, res) 
     if (req.files && req.files.length > 0) {
       images = req.files.map(f => `/uploads/company-gallery/${f.filename}`);
     }
+
+    // Генерация артикула (sku), если не передан
+    let generatedSku = sku;
+    if (!generatedSku) {
+      // SKU: первые 3 буквы транслита названия + 4 цифры времени + 2 символа компании
+      const base = translit(name).replace(/[^a-z0-9]/g, '').slice(0, 3).toUpperCase();
+      const time = Date.now().toString().slice(-4);
+      const comp = company._id.toString().slice(-2).toUpperCase();
+      generatedSku = `${base}${time}${comp}`;
+    }
     // Генерируем slug: латиница, цифры, дефисы, уникальность по id
     // Транслитерация кириллицы в латиницу для slug
     function translit(str) {
@@ -251,16 +513,16 @@ router.post('/:id/products', auth, upload.array('images', 10), async (req, res) 
     const tempId = Math.random().toString(36).slice(2, 8);
     const baseSlug = translit(name);
     let product = await Product.create({
-  company: company._id,
-  name,
-  slug: baseSlug + '-' + tempId,
-  description,
-  price,
-  category,
-  sku,
-  quantity,
-  unit,
-  images
+      company: company._id,
+      name,
+      slug: baseSlug + '-' + tempId,
+      description,
+      price,
+      category,
+      sku: generatedSku,
+      quantity,
+      unit,
+      images
     });
     // После создания товара обновляем slug с реальным id
     product.slug = baseSlug + '-' + product._id.toString().slice(-6);
@@ -683,6 +945,17 @@ router.get('/:id', async (req, res) => {
         }
       }
     } catch (e) {}
+
+    // Инкрементировать просмотры
+    try {
+      const CompanyView = require('../models/CompanyView');
+      const todayStr = new Date().toISOString().slice(0, 10);
+      await CompanyView.findOneAndUpdate(
+        { companyId: company._id, date: todayStr },
+        { $inc: { count: 1 } },
+        { upsert: true }
+      );
+    } catch (e) { console.error('Ошибка записи CompanyView:', e); }
 
     // Вставляем isOwner и контакты в ответ
     const companyObj = company.toObject();

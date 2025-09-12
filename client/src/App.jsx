@@ -1,3 +1,43 @@
+import CompanyCrmIntegrationPage from './pages/company/CompanyCrmIntegrationPage';
+import CompanyCrmOrdersPage from './pages/company/CompanyCrmOrdersPage';
+import CompanyNotificationsPage from './pages/company/CompanyNotificationsPage';
+import CompanyAnalyticsPage from './pages/company/CompanyAnalyticsPage';
+import CompanyChatPage from './pages/company/CompanyChatPage';
+import CompanyHistoryPage from './pages/company/CompanyHistoryPage';
+import CompanyContactForm from './pages/CompanyContactForm';
+              <Route path="/company/:companySlug/contact" element={<CompanyContactForm />} />
+
+// ...existing imports...
+
+// Загрузчик портфолио компании по слагу
+function CompanyPortfolioLoader() {
+  const { companySlug } = useParams();
+  const [works, setWorks] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState('');
+
+  React.useEffect(() => {
+    setLoading(true);
+    apiFetch(`${API_BASE_URL}/companies/by-slug/${companySlug}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.company) {
+          setWorks(data.company.portfolio ? data.company.portfolio : (data.company.works ? data.company.works : []));
+        } else {
+          setWorks([]);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setError('Компания не найдена');
+        setLoading(false);
+      });
+  }, [companySlug]);
+
+  if (loading) return <div className="p-8">Загрузка...</div>;
+  if (error) return <div className="p-8 text-red-600">{error}</div>;
+  return <CompanyPortfolio works={works} />;
+}
 import PsychologistSessions from './pages/PsychologistSessions';
 import AdminPaidUsers from './pages/AdminPaidUsers';
 import PsychologistSubscription from './pages/PsychologistSubscription';
@@ -69,6 +109,8 @@ import ProductPage from './pages/ProductPage';
 import Products from './pages/Products';
 import BulkProductPage from './pages/BulkProductPage';
 import CompanyProfile from './pages/CompanyProfile';
+import CompanyPortfolio from './pages/CompanyPortfolio';
+
 import UserConnections from './components/UserConnections';
 import UserOrders from './pages/UserOrders';
 import OrderDetails from './pages/OrderDetails';
@@ -201,6 +243,16 @@ const App = () => {
           <Navigation />
           <main className="pb-16 lg:pb-0">
             <Routes>
+              <Route path="/company/:companySlug/crm-integration" element={<CompanyCrmIntegrationPage />} />
+              <Route path="/companies/:id/crm-integration" element={<CompanyCrmIntegrationPage />} />
+              <Route path="/company/:companySlug/crm-orders" element={<CompanyCrmOrdersPage />} />
+              <Route path="/companies/:id/crm-orders" element={<CompanyCrmOrdersPage />} />
+              <Route path="/company/:companySlug/notifications" element={<CompanyNotificationsPage />} />
+              <Route path="/companies/:id/notifications" element={<CompanyNotificationsPage />} />
+              <Route path="/company/:companySlug/analytics" element={<CompanyAnalyticsPage />} />
+              <Route path="/companies/:id/analytics" element={<CompanyAnalyticsPage />} />
+              <Route path="/company/:companySlug/chat" element={<CompanyChatPage />} />
+              <Route path="/companies/:id/chat" element={<CompanyChatPage />} />
               <Route path="/psychologist-sessions" element={<PsychologistSessions />} />
               <Route path="/admin/paid-users" element={<AdminPaidUsers />} />
               <Route path="/psychologist-subscription" element={<PsychologistSubscription />} />
@@ -253,6 +305,9 @@ const App = () => {
               {/* <Route path="/company/:companySlug/bulk-products" element={<BulkProductPage />} /> */}
               <Route path="/company/:companyId/bulk-products" element={<BulkProductPage />} />
               <Route path="/company/:companySlug" element={<CompanyProfileBySlug />} />
+              <Route path="/company/:companySlug/portfolio" element={<CompanyPortfolioLoader />} />
+              <Route path="/company/:companySlug/history" element={<CompanyHistoryPage />} />
+              <Route path="/companies/:id/history" element={<CompanyHistoryPage />} />
               <Route path="/user/:id" element={<UserPublicPage />} />
               <Route path="/users-catalog" element={<UsersCatalogPage />} />
               <Route path="*" element={<NotFound />} />

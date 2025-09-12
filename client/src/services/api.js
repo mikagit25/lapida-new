@@ -118,6 +118,7 @@ export {
   userService,
   notificationService,
   friendsService,
+  messagesService,
   companyService,
   pageService,
   reportService,

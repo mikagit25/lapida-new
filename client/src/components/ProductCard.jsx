@@ -1,14 +1,23 @@
 import React from 'react';
+import CopySkuButton from './CopySkuButton';
+import QuickOrderButton from './QuickOrderButton';
 import { Link } from 'react-router-dom';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
+import ProductGallery from './ProductGallery';
+import ProductBadge from './ProductBadge';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import CardActions from '@mui/material/CardActions';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Rating from '@mui/material/Rating';
+import ProductPrice from './ProductPrice';
+import ProductReviews from './ProductReviews';
+import FavoriteButton from './FavoriteButton';
+import ShareButton from './ShareButton';
+import SimilarProducts from './SimilarProducts';
 
 const ProductCard = ({ product, onEdit, onDelete }) => {
   // Универсальная функция покупки
@@ -34,24 +43,30 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
   };
   return (
     <Card sx={{ maxWidth: 345, display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {product.images && product.images.length > 0 ? (
-        <CardMedia
-          component="img"
-          height="180"
-          image={product.images[0]}
-          alt={product.name}
-        />
-      ) : (
-        <CardMedia
-          component="div"
-          sx={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5', fontSize: 48, color: '#bbb' }}
-        >🛒</CardMedia>
-      )}
+      <div style={{ position: 'relative' }}>
+        <ProductBadge tags={product.tags} />
+        {product.images && product.images.length > 0 ? (
+          <ProductGallery images={product.images} alt={product.name} />
+        ) : (
+          <CardMedia
+            component="div"
+            sx={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5', fontSize: 48, color: '#bbb' }}
+          >🛒</CardMedia>
+        )}
+      </div>
       <CardContent sx={{ flexGrow: 1 }}>
-        <Typography gutterBottom variant="h6" component="div" noWrap>{product.name}</Typography>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'space-between' }}>
+          <Typography gutterBottom variant="h6" component="div" noWrap>{product.name}</Typography>
+          <FavoriteButton productId={product._id} />
+          <ShareButton url={window.location.origin + '/products/' + product.slug} />
+        </div>
         <Typography variant="body2" color="text.secondary" noWrap>{product.category}</Typography>
         {product.sku && (
-          <Typography variant="body2" color="text.secondary">Артикул: {product.sku}</Typography>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Typography variant="body2" color="text.secondary">Артикул: {product.sku}</Typography>
+            <CopySkuButton sku={product.sku} name={product.name} />
+            <QuickOrderButton sku={product.sku} name={product.name} />
+          </div>
         )}
         {product.quantity !== undefined && (
           <Typography variant="body2" color="text.secondary">Остаток: {product.quantity}</Typography>
@@ -68,10 +83,8 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
           </Stack>
         )}
         {/* Рейтинг товара */}
-        <Rating name="product-rating" value={product.rating || 0} precision={0.5} readOnly sx={{ mb: 1 }} />
-        <Typography variant="subtitle1" color="primary" sx={{ fontWeight: 'bold', mb: 1 }}>
-          {product.price ? product.price + ' ₽' : 'Цена не указана'}
-        </Typography>
+  <Rating name="product-rating" value={product.rating || 0} precision={0.5} readOnly sx={{ mb: 1 }} />
+  <ProductPrice price={product.price} oldPrice={product.oldPrice} />
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }} noWrap>{product.description}</Typography>
         {product.companyName && (
           <Typography variant="caption" color="text.secondary" component={Link} to={`/companies/${product.companyId}`} sx={{ textDecoration: 'none', color: 'blue' }}>
@@ -79,7 +92,9 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
           </Typography>
         )}
       </CardContent>
-      <CardActions sx={{ flexDirection: 'column', alignItems: 'stretch', gap: 1 }}>
+  <ProductReviews reviews={product.reviews} />
+  {/* <SimilarProducts product={product} /> -- убрано для страницы компании */}
+  <CardActions sx={{ flexDirection: 'column', alignItems: 'stretch', gap: 1 }}>
         <Button component={Link} to={`/products/${product.slug}`} variant="contained" color="primary" fullWidth>
           Просмотреть товар
         </Button>

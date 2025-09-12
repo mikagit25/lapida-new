@@ -14,6 +14,7 @@ import CompanyGallery from '../components/CompanyGallery';
 import ProductList from '../components/ProductList';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import CompanyQRCodeBlock from '../components/CompanyQRCodeBlock';
+import CompanyAnalytics from '../components/CompanyAnalytics';
 import CompanyMap from '../components/CompanyMap';
 import CompanyNewsForm from '../components/CompanyNewsForm';
 import CompanyDocumentsForm from '../components/CompanyDocumentsForm';
@@ -357,17 +358,13 @@ function CompanyCabinet() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex gap-2 items-center">
-          <Link to={`/companies/${company._id}`} className="text-blue-600 hover:underline">← Назад к компании</Link>
+          <Link to={`/company/${company.customSlug || company._id}`} className="text-blue-600 hover:underline">← Назад к компании</Link>
           <span className="text-gray-400">|</span>
           <span className="font-bold">Личный кабинет компании</span>
         </div>
   {/* Быстрый переход в личные кабинеты компаний пользователя */}
-        {/* Статистика компании */}
-        <div className="mb-4 flex gap-8 items-center text-sm text-gray-700">
-          <div><b>Товаров:</b> {products.length}</div>
-          <div><b>Заказов:</b> {company.ordersCount ?? '—'}</div>
-          <div><b>Отзывы:</b> {Array.isArray(company.reviews) ? company.reviews.length : '—'}</div>
-        </div>
+  {/* Аналитика компании */}
+  <CompanyAnalytics companyId={company._id} />
         <CompanyTabs tabs={TABS} currentTab={tab} setTab={setTab} />
         <div className="bg-white rounded-lg shadow p-6">
           {/* QR-код компании с актуальным адресом */}

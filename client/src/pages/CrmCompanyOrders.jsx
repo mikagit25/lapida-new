@@ -65,3 +65,5 @@ const CrmCompanyOrders = () => {
 };
 
 // CRM integration removed
+
+export default CrmCompanyOrders;

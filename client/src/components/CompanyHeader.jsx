@@ -1,4 +1,6 @@
 import React, { useRef } from 'react';
+import FavoriteCompanyButton from './FavoriteCompanyButton';
+import ShareCompanyButton from './ShareCompanyButton';
 import { useNavigate } from 'react-router-dom';
 
 export default function CompanyHeader({ company, canEdit, onHeaderBgUpload }) {
@@ -19,7 +21,7 @@ export default function CompanyHeader({ company, canEdit, onHeaderBgUpload }) {
       )}
       <div className="relative flex items-center gap-4 h-40 z-10 px-6">
         <img src={company.logo} alt="Логотип" className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg bg-white" />
-        <div>
+        <div className="flex items-center gap-2">
           {/* Имя компании теперь кликабельно для перехода в личный кабинет */}
           <div
             className="font-bold text-2xl text-white drop-shadow-lg cursor-pointer hover:underline"
@@ -28,10 +30,12 @@ export default function CompanyHeader({ company, canEdit, onHeaderBgUpload }) {
           >
             {company.name}
           </div>
-          {company.extra && (
-            <div className="text-gray-200 drop-shadow">{company.extra}</div>
-          )}
+          <FavoriteCompanyButton companyId={company._id} />
+          <ShareCompanyButton url={window.location.origin + (company.customSlug ? `/company/${company.customSlug}` : `/company/${company._id}`)} />
         </div>
+        {company.extra && (
+          <div className="text-gray-200 drop-shadow">{company.extra}</div>
+        )}
         {canEdit && (
           <div className="ml-auto">
             <button

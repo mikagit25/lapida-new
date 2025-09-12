@@ -1,9 +1,21 @@
+// ...existing code...
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String },
   gallery: { type: [String], default: [] },
+  portfolio: {
+    type: [
+      {
+        image: { type: String, required: true },
+        title: { type: String, required: true },
+        description: { type: String, default: '' },
+        date: { type: String, default: '' }
+      }
+    ],
+    default: []
+  },
   price: { type: Number },
   category: { type: String },
   createdAt: { type: Date, default: Date.now }
@@ -53,6 +65,17 @@ const companySchema = new mongoose.Schema({
   gallery: { type: [String], default: [] },
   products: { type: [productSchema], default: [] },
   documents: { type: [String], default: [] },
+  history: {
+    type: [
+      {
+        date: { type: String, required: true },
+        title: { type: String, required: true },
+        description: { type: String, default: '' },
+        image: { type: String, default: '' }
+      }
+    ],
+    default: []
+  },
   status: { type: String, enum: ['pending', 'verified'], default: 'pending' },
   reviews: { type: [reviewSchema], default: [] },
   news: {
@@ -68,7 +91,8 @@ const companySchema = new mongoose.Schema({
   },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
-  headerBackground: { type: String, default: '' }
+  headerBackground: { type: String, default: '' },
+  erpnextToken: { type: String, default: '' } // API-токен ERPNext для интеграции
 });
 
 module.exports = mongoose.model('Company', companySchema);

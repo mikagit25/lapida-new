@@ -32,6 +32,16 @@ const ProductPage = () => {
     fetchProduct();
   }, [slug]);
 
+  // Сохранять просмотренный товар в localStorage
+  useEffect(() => {
+    if (!product || !product._id) return;
+    let viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
+    viewed = viewed.filter(id => id !== product._id); // убрать дубликаты
+    viewed.unshift(product._id);
+    if (viewed.length > 30) viewed = viewed.slice(0, 30); // максимум 30 товаров
+    localStorage.setItem('viewedProducts', JSON.stringify(viewed));
+  }, [product]);
+
   const fetchProduct = async () => {
     setLoading(true);
     setError('');

@@ -13,6 +13,8 @@ import GoToCompanyCabinetButton from './GoToCompanyCabinetButton';
 import CompanyCabinetQuickActions from './CompanyCabinetQuickActions';
 import { Link } from 'react-router-dom';
 import GoToConnectionsButton from './GoToConnectionsButton';
+import FavoritesSection from './FavoritesSection';
+import ViewedSection from './ViewedSection';
 
 const PersonalCabinet = () => {
   const [userCompanies, setUserCompanies] = useState([]);
@@ -309,6 +311,12 @@ const PersonalCabinet = () => {
               formatDate={formatDate}
               fixImageUrl={fixImageUrl}
             />
+
+            {/* Избранные товары */}
+            <FavoritesSection />
+
+            {/* Просмотренные товары */}
+            <ViewedSection />
           </div>
 
           {/* Правая колонка - Уведомления и активность */}

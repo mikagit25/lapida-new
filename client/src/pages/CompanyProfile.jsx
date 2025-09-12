@@ -21,6 +21,9 @@ import CompanyReviewForm from '../components/CompanyReviewForm';
 import CompanyAddressMapProfileBlock from '../components/CompanyAddressMapProfileBlock';
 import CompanyReviewsProfileBlock from '../components/CompanyReviewsProfileBlock';
 import CompanyQRCodeBlock from '../components/CompanyQRCodeBlock';
+import CompanyFAQ from '../components/CompanyFAQ';
+import CompanyRecommendations from '../components/CompanyRecommendations';
+import CompanyHistory from '../components/CompanyHistory';
 import { API_BASE_URL } from '../config/api';
 import { apiFetch } from '../services/apiFetch';
 export default function CompanyProfile({ company, userData, news, team, contacts }) {
@@ -138,8 +141,77 @@ export default function CompanyProfile({ company, userData, news, team, contacts
         </div>
       )}
       <CompanyInfo company={companyState} />
-      {/* Галерея компании */}
-      <CompanyGallery images={companyState.gallery} isOwner={isOwner} companyId={companyState._id} />
+
+  {/* Галерея компании */}
+  <CompanyGallery images={companyState.gallery} isOwner={isOwner} companyId={companyState._id} />
+
+  {/* История компании (этапы, важные даты, достижения) */}
+  <CompanyHistory companyId={companyState._id} isOwner={isOwner} />
+
+      {/* Ссылки на разделы компании: часть только для владельца */}
+      <div className="my-4 flex flex-wrap gap-2">
+        {isOwner && (
+          <>
+            <Link
+              to={companyState.customSlug
+                ? `/company/${companyState.customSlug}/crm-integration`
+                : `/companies/${companyState._id}/crm-integration`}
+              className="inline-block bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold px-4 py-2 rounded transition"
+            >
+              Интеграция с CRM
+            </Link>
+            <Link
+              to={companyState.customSlug
+                ? `/company/${companyState.customSlug}/crm-orders`
+                : `/companies/${companyState._id}/crm-orders`}
+              className="inline-block bg-orange-100 hover:bg-orange-200 text-orange-800 font-semibold px-4 py-2 rounded transition"
+            >
+              CRM-заказы
+            </Link>
+            <Link
+              to={companyState.customSlug
+                ? `/company/${companyState.customSlug}/notifications`
+                : `/companies/${companyState._id}/notifications`}
+              className="inline-block bg-red-100 hover:bg-red-200 text-red-800 font-semibold px-4 py-2 rounded transition"
+            >
+              Уведомления
+            </Link>
+            <Link
+              to={companyState.customSlug
+                ? `/company/${companyState.customSlug}/analytics`
+                : `/companies/${companyState._id}/analytics`}
+              className="inline-block bg-purple-100 hover:bg-purple-200 text-purple-800 font-semibold px-4 py-2 rounded transition"
+            >
+              Аналитика
+            </Link>
+          </>
+        )}
+        {/* Чат компании можно сделать публичным или только для владельца — оставим публичным, если требуется скрыть, обернуть в isOwner */}
+        <Link
+          to={companyState.customSlug
+            ? `/company/${companyState.customSlug}/chat`
+            : `/companies/${companyState._id}/chat`}
+          className="inline-block bg-green-100 hover:bg-green-200 text-green-800 font-semibold px-4 py-2 rounded transition"
+        >
+          Чат компании
+        </Link>
+        <Link
+          to={companyState.customSlug
+            ? `/company/${companyState.customSlug}/history`
+            : `/companies/${companyState._id}/history`}
+          className="inline-block bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-semibold px-4 py-2 rounded transition"
+        >
+          История компании
+        </Link>
+        <Link
+          to={companyState.customSlug
+            ? `/company/${companyState.customSlug}/portfolio`
+            : `/company/${companyState._id}/portfolio`}
+          className="inline-block bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold px-4 py-2 rounded transition"
+        >
+          Портфолио компании
+        </Link>
+      </div>
       {/* Мини-каталог товаров компании */}
       <CompanyProductsProfileBlock products={companyState.products} />
       <CompanyNewsProfileBlock news={companyNews} />
@@ -149,6 +221,21 @@ export default function CompanyProfile({ company, userData, news, team, contacts
       {/* <CompanyReviews reviews={companyState.reviews} /> */}
       <CompanyTeamProfileBlock team={team} />
       <CompanyContactsProfileBlock contacts={companyState.contacts} phones={companyState.phones} emails={companyState.emails} />
+
+      {/* Ссылка на контактную форму */}
+      <div className="my-4">
+        <Link
+          to={companyState.customSlug
+            ? `/company/${companyState.customSlug}/contact`
+            : `/company/${companyState._id}/contact`}
+          className="inline-block bg-green-100 hover:bg-green-200 text-green-800 font-semibold px-4 py-2 rounded transition"
+        >
+          Связаться с компанией
+        </Link>
+      </div>
+
+      {/* Рекомендации/похожие компании */}
+      <CompanyRecommendations companyId={companyState._id} category={companyState.products && companyState.products[0]?.category} />
       {/* Show address and map if present (OpenStreetMap) - теперь ниже контактов */}
       {(companyState.address || (companyState.lat && companyState.lng)) && (
         <CompanyAddressMapProfileBlock
@@ -163,6 +250,9 @@ export default function CompanyProfile({ company, userData, news, team, contacts
           ? `${window.location.origin}/company/${companyState.customSlug}`
           : `${window.location.origin}/company/${companyState._id}`}
       />
+
+      {/* FAQ компании (вопросы и ответы) */}
+      <CompanyFAQ faqs={companyState.faqs || []} />
       <CompanyReviewsProfileBlock
         companyId={companyState._id}
         reviews={reviews}
