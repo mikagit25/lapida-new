@@ -1,4 +1,188 @@
 {
+  "religiousOrg": {
+    "tabs": {
+      "profile": "Profile",
+      "gallery": "Gallery",
+      "schedule": "Schedule",
+      "services": "Services",
+      "products": "Products",
+      "news": "News",
+      "team": "Team",
+      "documents": "Documents",
+      "contacts": "Contacts",
+      "reviews": "Reviews"
+    },
+    "notFound": "Organization not found"
+  },
+  "religiousOrgCabinet": {
+    "notFound": "Organization not found",
+    "ownerOnly": "Access only for the organization owner or authorized person.",
+    "title": "Religious Organization Cabinet",
+    "menu": {
+      "profile": "Organization Profile",
+      "gallery": "Gallery",
+      "schedule": "Schedule",
+      "services": "Services",
+      "products": "Products",
+      "orders": "Orders",
+      "team": "Team",
+      "contacts": "Contacts",
+      "documents": "Documents",
+      "news": "News",
+      "reviews": "Reviews"
+    },
+    "help": {
+      "profile": "Edit your organization's main information: name, description, contacts, etc.",
+      "gallery": "Add and manage photo albums and images of your organization.",
+      "schedule": "Plan and publish the schedule of services, events, and activities.",
+      "services": "Manage the list of services provided.",
+      "products": "Add products for the church shop or online orders.",
+      "orders": "View and manage orders for products and services.",
+      "team": "Add and edit information about staff and ministers.",
+      "contacts": "Manage contact information and map display.",
+      "documents": "Upload and publish important documents for parishioners.",
+      "news": "Publish news and announcements of the organization.",
+      "reviews": "View reviews and ratings of your organization."
+    }
+  },
+  "religiousOrgDashboard": {
+    "title": "Religious Organization Dashboard"
+  },
+  "religiousOrgProfile": {
+    "title": "Organization Profile",
+    "loadError": "Profile loading error",
+    "saveError": "Profile saving error",
+    "name": "Name",
+    "type": "Type (church, parish...)",
+    "confession": "Confession",
+    "description": "Description",
+    "phone": "Phone",
+    "email": "Email",
+    "website": "Website",
+    "address": "Address"
+  },
+  "religiousOrgServices": {
+    "title": "Services",
+    "loadError": "Services loading error",
+    "saveError": "Service saving error",
+    "deleteError": "Service deletion error",
+    "name": "Service name",
+    "description": "Description",
+    "price": "Price",
+    "available": "Available",
+    "unavailable": "unavailable"
+  },
+  "religiousOrgProducts": {
+    "title": "Products and Church Shop",
+    "loadError": "Products loading error",
+    "saveError": "Product saving error",
+    "deleteError": "Product deletion error",
+    "name": "Product name",
+    "description": "Description",
+    "price": "Price (₽)",
+    "image": "Image URL",
+    "available": "Available for order",
+    "unavailable": "unavailable"
+  },
+  "religiousOrgOrders": {
+    "title": "Orders",
+    "loadError": "Orders loading error",
+    "saveError": "Order saving error",
+    "deleteError": "Order deletion error",
+    "customerName": "Customer name",
+    "product": "Product/Service",
+    "quantity": "Quantity",
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "comment": "Comment"
+  },
+  "religiousOrgReviews": {
+    "title": "Reviews and Ratings",
+    "loadError": "Reviews loading error",
+    "saveError": "Review saving error",
+    "deleteError": "Review deletion error",
+    "author": "Your name",
+    "text": "Your review"
+  },
+  "religiousOrgGallery": {
+    "title": "Gallery",
+    "loadError": "Gallery loading error",
+    "saveError": "Album saving error",
+    "deleteError": "Album deletion error",
+    "titleInput": "Album title",
+    "description": "Description",
+    "addAlbum": "Add album",
+    "noPhotos": "No photos"
+  },
+  "religiousOrgSchedule": {
+    "title": "Schedule",
+    "loadError": "Schedule loading error",
+    "saveError": "Event saving error",
+    "deleteError": "Event deletion error",
+    "titleInput": "Event title",
+    "description": "Description",
+    "location": "Location"
+  },
+  "religiousOrgEventReports": {
+    "title": "Event Reports",
+    "event": "Event",
+    "reportDate": "Report date",
+    "reportText": "Report text",
+    "photoReport": "Photo report",
+    "noReports": "No reports",
+    "date": "Date",
+    "details": "Details"
+  },
+  "religiousOrgNews": {
+    "title": "News",
+    "publishedAt": "Publication date",
+    "images": "Images",
+    "noNews": "No news",
+    "date": "Date",
+    "details": "Details"
+  },
+  "religiousOrgTeam": {
+    "title": "Our Team",
+    "position": "Position",
+    "description": "Description",
+    "contacts": "Contacts",
+    "noMembers": "No team information",
+    "details": "Details"
+  },
+  "religiousOrgDocuments": {
+    "title": "Documents",
+    "publishedAt": "Publication date",
+    "downloadDoc": "Download document",
+    "noDocs": "No documents",
+    "date": "Date",
+    "details": "Details",
+    "download": "Download"
+  },
+  "religiousOrgContacts": {
+    "title": "Contacts",
+    "noContacts": "No contact information",
+    "mapTitle": "We are on the map"
+  },
+  "religiousOrgEvents": {
+    "title": "Events",
+    "date": "Date",
+    "location": "Location",
+    "description": "Description",
+    "registrationTitle": "Event registration",
+    "name": "Name",
+    "phone": "Phone",
+    "register": "Register",
+    "registered": "You are successfully registered!",
+    "registerError": "Registration error",
+    "noEvents": "No events",
+    "details": "Details",
+    "backToList": "Back to list"
+    ,"registerBtn": "Register"
+  },
   "avatar": "Avatar",
   "user": "User",
   "hide_block": "Hide block",

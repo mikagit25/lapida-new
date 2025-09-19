@@ -1,4 +1,19 @@
 {
+  "religiousOrg": {
+    "tabs": {
+      "profile": "Profil",
+      "gallery": "Galerie",
+      "schedule": "Zeitplan",
+      "services": "Dienstleistungen",
+      "products": "Produkte",
+      "news": "Nachrichten",
+      "team": "Team",
+      "documents": "Dokumente",
+      "contacts": "Kontakte",
+      "reviews": "Bewertungen"
+    },
+    "notFound": "Organisation nicht gefunden"
+  },
   "avatar": "Avatar",
   "user": "User",
   "hide_block": "Hide block",
@@ -14,8 +29,6 @@
   "loading": "Loading...",
   "no_companies_found": "No companies found",
   "nav_memorials": "Memorials",
-  "nav_companies": "Companies",
-  "nav_users": "Users",
   "nav_business": "For Business",
   "nav_products": "Products",
   "nav_cart": "Cart",
@@ -51,24 +64,7 @@
   "logging_in": "Anmeldung...",
   "enter_email": "E-Mail eingeben",
   "enter_password": "Passwort eingeben",
-  "confirm_password": "Passwort bestätigen"
-  "home_hero_title": "Haupttitel (Beispiel)",
-  "home_hero_desc": "Startseitenbeschreibung (Beispiel)",
-  "home_hero_btn_products": "Produkte",
-  "home_hero_btn_companies": "Firmen",
-  "home_popular_products": "Beliebte Produkte",
-  "add_to_cart": "In den Warenkorb",
-  "see_all_products": "Alle Produkte ansehen",
-  "home_partner_companies": "Partnerfirmen",
-  "psy_sub_title": "Psychologen-Abonnement",
-  "psy_sub_limited_text": "Demo-Modus: eingeschränkte Funktionalität.",
-  "psy_sub_benefit_unlimited": "Unbegrenzte Beratungen",
-  "psy_sub_benefit_history": "Chatverlauf gespeichert",
-  "psy_sub_benefit_support": "24/7 Support",
-  "psy_sub_benefit_future": "Zukünftige Funktionen",
-  "psy_sub_demo_note": "Demo-Hinweis: Abonnement kommt bald.",
-  "psy_sub_btn_soon": "Bald",
-  "psy_sub_back_to_chat": "Zurück zum Chat",
+  
   "admin_paid_user_not_found": "Benutzer nicht gefunden",
   "admin_paid_user_error": "Fehler beim Aktualisieren des Status",
   "admin_paid_user_status_updated": "Benutzerstatus aktualisiert",
@@ -129,5 +125,146 @@
   "header_title": "Kopfzeile",
   "header_in_development": "In Entwicklung",
   "footer_title": "Fußzeile",
-  "footer_in_development": "In Entwicklung"
+
+  "religiousOrgCabinet": {
+    "title": "Religious Organization Cabinet"
+  },
+  "religiousOrgDashboard": {
+    "title": "Religious Organization Dashboard"
+  },
+  "religiousOrgProfile": {
+    "title": "Organization Profile",
+    "loadError": "Profile loading error",
+    "saveError": "Profile saving error",
+    "name": "Name",
+    "type": "Type (church, parish...)",
+    "confession": "Confession",
+    "description": "Description",
+    "phone": "Phone",
+    "email": "Email",
+    "website": "Website",
+    "address": "Address"
+  },
+  "religiousOrgServices": {
+    "title": "Services",
+    "loadError": "Services loading error",
+    "saveError": "Service saving error",
+    "deleteError": "Service deletion error",
+    "name": "Service name",
+    "description": "Description",
+    "price": "Price",
+    "available": "Available",
+    "unavailable": "unavailable"
+  },
+  "religiousOrgProducts": {
+    "title": "Products and Church Shop",
+    "loadError": "Products loading error",
+    "saveError": "Product saving error",
+    "deleteError": "Product deletion error",
+    "name": "Product name",
+    "description": "Description",
+    "price": "Price (₽)",
+    "image": "Image URL",
+    "available": "Available for order",
+    "unavailable": "unavailable"
+  },
+  "religiousOrgOrders": {
+    "title": "Orders",
+    "loadError": "Orders loading error",
+    "saveError": "Order saving error",
+    "deleteError": "Order deletion error",
+    "customerName": "Customer name",
+    "product": "Product/Service",
+    "quantity": "Quantity",
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "comment": "Comment"
+  },
+  "religiousOrgReviews": {
+    "title": "Reviews and Ratings",
+    "loadError": "Reviews loading error",
+    "saveError": "Review saving error",
+    "deleteError": "Review deletion error",
+    "author": "Your name",
+    "text": "Your review"
+  },
+  "religiousOrgGallery": {
+    "title": "Gallery",
+    "loadError": "Gallery loading error",
+    "saveError": "Album saving error",
+    "deleteError": "Album deletion error",
+    "titleInput": "Album title",
+    "description": "Description",
+    "addAlbum": "Add album",
+    "noPhotos": "No photos"
+  },
+  "religiousOrgSchedule": {
+    "title": "Schedule",
+    "loadError": "Schedule loading error",
+    "saveError": "Event saving error",
+    "deleteError": "Event deletion error",
+    "titleInput": "Event title",
+    "description": "Description",
+    "location": "Location"
+  },
+  "religiousOrgEventReports": {
+    "title": "Event Reports",
+    "event": "Event",
+    "reportDate": "Report date",
+    "reportText": "Report text",
+    "photoReport": "Photo report",
+    "noReports": "No reports",
+    "date": "Date",
+    "details": "Details"
+  },
+  "religiousOrgNews": {
+    "title": "News",
+    "publishedAt": "Publication date",
+    "images": "Images",
+    "noNews": "No news",
+    "date": "Date",
+    "details": "Details"
+  },
+  "religiousOrgTeam": {
+    "title": "Our Team",
+    "position": "Position",
+    "description": "Description",
+    "contacts": "Contacts",
+    "noMembers": "No team information",
+    "details": "Details"
+  },
+  "religiousOrgDocuments": {
+    "title": "Documents",
+    "publishedAt": "Publication date",
+    "downloadDoc": "Download document",
+    "noDocs": "No documents",
+    "date": "Date",
+    "details": "Details",
+    "download": "Download"
+  },
+  "religiousOrgContacts": {
+    "title": "Contacts",
+    "noContacts": "No contact information",
+    "mapTitle": "We are on the map"
+  },
+  "religiousOrgEvents": {
+    "title": "Events",
+    "date": "Date",
+    "location": "Location",
+    "description": "Description",
+    "registrationTitle": "Event registration",
+    "name": "Name",
+    "phone": "Phone",
+    "register": "Register",
+    "registered": "You are successfully registered!",
+    "registerError": "Registration error",
+    "noEvents": "No events",
+    "details": "Details",
+    "backToList": "Back to list"
+    ,"registerBtn": "Register"
+  }
 }

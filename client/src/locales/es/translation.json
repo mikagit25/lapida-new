@@ -1,4 +1,19 @@
 {
+  "religiousOrg": {
+    "tabs": {
+      "profile": "Perfil",
+      "gallery": "Galería",
+      "schedule": "Horario",
+      "services": "Servicios",
+      "products": "Productos",
+      "news": "Noticias",
+      "team": "Equipo",
+      "documents": "Documentos",
+      "contacts": "Contactos",
+      "reviews": "Reseñas"
+    },
+    "notFound": "Organización no encontrada"
+  },
   "avatar": "Avatar",
   "user": "User",
   "hide_block": "Hide block",
@@ -51,7 +66,7 @@
   "logging_in": "Iniciando sesión...",
   "enter_email": "Ingrese el correo",
   "enter_password": "Ingrese la contraseña",
-  "confirm_password": "Confirmar contraseña"
+  "confirm_password": "Confirmar contraseña",
   "home_hero_title": "Título principal (ejemplo)",
   "home_hero_desc": "Descripción de la página principal (ejemplo)",
   "home_hero_btn_products": "Productos",
@@ -129,5 +144,146 @@
   "header_title": "Encabezado",
   "header_in_development": "En desarrollo",
   "footer_title": "Pie de página",
-  "footer_in_development": "En desarrollo"
+
+  "religiousOrgCabinet": {
+    "title": "Religious Organization Cabinet"
+  },
+  "religiousOrgDashboard": {
+    "title": "Religious Organization Dashboard"
+  },
+  "religiousOrgProfile": {
+    "title": "Organization Profile",
+    "loadError": "Profile loading error",
+    "saveError": "Profile saving error",
+    "name": "Name",
+    "type": "Type (church, parish...)",
+    "confession": "Confession",
+    "description": "Description",
+    "phone": "Phone",
+    "email": "Email",
+    "website": "Website",
+    "address": "Address"
+  },
+  "religiousOrgServices": {
+    "title": "Services",
+    "loadError": "Services loading error",
+    "saveError": "Service saving error",
+    "deleteError": "Service deletion error",
+    "name": "Service name",
+    "description": "Description",
+    "price": "Price",
+    "available": "Available",
+    "unavailable": "unavailable"
+  },
+  "religiousOrgProducts": {
+    "title": "Products and Church Shop",
+    "loadError": "Products loading error",
+    "saveError": "Product saving error",
+    "deleteError": "Product deletion error",
+    "name": "Product name",
+    "description": "Description",
+    "price": "Price (₽)",
+    "image": "Image URL",
+    "available": "Available for order",
+    "unavailable": "unavailable"
+  },
+  "religiousOrgOrders": {
+    "title": "Orders",
+    "loadError": "Orders loading error",
+    "saveError": "Order saving error",
+    "deleteError": "Order deletion error",
+    "customerName": "Customer name",
+    "product": "Product/Service",
+    "quantity": "Quantity",
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "comment": "Comment"
+  },
+  "religiousOrgReviews": {
+    "title": "Reviews and Ratings",
+    "loadError": "Reviews loading error",
+    "saveError": "Review saving error",
+    "deleteError": "Review deletion error",
+    "author": "Your name",
+    "text": "Your review"
+  },
+  "religiousOrgGallery": {
+    "title": "Gallery",
+    "loadError": "Gallery loading error",
+    "saveError": "Album saving error",
+    "deleteError": "Album deletion error",
+    "titleInput": "Album title",
+    "description": "Description",
+    "addAlbum": "Add album",
+    "noPhotos": "No photos"
+  },
+  "religiousOrgSchedule": {
+    "title": "Schedule",
+    "loadError": "Schedule loading error",
+    "saveError": "Event saving error",
+    "deleteError": "Event deletion error",
+    "titleInput": "Event title",
+    "description": "Description",
+    "location": "Location"
+  },
+  "religiousOrgEventReports": {
+    "title": "Event Reports",
+    "event": "Event",
+    "reportDate": "Report date",
+    "reportText": "Report text",
+    "photoReport": "Photo report",
+    "noReports": "No reports",
+    "date": "Date",
+    "details": "Details"
+  },
+  "religiousOrgNews": {
+    "title": "News",
+    "publishedAt": "Publication date",
+    "images": "Images",
+    "noNews": "No news",
+    "date": "Date",
+    "details": "Details"
+  },
+  "religiousOrgTeam": {
+    "title": "Our Team",
+    "position": "Position",
+    "description": "Description",
+    "contacts": "Contacts",
+    "noMembers": "No team information",
+    "details": "Details"
+  },
+  "religiousOrgDocuments": {
+    "title": "Documents",
+    "publishedAt": "Publication date",
+    "downloadDoc": "Download document",
+    "noDocs": "No documents",
+    "date": "Date",
+    "details": "Details",
+    "download": "Download"
+  },
+  "religiousOrgContacts": {
+    "title": "Contacts",
+    "noContacts": "No contact information",
+    "mapTitle": "We are on the map"
+  },
+  "religiousOrgEvents": {
+    "title": "Events",
+    "date": "Date",
+    "location": "Location",
+    "description": "Description",
+    "registrationTitle": "Event registration",
+    "name": "Name",
+    "phone": "Phone",
+    "register": "Register",
+    "registered": "You are successfully registered!",
+    "registerError": "Registration error",
+    "noEvents": "No events",
+    "details": "Details",
+  "backToList": "Back to list",
+  "registerBtn": "Register"
+  }
 }
