@@ -162,6 +162,8 @@ app.get('/api/health/db', async (req, res) => {
 // Маршруты API
 app.use(passport.initialize());
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/token', require('./routes/token'));
+app.use('/api/pool', require('./routes/pool'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/memorials', require('./routes/memorials-new'));
 app.use('/api/comments', require('./routes/comments'));
@@ -178,6 +180,16 @@ try {
 }
 app.use('/api/upload', uploadRouter);
 app.use('/api/photo-comments', require('./routes/photoComments'));
+app.use('/api/religious-services', require('./routes/religiousServices'));
+app.use('/api/religious-products', require('./routes/religiousProducts'));
+app.use('/api/religious-galleries', require('./routes/religiousGalleries'));
+app.use('/api/religious-schedules', require('./routes/religiousSchedules'));
+app.use('/api/religious-events', require('./routes/religiousEvents'));
+app.use('/api/religious-event-reports', require('./routes/religiousEventReports'));
+app.use('/api/religious-news', require('./routes/religiousNews'));
+app.use('/api/religious-team-members', require('./routes/religiousTeamMembers'));
+app.use('/api/religious-documents', require('./routes/religiousDocuments'));
+app.use('/api/religious-contacts', require('./routes/religiousContacts'));
 app.use('/api/memory-days', require('./routes/memoryDays'));
 app.use('/api/support-groups', require('./routes/supportGroups'));
 app.use('/api/photo-comments-simple', require('./routes/photoCommentsSimple'));
@@ -198,6 +210,7 @@ app.use('/api/psychologist', require('./routes/psychologist'));
 // app.use('/api/payments', require('./routes/payments'));
 // app.use('/api/admin', require('./routes/admin'));
 // app.use('/api/integrations', require('./routes/integrations'));
+app.use('/api/religious-organizations', require('./routes/religiousOrganizations'));
 app.use('/api/admin-paid', require('./routes/adminPaid'));
 // app.use('/api/media', require('./routes/media'));
 

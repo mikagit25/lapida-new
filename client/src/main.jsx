@@ -1,4 +1,8 @@
 
+
+import { Buffer } from 'buffer';
+window.Buffer = Buffer;
+globalThis.Buffer = Buffer;
 import './index.css';
 import './App.css';
 import './i18n';

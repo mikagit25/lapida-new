@@ -10,9 +10,10 @@ const Business = () => {
         <div className="mb-6 text-gray-700 text-lg">
           <p>Lapida — современная платформа для мемориальных и ритуальных компаний. Здесь вы можете продвигать свои услуги, управлять заказами, получать отзывы и работать с клиентами онлайн.</p>
         </div>
-        {/* Кнопка регистрации компании */}
-        <div className="mb-8 flex justify-center">
+        {/* Кнопки регистрации */}
+        <div className="mb-8 flex flex-col sm:flex-row justify-center gap-4">
           <Link to="/register-company" className="bg-blue-600 text-white px-8 py-3 rounded-lg shadow hover:bg-blue-700 text-xl font-semibold">Создать компанию</Link>
+          <Link to="/register-religious-organization" className="bg-green-600 text-white px-8 py-3 rounded-lg shadow hover:bg-green-700 text-xl font-semibold">Создать религиозную организацию</Link>
         </div>
         {/* Преимущества */}
         <div className="mb-8">

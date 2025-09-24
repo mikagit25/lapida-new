@@ -1,0 +1,29 @@
+﻿
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : [{"contacts":{"phone":"436643","email":"11@gma
+                    il.com","website":"","address":"Москва бульвар
+                     дружбы 1"},"_id":"68c51c74a7724e784a19bc18","
+                    name":"Храм тест 2","type":"церковь","confessi
+                    on":"провославна...
+RawContent        : HTTP/1.1 200 OK
+                    Vary: Origin
+                    Access-Control-Allow-Credentials: true
+                    Connection: keep-alive
+                    Keep-Alive: timeout=5
+                    Content-Length: 923
+                    Content-Type: application/json; charset=utf-8
+                    Date: Sun, 21 ...
+Forms             : {}
+Headers           : {[Vary, Origin], [Access-Control-Allow-Credent
+                    ials, true], [Connection, keep-alive], [Keep-A
+                    live, timeout=5]...}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : mshtml.HTMLDocumentClass
+RawContentLength  : 923
+
+
+

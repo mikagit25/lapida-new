@@ -1,5 +1,7 @@
-import CompanyCrmIntegrationPage from './pages/company/CompanyCrmIntegrationPage';
 import CompanyCrmOrdersPage from './pages/company/CompanyCrmOrdersPage';
+import { Web3Modal } from '@web3modal/react';
+import { WagmiProvider, createConfig, http } from 'wagmi';
+import CompanyCrmIntegrationPage from './pages/company/CompanyCrmIntegrationPage';
 import CompanyNotificationsPage from './pages/company/CompanyNotificationsPage';
 import CompanyAnalyticsPage from './pages/company/CompanyAnalyticsPage';
 import CompanyChatPage from './pages/company/CompanyChatPage';
@@ -80,6 +82,15 @@ import AdminPagesManager from './pages/AdminPagesManager';
 import AdminCompaniesManager from './pages/AdminCompaniesManager';
 import AdminMemorialsManager from './pages/AdminMemorialsManager';
 import AdminReportsManager from './pages/AdminReportsManager';
+import TokensHome from './Token/TokensHome';
+import TokensBuy from './Token/TokensBuy';
+import TokensSwap from './Token/TokensSwap';
+import TokensStake from './Token/TokensStake';
+import TokensAnalytics from './Token/TokensAnalytics';
+import TokensDocs from './Token/TokensDocs';
+import TokensListing from './Token/TokensListing';
+import TokensPool from './Token/TokensPool';
+import TokensPoolMLPDLPD from './Token/TokensPoolMLPDLPD';
 import AdminCabinet from './pages/AdminCabinet';
 import AdminPage from './pages/AdminPage';
 import React, { useState, useEffect } from 'react';
@@ -101,6 +112,11 @@ import { fixImageUrl } from './utils/imageUrl';
 import Companies from './pages/Companies';
 import CompanyPage from './pages/CompanyPage';
 import Business from './pages/Business';
+import ReligiousOrganizations from './pages/ReligiousOrganizations';
+import RegisterReligiousOrganization from './pages/RegisterReligiousOrganization';
+import ReligiousOrganizationProfile from './pages/ReligiousOrganizationProfile';
+import ReligiousOrganizationPage from './religious/ReligiousOrganizationPage';
+import ReligiousOrgCabinet from './religious/ReligiousOrgCabinet';
 import RegisterCompany from './pages/RegisterCompany';
 import Cart from './components/Cart';
 import Checkout from './pages/Checkout';
@@ -181,10 +197,12 @@ const Navigation = () => {
               {/* <Link to="/" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">{t('nav_home')}</Link> */}
               <Link to="/memorials" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">{t('nav_memorials')}</Link>
               <Link to="/companies" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">{t('nav_companies')}</Link>
-              <Link to="/users-catalog" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">{t('nav_users')}</Link>
+              <Link to="/religious-organizations" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">Каталог религиозных организаций</Link>
+              {/* <Link to="/users-catalog" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">{t('nav_users')}</Link> */}
               <Link to="/business" className="text-blue-700 hover:text-blue-900 px-3 py-2 rounded-md text-sm font-medium font-semibold">{t('nav_business')}</Link>
               <Link to="/products" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">{t('nav_products')}</Link>
-              <Link to="/cart" className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium font-semibold">{t('nav_cart')}</Link>
+              <Link to="/tokens" className="text-indigo-700 hover:text-indigo-900 px-3 py-2 rounded-md text-sm font-medium font-semibold">Токены</Link>
+              {/* <Link to="/cart" className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium font-semibold">{t('nav_cart')}</Link> */}
             </div>
           </div>
           <div className="hidden md:flex flex-1 justify-center px-6 lg:px-8">
@@ -243,6 +261,16 @@ const App = () => {
           <Navigation />
           <main className="pb-16 lg:pb-0">
             <Routes>
+              {/* Lapida Token Platform routes */}
+              <Route path="/tokens" element={<TokensHome />} />
+              <Route path="/tokens/buy" element={<TokensBuy />} />
+              <Route path="/tokens/swap" element={<TokensSwap />} />
+              <Route path="/tokens/stake" element={<TokensStake />} />
+              <Route path="/tokens/analytics" element={<TokensAnalytics />} />
+              <Route path="/tokens/docs" element={<TokensDocs />} />
+              <Route path="/tokens/listing" element={<TokensListing />} />
+              <Route path="/tokens/pool" element={<TokensPool />} />
+              <Route path="/tokens/pool-mlpd-lpd" element={<TokensPoolMLPDLPD />} />
               <Route path="/company/:companySlug/crm-integration" element={<CompanyCrmIntegrationPage />} />
               <Route path="/companies/:id/crm-integration" element={<CompanyCrmIntegrationPage />} />
               <Route path="/company/:companySlug/crm-orders" element={<CompanyCrmOrdersPage />} />
@@ -289,6 +317,10 @@ const App = () => {
               <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path="/create-memorial" element={<PrivateRoute><MemorialCreate /></PrivateRoute>} />
               <Route path="/companies" element={<Companies />} />
+              <Route path="/religious-organizations" element={<ReligiousOrganizations />} />
+              <Route path="/register-religious-organization" element={<RegisterReligiousOrganization />} />
+              <Route path="/religious-organizations/:id" element={<ReligiousOrganizationPage />} />
+              <Route path="/religious-org-cabinet/:id" element={<ReligiousOrgCabinet />} />
               <Route path="/companies/:id" element={<CompanyPage />} />
               <Route path="/companies/:id/cabinet" element={<CompanyCabinet />} />
               <Route path="/order/:orderId" element={<OrderDetails />} />
@@ -466,4 +498,35 @@ const Memorials = () => {
   );
 };
 
-export default App;
+// ...existing code...
+
+// Настройки Web3Modal
+
+const projectId = 'demo'; // Замените на свой projectId из https://cloud.walletconnect.com/
+const chains = [
+  {
+    id: 56,
+    name: 'Binance Smart Chain',
+    rpcUrls: {
+      default: { http: ['https://bsc-dataseed.binance.org/'] }
+    }
+  }
+];
+
+const wagmiConfig = createConfig({
+  chains,
+  transports: {
+    56: http('https://bsc-dataseed.binance.org/')
+  }
+});
+
+function AppWrapper() {
+  return (
+    <WagmiProvider config={wagmiConfig}>
+      <App />
+      <Web3Modal projectId={projectId} chains={chains} />
+    </WagmiProvider>
+  );
+}
+
+export default AppWrapper;

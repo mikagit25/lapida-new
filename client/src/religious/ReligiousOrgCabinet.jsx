@@ -67,30 +67,31 @@ const ReligiousOrgCabinet = () => {
     return <div className="p-8 text-red-600">{t('religiousOrgCabinet.ownerOnly')}</div>;
   }
 
+  const isOwner = user && org && user._id === org.owner;
   const renderSection = () => {
     switch (section) {
       case 'profile':
-        return <ReligiousOrgProfile organizationId={id} />;
+        return <ReligiousOrgProfile organizationId={id} isOwner={isOwner} />;
       case 'gallery':
-        return <ReligiousOrgGallery orgId={id} />;
+        return <ReligiousOrgGallery orgId={id} isOwner={isOwner} />;
       case 'schedule':
-        return <ReligiousOrgSchedule orgId={id} />;
+        return <ReligiousOrgSchedule orgId={id} isOwner={isOwner} />;
       case 'services':
-        return <ReligiousOrgServices orgId={id} />;
+        return <ReligiousOrgServices orgId={id} isOwner={isOwner} />;
       case 'products':
-        return <ReligiousOrgProducts orgId={id} />;
+        return <ReligiousOrgProducts orgId={id} isOwner={isOwner} />;
       case 'orders':
-        return <ReligiousOrgOrders orgId={id} />;
+        return <ReligiousOrgOrders orgId={id} isOwner={isOwner} />;
       case 'team':
-        return <ReligiousOrgTeam organizationId={id} />;
+        return <ReligiousOrgTeam organizationId={id} isOwner={isOwner} />;
       case 'contacts':
-        return <ReligiousOrgContacts organizationId={id} />;
+        return <ReligiousOrgContacts organizationId={id} isOwner={isOwner} />;
       case 'documents':
-        return <ReligiousOrgDocuments organizationId={id} />;
+        return <ReligiousOrgDocuments organizationId={id} isOwner={isOwner} />;
       case 'news':
-        return <ReligiousOrgNews organizationId={id} />;
+        return <ReligiousOrgNews organizationId={id} isOwner={isOwner} />;
       case 'reviews':
-        return <ReligiousOrgReviews organizationId={id} />;
+        return <ReligiousOrgReviews organizationId={id} isOwner={isOwner} />;
       default:
         return null;
     }

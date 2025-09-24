@@ -5,7 +5,9 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+
 const PsychologistVoiceInput = ({ onResult, disabled }) => {
+  const { t } = useTranslation();
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
 

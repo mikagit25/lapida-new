@@ -23,13 +23,15 @@ const MobileNavigation = () => {
   };
 
   const navigationItems = [
-    { path: '/', label: 'Главная', icon: '🏠', public: true },
-    { path: '/companies', label: 'Компании', icon: '🏢', public: true },
-    { path: '/products', label: 'Товары', icon: '�', public: true },
-    { path: '/memorials', label: 'Мемориалы', icon: '🏛️', public: true },
-    { path: '/dashboard', label: 'Дашборд', icon: '📊', auth: true },
-    { path: '/create-memorial', label: 'Создать мемориал', icon: '➕', auth: true },
-    { path: '/profile', label: 'Профиль', icon: '👤', auth: true },
+  { path: '/', label: 'Главная', icon: '🏠', public: true },
+  { path: '/companies', label: 'Компании', icon: '🏢', public: true },
+  { path: '/religious-organizations', label: 'Религ. организации', icon: '⛪', public: true },
+  { path: '/products', label: 'Товары', icon: '�', public: true },
+  { path: '/memorials', label: 'Мемориалы', icon: '🏛️', public: true },
+  { path: '/tokens', label: 'Токены', icon: '🪙', public: true },
+  { path: '/dashboard', label: 'Дашборд', icon: '📊', auth: true },
+  { path: '/create-memorial', label: 'Создать мемориал', icon: '➕', auth: true },
+  { path: '/profile', label: 'Профиль', icon: '👤', auth: true },
   ];
 
   const visibleItems = navigationItems.filter(item => 

@@ -43,10 +43,124 @@
       "documents": "Загружайте и публикуйте важные документы для прихожан.",
       "news": "Публикуйте новости и объявления организации.",
       "reviews": "Просматривайте отзывы и рейтинги вашей организации."
-    }
-  },
-  "religiousOrgDashboard": {
-    "title": "Панель управления религиозной организацией"
+    },
+  "token": {
+        "home": {
+          "title": "Lapida Token Platform",
+          "welcome": "Добро пожаловать на платформу управления токенами Lapida. Здесь вы можете купить, обменять, застейкать токены, ознакомиться с документацией и аналитикой.",
+          "buy": "Купить токен",
+          "swap": "Обменять токены (DEX)",
+          "stake": "Стейкинг",
+          "analytics": "Аналитика",
+          "docs": "Документация и whitepaper",
+          "listing": "Листинг токена",
+          "pool_usdt_lpd": "Пул ликвидности USDT/LPD",
+          "pool_mlpd_lpd": "Пул ликвидности MLPD/LPD",
+          "contract": "Контракт",
+          "network": "Сеть"
+        },
+        "buy": {
+          "title": "Купить токен Lapida",
+          "desc": "Для покупки токена Lapida используйте PancakeSwap или подключите кошелёк (MetaMask, TrustWallet).",
+          "pancake": "Купить на PancakeSwap",
+          "apiTitle": "Купить через API:",
+          "amount": "Сумма",
+          "buyBtn": "Купить",
+          "instruction": "Инструкция:",
+          "step1": "Откройте PancakeSwap и подключите кошелёк.",
+          "step2": "Вставьте адрес токена Lapida.",
+          "step3": "Выберите сумму и подтвердите обмен.",
+          "requestSent": "Запрос отправлен"
+        },
+        "swap": {
+          "title": "Обмен токенов (DEX)",
+          "desc": "Обменяйте Lapida Token на другие токены BSC через PancakeSwap или внутренний DEX.",
+          "pancake": "Обменять на PancakeSwap",
+          "apiTitle": "Обмен через API:",
+          "from": "Из токена",
+          "to": "В токен",
+          "amount": "Сумма",
+          "swapBtn": "Обменять",
+          "api": "API обмена:",
+          "requestSent": "Запрос отправлен"
+        },
+        "stake": {
+          "title": "Стейкинг токенов",
+          "desc": "Застейкайте Lapida Token и получайте MLPD/GLPD. Подключите кошелёк для взаимодействия со смарт-контрактом.",
+          "apiTitle": "Стейкинг через API:",
+          "amount": "Сумма",
+          "stakeBtn": "Стейкать",
+          "api": "API стейкинга:",
+          "instruction": "Инструкция:",
+          "step1": "Подключите MetaMask или другой web3-кошелёк.",
+          "step2": "Выберите сумму для стейкинга.",
+          "step3": "Подтвердите транзакцию.",
+          "requestSent": "Запрос отправлен"
+        },
+        "analytics": {
+          "title": "Аналитика токенов",
+          "loading": "Загрузка...",
+          "liquidity": "Операций ликвидности",
+          "exchange": "Операций обмена",
+          "staking": "Операций стейкинга",
+          "apiHint": "Последние операции отображаются в API /api/analytics",
+          "noData": "Нет данных"
+        },
+        "docs": {
+          "title": "Документация и Whitepaper",
+          "whitepaperRu": "Whitepaper (RU)",
+          "whitepaperEn": "Whitepaper (EN)",
+          "audit": "Security Audit Checklist",
+          "deploy": "Инструкция по деплою токена",
+          "listing": "Инструкция по листингу токена"
+        },
+        "listing": {
+          "title": "Листинг токена Lapida",
+          "desc": "Токен Lapida доступен на Binance Smart Chain и ведущих DEX-платформах.",
+          "instruction": "Инструкция по листингу",
+          "pancake": "Обмен на PancakeSwap",
+          "bscscan": "Контракт на BscScan",
+          "tofunft": "Коллекция на TofuNFT",
+          "contract": "Контракт",
+          "network": "Сеть"
+        },
+        "pool": {
+          "title": "Пул ликвидности USDT/LPD",
+          "lockLabel": "Срок блокировки",
+          "minHours": "Минимум {{min}}",
+          "min1": "Минимум 1",
+          "minHint": "Минимальный срок: 12 часов. Если не указано — будет выбран минимум.",
+          "hours": "Часы",
+          "days": "Дни",
+          "apr": "Текущий APR",
+          "add": "Добавить ликвидность",
+          "claim": "Получить премию MLPD",
+          "remove": "Забрать ликвидность",
+          "rewardToClaim": "Премия к получению",
+          "yourPool": "Ваш пул",
+          "lockPeriod": "Срок блокировки",
+          "lastDeposit": "Последний депозит",
+          "claimed": "Получено премий"
+        },
+        "poolMLPDLPD": {
+          "title": "Пул ликвидности MLPD/LPD",
+          "lockLabel": "Срок блокировки",
+          "minHours": "Минимум {{min}}",
+          "min1": "Минимум 1",
+          "minHint": "Минимальный срок: 12 часов. Если не указано — будет выбран минимум.",
+          "hours": "Часы",
+          "days": "Дни",
+          "apr": "Текущий APR",
+          "add": "Добавить ликвидность",
+          "claim": "Получить премию LPD",
+          "remove": "Забрать ликвидность",
+          "rewardToClaim": "Премия к получению",
+          "yourPool": "Ваш пул",
+          "lockPeriod": "Срок блокировки",
+          "lastDeposit": "Последний депозит",
+          "claimed": "Получено премий"
+        }
+      }
   },
   "religiousOrgProfile": {
     "title": "Профиль организации",
@@ -60,6 +174,15 @@
     "email": "Email",
     "website": "Сайт",
     "address": "Адрес"
+    ,"confirmDelete": "Вы уверены, что хотите удалить организацию? Это действие необратимо.",
+    "deleted": "Организация успешно удалена.",
+    "deleteError": "Ошибка удаления организации"
+  },
+  "common": {
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "save": "Сохранить",
+    "loading": "Загрузка..."
   },
   "religiousOrgServices": {
     "title": "Услуги",
@@ -327,4 +450,18 @@
   "header_in_development": "В разработке",
   "footer_title": "Футер",
   "footer_in_development": "В разработке"
+  ,
+  "new_session": "Новая сессия",
+  "emergency_help": "Экстренная помощь",
+  "emergency_help_aria": "Открыть окно экстренной помощи"
+  ,
+  "psychologist_sessions_title": "История сессий с психологом",
+  "sessions_load_error": "Ошибка загрузки сессий",
+  "auth_only": "Только для авторизованных пользователей",
+  "no_sessions": "Нет сессий",
+  "no_messages": "Нет сообщений",
+  "you": "Вы",
+  "psychologist_system_message": "Вы можете задать любой вопрос психологу. Пожалуйста, помните, что это виртуальный помощник и не заменяет профессиональную помощь.",
+  "copy_answer": "Скопировать ответ",
+  "copied": "Скопировано"
 }

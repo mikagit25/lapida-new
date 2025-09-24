@@ -7,6 +7,7 @@ export function getApi() {
   if (apiInstance) return apiInstance;
   apiInstance = axios.create({
     baseURL: API_BASE_URL,
+    withCredentials: true, // Всегда отправлять cookie (token) на сервер
     // Можно добавить другие настройки по необходимости
   });
   // Интерцептор для автоматической передачи токена
@@ -123,6 +124,9 @@ export {
   pageService,
   reportService,
 };
+
+// Экспортировать axios instance по умолчанию для совместимости с import api from './api'
+export default getApi();
 // Сервис компаний
 const companyService = {
   getAll: async () => {

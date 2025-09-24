@@ -197,6 +197,37 @@ const PersonalCabinet = () => {
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Быстрые действия</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Link to="/my-orders" className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 text-lg font-semibold inline-block mb-4">Мои заказы</Link>
+                {/* Быстрые действия: Корзина и Пользователи */}
+                <Link
+                  to="/cart"
+                  className="flex items-center p-4 border border-pink-200 rounded-lg hover:bg-pink-50 transition-colors bg-pink-50"
+                  style={{ minHeight: 64 }}
+                >
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 bg-pink-500 rounded-md flex items-center justify-center">
+                      <span className="text-white text-2xl">🛒</span>
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-sm font-medium text-gray-900">Корзина</h3>
+                    <p className="text-xs text-gray-500">Ваши выбранные товары</p>
+                  </div>
+                </Link>
+                <Link
+                  to="/users-catalog"
+                  className="flex items-center p-4 border border-yellow-200 rounded-lg hover:bg-yellow-50 transition-colors bg-yellow-50"
+                  style={{ minHeight: 64 }}
+                >
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 bg-yellow-500 rounded-md flex items-center justify-center">
+                      <span className="text-white text-2xl">👥</span>
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-sm font-medium text-gray-900">Пользователи</h3>
+                    <p className="text-xs text-gray-500">Каталог пользователей платформы</p>
+                  </div>
+                </Link>
 
                 {/* Кнопка поговорить с психологом */}
                 <Link
