@@ -1,13 +1,25 @@
 import React from 'react';
 import QRCode from 'react-qr-code';
 
-export default function CompanyQRCodeBlock({ url }) {
-  // Ensure QR always uses /company/:slug
-  let qrUrl = url;
-  if (url && url.includes(window.location.origin + '/') && !url.includes('/company/')) {
-    const path = url.replace(window.location.origin, '');
-    qrUrl = window.location.origin + '/company/' + path.replace(/^\/?/, '');
+const PUBLIC_ORIGIN = import.meta.env.VITE_PUBLIC_ORIGIN || 'https://lapida.one';
+
+// Нормализует ссылку на компанию, принудительно подставляя публичный домен и префикс /company
+function buildCompanyUrl(rawUrl) {
+  if (!rawUrl) return `${PUBLIC_ORIGIN}/company`;
+  try {
+    const parsed = new URL(rawUrl, PUBLIC_ORIGIN);
+    const path = parsed.pathname.replace(/^\/+/, '');
+    if (path.startsWith('company/')) return `${PUBLIC_ORIGIN}/${path}`;
+    return `${PUBLIC_ORIGIN}/company/${path}`;
+  } catch (e) {
+    const safePath = String(rawUrl).replace(/^https?:\/\//, '').replace(/^[^/]+/, '').replace(/^\/+/, '');
+    if (safePath.startsWith('company/')) return `${PUBLIC_ORIGIN}/${safePath}`;
+    return `${PUBLIC_ORIGIN}/company/${safePath}`;
   }
+}
+
+export default function CompanyQRCodeBlock({ url }) {
+  const qrUrl = buildCompanyUrl(url);
   return (
     <div className="mb-6">
       <h2 className="text-lg font-semibold mb-2">QR-код компании</h2>

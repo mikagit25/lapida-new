@@ -25,6 +25,7 @@ const ProductPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [companyLink, setCompanyLink] = useState(null);
 
   const fetchProduct = useCallback(async () => {
     setLoading(true);
@@ -59,9 +60,51 @@ const ProductPage = () => {
     localStorage.setItem('viewedProducts', JSON.stringify(viewed));
   }, [product]);
 
+  // Определяем ссылку на компанию: пробуем slug, иначе тянем компанию по id и берём customSlug
+  useEffect(() => {
+    if (!product) return;
+
+    const slugFromProduct = product?.company?.customSlug
+      || product?.company?.slug
+      || product?.companyCustomSlug
+      || product?.companySlug;
+
+    const companyId = product?.companyId
+      || (typeof product?.company === 'string' ? product.company : null)
+      || product?.company?._id;
+
+    if (slugFromProduct) {
+      setCompanyLink(`/company/${slugFromProduct}`);
+      return;
+    }
+
+    const loadCompany = async () => {
+      if (!companyId) return;
+      try {
+        const res = await apiFetch(`${API_BASE_URL}/companies/${companyId}`);
+        const data = await res.json();
+        const fetchedSlug = data?.company?.customSlug || data?.company?.slug;
+        if (fetchedSlug) {
+          setCompanyLink(`/company/${fetchedSlug}`);
+        } else {
+          // Если слага нет, используем маршрут на компанию по id
+          setCompanyLink(`/companies/${companyId}`);
+        }
+      } catch (e) {
+        console.warn('Не удалось загрузить компанию для товара', e);
+        setCompanyLink(`/companies/${companyId}`);
+      }
+    };
+
+    loadCompany();
+  }, [product]);
+
   // Универсальная логика заказа: добавить товар в корзину и перейти к оформлению
   const handleOrder = () => {
     if (!product) return;
+    const companyId = product.companyId
+      || (typeof product.company === 'string' ? product.company : null)
+      || product?.company?._id;
     // Получить текущие товары из корзины
     const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
     // Проверить, есть ли товар уже в корзине
@@ -69,7 +112,7 @@ const ProductPage = () => {
     if (exists) {
       exists.quantity = (exists.quantity || 1) + 1;
     } else {
-      cartItems.push({ ...product, quantity: 1, companyId: product.companyId });
+      cartItems.push({ ...product, quantity: 1, companyId });
     }
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
     // Перейти к оформлению заказа
@@ -147,20 +190,17 @@ const ProductPage = () => {
             )}
           </div>
           {/* Ссылка на страницу компании */}
-          {product.company && (
+          {companyLink && (
             <div className="mb-4">
               <div className="text-sm text-gray-500">Продавец:</div>
               <h2 className="text-lg font-semibold mb-1">
-                <Link
-                  to={product.company.customSlug ? `/company/${product.company.customSlug}` : `/company/${product.company._id}`}
-                  className="text-blue-700 hover:underline"
-                >
-                  {product.company.name}
+                <Link to={companyLink} className="text-blue-700 hover:underline">
+                  {product.company?.name || 'Страница компании'}
                 </Link>
               </h2>
               <button
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
-                onClick={() => window.location.href = product.company.customSlug ? `/company/${product.company.customSlug}` : `/company/${product.company._id}`}
+                onClick={() => window.location.href = companyLink}
               >
                 Посмотреть страницу компании
               </button>

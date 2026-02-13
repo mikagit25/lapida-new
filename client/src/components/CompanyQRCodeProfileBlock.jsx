@@ -1,14 +1,24 @@
 import React from 'react';
 import QRCode from 'react-qr-code';
 
-function CompanyQRCodeProfileBlock({ companyUrl, customSlug, companyId }) {
-  // Always use /company/:slug for QR
-  let url = companyUrl;
-  if (customSlug) {
-    url = `${window.location.origin}/company/${customSlug}`;
-  } else if (companyId) {
-    url = `${window.location.origin}/company/${companyId}`;
+const PUBLIC_ORIGIN = import.meta.env.VITE_PUBLIC_ORIGIN || 'https://lapida.one';
+
+function buildCompanyUrl(companyUrl, customSlug, companyId) {
+  if (customSlug) return `${PUBLIC_ORIGIN}/company/${customSlug}`;
+  if (companyId) return `${PUBLIC_ORIGIN}/company/${companyId}`;
+  if (companyUrl) {
+    try {
+      const parsed = new URL(companyUrl, PUBLIC_ORIGIN);
+      const path = parsed.pathname.replace(/^\/+/, '');
+      if (path.startsWith('company/')) return `${PUBLIC_ORIGIN}/${path}`;
+      return `${PUBLIC_ORIGIN}/company/${path}`;
+    } catch (e) {}
   }
+  return `${PUBLIC_ORIGIN}/company`;
+}
+
+function CompanyQRCodeProfileBlock({ companyUrl, customSlug, companyId }) {
+  const url = buildCompanyUrl(companyUrl, customSlug, companyId);
   return (
     <div className="bg-white rounded-lg shadow p-6 mb-8">
       <h2 className="text-lg font-semibold mb-4">QR-код компании</h2>
