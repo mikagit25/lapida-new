@@ -56,6 +56,10 @@ const VirtualItemBlock = ({
 
   const handleAdd = async () => {
     if (availableItems.length && !selectedItem) return;
+    if (!user?._id) {
+      alert('Пожалуйста, войдите в систему');
+      return;
+    }
     setLoading(true);
     try {
       await virtualItemsService.addItem(type, memorialId, {
@@ -68,7 +72,8 @@ const VirtualItemBlock = ({
       setSelectedItem(null);
       setShowForm(false);
       loadItems();
-    } catch (e) {
+    } catch (err) {
+      console.error('Ошибка при добавлении виртуального предмета:', err);
       alert('Ошибка при добавлении');
     }
     setLoading(false);

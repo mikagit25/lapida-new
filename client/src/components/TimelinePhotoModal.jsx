@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import { useFullImageSrc } from './GravePhotoGallery';
+import { useFullImageSrc } from '../hooks/useFullImageSrc';
 
 const TimelinePhotoModal = ({ photo, description, onClose }) => {
   const src = useFullImageSrc(photo);

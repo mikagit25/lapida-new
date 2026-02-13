@@ -1,14 +1,14 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import CompanyProfile from './CompanyProfile';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { apiFetch } from '../services/apiFetch';
 
 export default function CompanyPage() {
   const { t } = useTranslation();
-  const { id, slug } = useParams();
-  const navigate = useNavigate();
+  const { id } = useParams();
   const location = useLocation();
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +26,7 @@ export default function CompanyPage() {
         url = `/api/companies/by-slug/${id}`;
       }
     } else {
-  setError(t('company_invalid_address'));
+        setError(t('company_invalid_address'));
       setLoading(false);
       return;
     }
@@ -47,7 +47,7 @@ export default function CompanyPage() {
         setError(t('company_not_found'));
         setLoading(false);
       });
-  }, [id, location.pathname]);
+  }, [id, location.pathname, t]);
 
   if (loading || isLoading || !isAuthenticated || !user || !user._id) {
     return (

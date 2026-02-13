@@ -54,6 +54,7 @@ function ReligiousOrgContacts({ organizationId, isOwner }) {
       }
       setForm(initialContact);
     } catch (err) {
+      console.error('Ошибка сохранения контактов релорганизации:', err);
       setError(t('religiousOrgContacts.saveError'));
     } finally {
       setLoading(false);

@@ -7,7 +7,7 @@ const renderTree = (node) => {
       <strong>{node.name}</strong> ({node.relation})
       {node.children && node.children.length > 0 && (
         <ul>
-          {node.children.map((child, idx) => renderTree(child))}
+          {node.children.map((child) => renderTree(child))}
         </ul>
       )}
     </li>

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fixImageUrl } from '../utils/imageUrl';
-import { API_BASE_URL } from '../config/api';
+import { getApi } from '../services/api';
 
 function ImageWithAsyncUrl({ image, alt, className }) {
-  const [imgUrl, setImgUrl] = React.useState('');
+  const [imgUrl, setImgUrl] = React.useState(null);
   React.useEffect(() => {
     let isMounted = true;
     (async () => {
@@ -12,6 +12,7 @@ function ImageWithAsyncUrl({ image, alt, className }) {
     })();
     return () => { isMounted = false; };
   }, [image]);
+  if (!imgUrl) return null;
   return <img src={imgUrl} alt={alt} className={className} />;
 }
 
@@ -20,6 +21,7 @@ const AvatarBackgroundManager = ({
   onUpdate
 }) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [avatarBgUrl, setAvatarBgUrl] = useState(null);
 
   const handleAvatarBackgroundUpload = async (event) => {
     console.log('AvatarBackgroundManager: handleAvatarBackgroundUpload вызвана');
@@ -51,21 +53,16 @@ const AvatarBackgroundManager = ({
       
       console.log('AvatarBackgroundManager: Загружаем фон аватара для мемориала:', memorial._id);
       
-      const response = await fetch(`${API_BASE_URL}/memorials/${memorial._id}/avatar-background`, {
-        method: 'PUT',
-        body: formData,
-        credentials: 'include',
+      const api = await getApi();
+      const response = await api.put(`/memorials/${memorial._id}/avatar-background`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
-      console.log('AvatarBackgroundManager: Ответ сервера:', response.status, response.statusText);
+      console.log('AvatarBackgroundManager: Ответ сервера:', response.status);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('AvatarBackgroundManager: Ошибка ответа сервера:', errorData);
-        throw new Error(errorData.message || 'Ошибка загрузки');
-      }
-
-      const data = await response.json();
+      const data = response.data;
       console.log('AvatarBackgroundManager: Данные от сервера:', data);
       
       // Обновляем memorial с новым фоном аватара
@@ -87,38 +84,35 @@ const AvatarBackgroundManager = ({
   };
 
   // Определяем стиль фона аватара
-  const getAvatarBackgroundUrl = (avatarBackground) => {
-    if (!avatarBackground) return null;
-    
-    // Если путь уже полный (содержит http), используем как есть
-    if (avatarBackground.startsWith('http')) {
-      return avatarBackground;
-    }
-    // Удаляем ведущий /api, чтобы избежать двойного /api/api/
-    let cleanPath = avatarBackground.replace(/^\/api\//, '/');
-    if (!cleanPath.startsWith('/')) {
-      cleanPath = '/' + cleanPath;
-    }
-    return `${API_BASE_URL}${cleanPath}`;
-  };
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      if (!memorial?.avatarBackground) {
+        if (active) setAvatarBgUrl(null);
+        return;
+      }
+      const resolved = await fixImageUrl(memorial.avatarBackground);
+      if (active) setAvatarBgUrl(resolved);
+    })();
+    return () => { active = false; };
+  }, [memorial?.avatarBackground]);
 
-  const avatarBackgroundUrl = getAvatarBackgroundUrl(memorial.avatarBackground);
   console.log('AvatarBackgroundManager: memorial.avatarBackground:', memorial.avatarBackground);
-  console.log('AvatarBackgroundManager: avatarBackgroundUrl:', avatarBackgroundUrl);
+  console.log('AvatarBackgroundManager: avatarBackgroundUrl:', avatarBgUrl);
 
-  const avatarStyle = memorial.avatarBackground ? {
-    backgroundImage: `url(${avatarBackgroundUrl})`,
+  const avatarStyle = memorial.avatarBackground && avatarBgUrl ? {
+    backgroundImage: `url(${avatarBgUrl})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat'
   } : {};
 
   return (
-    <div className="flex-shrink-0 relative">
+    <div className="flex-shrink-0 relative z-20">
       {/* Фон аватара */}
-      {memorial.avatarBackground && (
+      {memorial.avatarBackground && avatarBgUrl && (
         <div 
-          className="absolute inset-0 rounded-lg -z-10"
+          className="absolute inset-0 rounded-lg z-10"
           style={avatarStyle}
         />
       )}

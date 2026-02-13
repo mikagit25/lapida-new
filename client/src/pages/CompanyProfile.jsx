@@ -26,7 +26,7 @@ import CompanyRecommendations from '../components/CompanyRecommendations';
 import CompanyHistory from '../components/CompanyHistory';
 import { API_BASE_URL } from '../config/api';
 import { apiFetch } from '../services/apiFetch';
-export default function CompanyProfile({ company, userData, news, team, contacts }) {
+export default function CompanyProfile({ company, userData, team }) {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsError, setReviewsError] = useState('');
@@ -56,6 +56,7 @@ export default function CompanyProfile({ company, userData, news, team, contacts
           setReviewsError(data.message || 'Ошибка загрузки отзывов');
         }
       } catch (e) {
+        console.error('Ошибка загрузки отзывов:', e);
         setReviewsError('Ошибка загрузки отзывов');
       }
       setReviewsLoading(false);
@@ -72,6 +73,7 @@ export default function CompanyProfile({ company, userData, news, team, contacts
           setNewsError(data.message || 'Ошибка загрузки новостей');
         }
       } catch (e) {
+        console.error('Ошибка загрузки новостей:', e);
         setNewsError('Ошибка загрузки новостей');
       }
       setNewsLoading(false);
@@ -81,10 +83,6 @@ export default function CompanyProfile({ company, userData, news, team, contacts
   }, [companyState]);
 
   // Обработчик для обновления customSlug
-  const handleSlugSaved = (newSlug) => {
-    setCompanyState(prev => ({ ...prev, customSlug: newSlug }));
-  };
-
   // Обработчик загрузки горизонтальных обоев
   const handleHeaderBgUpload = async (event) => {
   // Removed duplicate import of React

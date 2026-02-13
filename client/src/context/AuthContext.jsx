@@ -1,5 +1,6 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { authService } from '../services/api.js';
+import { authService, userService } from '../services/api.js';
 
 // Создаем контекст
 const AuthContext = createContext();
@@ -62,15 +63,17 @@ const authReducer = (state, action) => {
         token: null,
       };
     case 'UPDATE_USER':
-      // Гарантируем наличие _id
-      let user = action.payload;
-      if (user && !user._id && user.id) {
-        user = { ...user, _id: user.id };
+      {
+        // Гарантируем наличие _id
+        let user = action.payload;
+        if (user && !user._id && user.id) {
+          user = { ...user, _id: user.id };
+        }
+        return {
+          ...state,
+          user,
+        };
       }
-      return {
-        ...state,
-        user,
-      };
     case 'CLEAR_ERROR':
       return {
         ...state,
@@ -84,33 +87,7 @@ const authReducer = (state, action) => {
 // Провайдер контекста
 export const AuthProvider = ({ children }) => {
 
-  // Восстановление авторизации при загрузке приложения
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    const user = localStorage.getItem('user');
-
-    if (token && user) {
-      // Проверяем токен через API
-      authService.verifyToken()
-        .then(() => {
-          dispatch({
-            type: 'LOGIN_SUCCESS',
-            payload: {
-              token,
-              user: JSON.parse(user),
-            },
-          });
-        })
-        .catch(() => {
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('user');
-          dispatch({ type: 'SET_LOADING', payload: false });
-        });
-    } else {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  }, []);
-    const [state, dispatch] = useReducer(authReducer, initialState);
+  const [state, dispatch] = useReducer(authReducer, initialState);
 
     // Восстановление авторизации при загрузке приложения
     useEffect(() => {
@@ -155,7 +132,7 @@ export const AuthProvider = ({ children }) => {
         freshUser = profileRes.user || profileRes;
         localStorage.setItem('user', JSON.stringify(freshUser));
       } catch (e) {
-        // fallback: используем user из ответа
+        console.warn('[AuthContext] Не удалось обновить профиль после логина:', e);
       }
       dispatch({
         type: 'LOGIN_SUCCESS',
@@ -187,7 +164,7 @@ export const AuthProvider = ({ children }) => {
         freshUser = profileRes.user || profileRes;
         localStorage.setItem('user', JSON.stringify(freshUser));
       } catch (e) {
-        // fallback: используем user из ответа
+        console.warn('[AuthContext] Не удалось обновить профиль после регистрации:', e);
       }
       dispatch({
         type: 'LOGIN_SUCCESS',
@@ -224,7 +201,7 @@ export const AuthProvider = ({ children }) => {
         freshUser = profileRes.user || profileRes;
         localStorage.setItem('user', JSON.stringify(freshUser));
       } catch (e) {
-        // fallback: используем user из ответа
+        console.warn('[AuthContext] Не удалось обновить профиль после updateProfile:', e);
       }
       dispatch({
         type: 'UPDATE_USER',
@@ -282,3 +259,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

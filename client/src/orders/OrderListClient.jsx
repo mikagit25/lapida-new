@@ -42,6 +42,7 @@ export default function OrderListClient() {
       });
       setOrders(prev => [newOrder, ...prev]);
     } catch (e) {
+      console.error('Ошибка повтора заказа:', e);
       alert('Ошибка повтора заказа: ' + (e?.message || e));
     }
   };
@@ -53,6 +54,7 @@ export default function OrderListClient() {
         const data = await orderService.getMyOrders();
         setOrders(data);
       } catch (e) {
+        console.error('Ошибка загрузки заказов:', e);
         setError('Ошибка загрузки заказов');
       } finally {
         setLoading(false);

@@ -43,7 +43,9 @@ const ReligiousOrgCabinet = () => {
     try {
       const u = JSON.parse(localStorage.getItem('user'));
       setUser(u);
-    } catch {}
+    } catch (err) {
+      console.error('Ошибка чтения пользователя из localStorage:', err);
+    }
   }, []);
 
   useEffect(() => {

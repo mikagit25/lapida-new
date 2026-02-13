@@ -34,6 +34,7 @@ export default function GalleryManager({ gallery = [], isOwner, companyId, onGal
         onGalleryChange(updated);
       }
     } catch (err) {
+      console.error('Ошибка загрузки изображения', err);
       alert('Ошибка загрузки изображения');
     }
     setLoading(false);
@@ -60,6 +61,7 @@ export default function GalleryManager({ gallery = [], isOwner, companyId, onGal
         onGalleryChange(updated);
       }
     } catch (err) {
+      console.error('Ошибка удаления изображения', err);
       alert('Ошибка удаления изображения');
     }
     setLoading(false);

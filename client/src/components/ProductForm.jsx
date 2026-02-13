@@ -13,7 +13,6 @@ export default function ProductForm({ initialData, onSave, onCancel }) {
   });
   const [files, setFiles] = useState([]); // реальные файлы
   const [previews, setPreviews] = useState([]); // превью для отображения
-  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef();
 
   // Для редактирования: сохранённые фото
@@ -76,8 +75,8 @@ export default function ProductForm({ initialData, onSave, onCancel }) {
       <div>
         <div className="mb-2 font-semibold">Фото товара</div>
         <input type="file" multiple accept="image/*" style={{ display: 'none' }} ref={fileInputRef} onChange={handleFileSelect} />
-        <button type="button" className="bg-blue-600 text-white px-4 py-2 rounded mb-2" onClick={() => fileInputRef.current.click()} disabled={uploading}>
-          {uploading ? 'Загрузка...' : 'Добавить фото'}
+        <button type="button" className="bg-blue-600 text-white px-4 py-2 rounded mb-2" onClick={() => fileInputRef.current.click()}>
+          Добавить фото
         </button>
         <div className="flex gap-2 flex-wrap">
           {/* Сохранённые фото */}

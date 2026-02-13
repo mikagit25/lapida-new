@@ -38,6 +38,7 @@ export default function CompanyReviewForm({ companyId, onReviewAdded }) {
         setError(data.message || 'Ошибка отправки отзыва');
       }
     } catch (e) {
+      console.error('Ошибка отправки отзыва', e);
       setError('Ошибка отправки отзыва');
     }
     setLoading(false);

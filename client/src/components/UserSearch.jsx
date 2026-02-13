@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { friendsService } from '../services/api';
-import { fixImageUrl } from '../utils/imageUrl';
+import AsyncImage from './AsyncImage';
 
 const UserSearch = ({ onUserSelect, placeholder = "Поиск пользователей...", className = '' }) => {
   const [query, setQuery] = useState('');
@@ -114,8 +114,8 @@ const UserSearch = ({ onUserSelect, placeholder = "Поиск пользоват
               {/* Аватар */}
               <div className="flex-shrink-0 w-10 h-10">
                 {user.avatar ? (
-                  <img
-                    src={fixImageUrl(user.avatar)}
+                  <AsyncImage
+                    url={user.avatar}
                     alt={user.name}
                     className="w-10 h-10 rounded-full object-cover"
                   />

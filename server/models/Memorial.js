@@ -207,23 +207,26 @@ const memorialSchema = new mongoose.Schema({
   }],
   
   // Пользователи с правом редактирования и делегированием по секциям
-  editors: [{
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    sections: [{
-      type: String,
-      enum: ['bio', 'gallery', 'epitaph', 'timeline', 'documents', 'comments', 'other'],
-      default: 'other'
+  editors: {
+    type: [{
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+      },
+      sections: [{
+        type: String,
+        enum: ['bio', 'gallery', 'epitaph', 'timeline', 'documents', 'comments', 'other'],
+        default: 'other'
+      }],
+      role: {
+        type: String,
+        enum: ['relative', 'friend', 'custom'],
+        default: 'custom'
+      }
     }],
-    role: {
-      type: String,
-      enum: ['relative', 'friend', 'custom'],
-      default: 'custom'
-    }
-  }],
+    default: []
+  },
   
   // Фоновое изображение шапки
   headerBackground: {
@@ -252,39 +255,43 @@ const memorialSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Общая функция транслитерации для shareUrl/customSlug
+const transliterate = (text) => {
+  const cyrillicToLatin = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
+    'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+    'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+    'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch',
+    'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
+    ' ': '-'
+  };
+
+  return text
+    .toLowerCase()
+    .split('')
+    .map(char => cyrillicToLatin[char] || char)
+    .join('')
+    .replace(/[^\w\s-]/g, '') // удаляем остальные спецсимволы
+    .replace(/\s+/g, '-') // заменяем пробелы на дефисы
+    .replace(/-+/g, '-') // удаляем множественные дефисы
+    .replace(/^-+|-+$/g, ''); // убираем дефисы в начале и конце
+};
+
 // Генерация уникальной ссылки для шэринга (согласно ТЗ)
 memorialSchema.pre('save', async function(next) {
-  // Генерируем shareUrl если его нет (только имя-фамилия, без числа)
+  // Если передан customSlug — используем его и для shareUrl, чтобы ссылки совпадали
+  if (this.customSlug) {
+    this.shareUrl = this.customSlug;
+  }
+
+  // Генерируем shareUrl если его нет: транслитерируем имя+фамилию
   if (!this.shareUrl) {
-    const firstName = this.firstName.toLowerCase().replace(/[^a-zа-я0-9]/gi, '');
-    const lastName = this.lastName.toLowerCase().replace(/[^a-zа-я0-9]/gi, '');
-    this.shareUrl = `${firstName}-${lastName}`;
+    const base = transliterate(`${this.firstName} ${this.lastName}`) || 'memorial';
+    this.shareUrl = base;
   }
   
   // Генерируем customSlug если его нет, но только для новых мемориалов
   if (this.isNew && !this.customSlug) {
-    // Функция транслитерации
-    const transliterate = (text) => {
-      const cyrillicToLatin = {
-        'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
-        'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
-        'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
-        'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch',
-        'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
-        ' ': '-'
-      };
-      
-      return text
-        .toLowerCase()
-        .split('')
-        .map(char => cyrillicToLatin[char] || char)
-        .join('')
-        .replace(/[^\w\s-]/g, '') // удаляем остальные спецсимволы
-        .replace(/\s+/g, '-') // заменяем пробелы на дефисы
-        .replace(/-+/g, '-') // удаляем множественные дефисы
-        .replace(/^-+|-+$/g, ''); // убираем дефисы в начале и конце
-    };
-
     const baseSlug = transliterate(`${this.firstName} ${this.lastName}`);
     
     // Если slug пустой после обработки, используем shareUrl

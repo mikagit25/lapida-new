@@ -54,7 +54,8 @@ function AddGalleryPhotoForm({ companyId, onAdd }) {
       } else {
         setError(data.message || 'Ошибка загрузки');
       }
-    } catch (e) {
+    } catch (err) {
+      console.error('Error uploading gallery photo:', err);
       setError('Ошибка загрузки');
     } finally {
       setLoading(false);

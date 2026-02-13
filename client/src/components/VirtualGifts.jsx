@@ -34,6 +34,10 @@ const VirtualGifts = ({ memorialId, canEdit = false }) => {
 
   const handleAddGift = async () => {
     if (!selectedGift) return;
+    if (!user?._id) {
+      alert('Пожалуйста, войдите в систему');
+      return;
+    }
     setLoading(true);
     try {
       await virtualItemsService.addItem('gift', memorialId, {
@@ -47,6 +51,7 @@ const VirtualGifts = ({ memorialId, canEdit = false }) => {
       setShowForm(false);
       loadGifts();
     } catch (e) {
+      console.error('Ошибка при добавлении подарка:', e);
       alert('Ошибка при добавлении подарка');
     }
     setLoading(false);

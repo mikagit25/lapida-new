@@ -43,15 +43,17 @@ const PreferencesManager = () => {
   });
 
   useEffect(() => {
-    loadPreferences();
-  }, []);
+    if (user) {
+      loadPreferences();
+    }
+  }, [user]);
 
   const loadPreferences = async () => {
     try {
       setLoading(true);
       const response = await userService.getPreferences();
       if (response.preferences) {
-        setPreferences({ ...preferences, ...response.preferences });
+        setPreferences(prev => ({ ...prev, ...response.preferences }));
       }
     } catch (error) {
       console.error('Error loading preferences:', error);
@@ -112,6 +114,10 @@ const PreferencesManager = () => {
       });
     }
   };
+
+  if (!user) {
+    return <div className="bg-white shadow rounded-lg p-6">Войдите, чтобы управлять настройками.</div>;
+  }
 
   if (loading && !preferences.emailNotifications) {
     return (

@@ -9,6 +9,7 @@ import Profile from './pages/Profile';
 import PrivateRoute from './components/PrivateRoute';
 import TestPhotoComments from './pages/TestPhotoComments';
 import { newMemorialService } from './services/api';
+import { fixImageUrl } from './utils/imageUrl';
 
 // Навигация с аутентификацией
 const Navigation = () => {
@@ -309,7 +310,7 @@ const Memorials = () => {
                 <div className="relative">
                   {memorial.profileImage ? (
                     <img
-                      src={require('./utils/imageUrl').fixImageUrl(memorial.profileImage)}
+                      src={fixImageUrl(memorial.profileImage)}
                       alt={memorial.fullName}
                       className="w-full h-48 object-cover"
                       onError={(e) => {

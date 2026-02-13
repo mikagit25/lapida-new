@@ -35,7 +35,9 @@ const ReligiousOrganizationProfile = () => {
     try {
       const u = JSON.parse(localStorage.getItem('user'));
       setUser(u);
-    } catch {}
+    } catch (err) {
+      console.error('Не удалось прочитать пользователя из localStorage:', err);
+    }
   }, []);
 
   useEffect(() => {

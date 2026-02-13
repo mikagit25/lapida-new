@@ -9,7 +9,7 @@ import CompanyTabs from '../components/CompanyTabs';
 import CompanyLogoUploader from '../components/CompanyLogoUploader';
 import ProductForm from '../components/ProductForm';
 import DeleteCompanyButton from '../components/DeleteCompanyButton';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import CompanyGallery from '../components/CompanyGallery';
 import ProductList from '../components/ProductList';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -19,22 +19,9 @@ import CompanyMap from '../components/CompanyMap';
 import CompanyNewsForm from '../components/CompanyNewsForm';
 import CompanyDocumentsForm from '../components/CompanyDocumentsForm';
 import CompanyContactsForm from '../components/CompanyContactsForm';
-import CustomSlugEditor from '../components/CustomSlugEditor';
 import CompanyEditForm from '../components/CompanyEditForm';
-import { userService } from '../services/api';
 import { API_BASE_URL } from '../config/api';
 import { apiFetch } from '../services/apiFetch';
-
-// Обработчик клика по карте через useMapEvents
-function MapClickHandler({ setEditForm, setMapCenter }) {
-  useMapEvents({
-    click(e) {
-      setEditForm(f => ({ ...f, lat: e.latlng.lat, lng: e.latlng.lng }));
-      setMapCenter([e.latlng.lat, e.latlng.lng]);
-    }
-  });
-  return null;
-}
 
 function CompanyCabinet() {
   const TABS = [
@@ -53,7 +40,6 @@ function CompanyCabinet() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editForm, setEditForm] = useState({ name: '', description: '', inn: '', extra: '', address: '', lat: null, lng: null, phones: [], emails: [], news: [], documents: [], customSlug: '' });
-  const [mapCenter, setMapCenter] = useState([55.751244, 37.618423]);
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState('');
   const [editSuccess, setEditSuccess] = useState('');
@@ -63,12 +49,7 @@ function CompanyCabinet() {
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState('');
   const [mapError, setMapError] = useState('');
-  const [slug, setSlug] = useState('');
-  const [slugAvailable, setSlugAvailable] = useState(true);
-  const [slugCheckLoading, setSlugCheckLoading] = useState(false);
-  const [loaded, setLoaded] = useState(false);
   const [customSlugInput, setCustomSlugInput] = useState('');
-  const [userCompanies, setUserCompanies] = useState([]);
   const mapRef = useRef(null);
 
   // Центрировать карту на маркере при изменении координат
@@ -93,6 +74,7 @@ function CompanyCabinet() {
           setError('Компания не найдена');
         }
       } catch (e) {
+          console.error('Ошибка загрузки компании:', e);
         setError('Ошибка загрузки компании');
       }
       setLoading(false);
@@ -118,17 +100,11 @@ function CompanyCabinet() {
         customSlug: company.customSlug || '',
         _initialized: true
       });
-      setSlug(company.customSlug || '');
       setCustomSlugInput(company.customSlug || '');
     }
-  }, [company]);
+  }, [company, editForm._initialized]);
 
-  useEffect(() => {
-    if (tab === 'gallery' && company) refetchCompany();
-    if (tab === 'products') fetchProducts();
-  }, [tab]);
-
-  const refetchCompany = async () => {
+  const refetchCompany = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -142,12 +118,13 @@ function CompanyCabinet() {
         setError('Компания не найдена');
       }
     } catch (e) {
+        console.error('Ошибка загрузки компании:', e);
       setError('Ошибка загрузки компании');
     }
     setLoading(false);
-  };
+  }, [id]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setProductsLoading(true);
     setProductsError('');
     try {
@@ -161,10 +138,17 @@ function CompanyCabinet() {
         setProductsError('Не удалось загрузить товары');
       }
     } catch (e) {
+        console.error('Ошибка загрузки товаров:', e);
       setProductsError('Ошибка загрузки товаров');
     }
     setProductsLoading(false);
-  };
+  }, [id]);
+
+  // Загружаем данные вкладок по переключению (без повторного цикла от company state)
+  useEffect(() => {
+    if (tab === 'gallery') refetchCompany();
+    if (tab === 'products') fetchProducts();
+  }, [tab, refetchCompany, fetchProducts]);
 
   const handleAddProduct = () => {
     setProductEditData(null);
@@ -190,6 +174,7 @@ function CompanyCabinet() {
         setProductsError('Ошибка удаления товара');
       }
     } catch (e) {
+        console.error('Ошибка удаления товара:', e);
       setProductsError('Ошибка удаления товара');
     }
     setProductsLoading(false);
@@ -220,6 +205,7 @@ function CompanyCabinet() {
         setProductsError(data.message || 'Ошибка сохранения товара');
       }
     } catch (e) {
+        console.error('Ошибка сохранения товара:', e);
       setProductsError('Ошибка сохранения товара');
     }
     setProductsLoading(false);
@@ -271,6 +257,7 @@ function CompanyCabinet() {
         setEditError(data.message || 'Ошибка сохранения');
       }
     } catch (e) {
+        console.error('Ошибка сохранения компании:', e);
       setEditError(e?.message ? `Ошибка сохранения: ${e.message}` : 'Ошибка сохранения');
       if (editError) {
         console.log('Ошибка сохранения:', editError);
@@ -280,75 +267,7 @@ function CompanyCabinet() {
   }
 
   // Геокодирование адреса через Nominatim
-  const geocodeAddress = async (address) => {
-    if (!address) return;
-    try {
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
-  console.log('Поиск адреса:', url);
-  const res = await apiFetch(url);
-  const data = await res.json();
-      console.log('Ответ Nominatim:', data);
-      if (data && data[0]) {
-        const lat = parseFloat(data[0].lat);
-        const lng = parseFloat(data[0].lon);
-        const foundAddress = data[0].display_name || '';
-        setEditForm(f => ({ ...f, lat, lng, foundAddress }));
-        setMapCenter([lat, lng]);
-        setMapError('');
-      } else {
-        setMapError('Адрес не найден');
-        console.warn('Адрес не найден:', address);
-      }
-    } catch (e) {
-      setMapError('Ошибка поиска адреса');
-      console.error('Ошибка поиска адреса:', e);
-    }
-  };
-
   const isOwner = company && company.isOwner;
-
-  const handleSlugChange = (e) => {
-    const value = e.target.value.replace(/[^a-zA-Z0-9-_]/g, '').toLowerCase();
-    setSlug(value);
-    setEditForm(f => {
-      // Не отправлять пустой customSlug на сервер
-      if (!value) {
-        const { customSlug, ...rest } = f;
-        return { ...rest };
-      }
-      return { ...f, customSlug: value };
-    });
-    if (!value) {
-      setSlugAvailable(true);
-      setSlugCheckLoading(false);
-      return;
-    }
-    setSlugCheckLoading(true);
-    apiFetch(`${API_BASE_URL}/companies/check-slug?slug=${value}`)
-      .then(res => res.json())
-      .then(data => setSlugAvailable(data.available))
-      .catch(() => setSlugAvailable(false))
-      .finally(() => setSlugCheckLoading(false));
-  };
-
-  useEffect(() => {
-    async function fetchUserCompanies() {
-      try {
-  console.log(`[CompanyCabinet] Запрос к ${API_BASE_URL}/users/me...`);
-        const res = await userService.getMe();
-        console.log('[CompanyCabinet] userService.getMe() response:', res);
-        if (res && Array.isArray(res.companies)) {
-          setUserCompanies(res.companies);
-        } else {
-          setUserCompanies([]);
-        }
-      } catch (err) {
-        console.error('[CompanyCabinet] Ошибка запроса компаний пользователя:', err);
-        setUserCompanies([]);
-      }
-    }
-    fetchUserCompanies();
-  }, []);
 
   if (loading) return <div className="p-8">Загрузка...</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;

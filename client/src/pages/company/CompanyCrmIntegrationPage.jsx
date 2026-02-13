@@ -40,6 +40,7 @@ export default function CompanyCrmIntegrationPage() {
         setMessage(testRes.message || 'Ошибка подключения к ERPNext');
       }
     } catch (err) {
+      console.error('Ошибка интеграции ERPNext:', err);
       setStatus('disconnected');
       setMessage('Ошибка соединения с сервером');
     } finally {

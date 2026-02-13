@@ -5,7 +5,7 @@ const User = require('../models/User');
 const Company = require('../models/Company');
 const Memorial = require('../models/Memorial');
 const Comment = require('../models/Comment');
-const { auth, adminAuth } = require('../middleware/auth');
+const { auth, adminAuth, optionalAuth } = require('../middleware/auth');
 const path = require('path');
 const fs = require('fs');
 
@@ -303,9 +303,12 @@ router.put('/me/profile', auth, async (req, res) => {
   }
 });
 
-// Получение списка пользователей (только для админов)
-router.get('/', adminAuth, async (req, res) => {
+// Получение списка пользователей (минимум авторизация; если нет токена — вернуть 401, но не 500)
+router.get('/', optionalAuth, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Требуется авторизация' });
+    }
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;

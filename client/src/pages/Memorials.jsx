@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { newMemorialService } from '../services/api';
 import MemorialsFilterSearch from '../components/MemorialsFilterSearch';
@@ -10,16 +10,13 @@ const Memorials = () => {
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({});
   const [sortBy, setSortBy] = useState('newest');
-
-  useEffect(() => {
-    loadMemorials();
-  }, []);
+  const searchTerm = filters.searchTerm || '';
 
   // Обработка фильтров и поиска
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
   };
-  const loadMemorials = async () => {
+  const loadMemorials = useCallback(async () => {
     try {
       setLoading(true);
       // Передаем фильтры в API (если поддерживается)
@@ -41,32 +38,27 @@ const Memorials = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
-  // Перезагрузка мемориалов при изменении фильтров
   useEffect(() => {
     loadMemorials();
-    // eslint-disable-next-line
-  }, [filters]);
-  const filteredMemorials = memorials.filter(memorial =>
-    // Расширенный поиск по имени, фамилии, эпитафии
-    (() => {
-      const term = filters.searchTerm ? filters.searchTerm.toLowerCase() : '';
-      return (
-        (!term ||
-          (memorial.fullName && memorial.fullName.toLowerCase().includes(term)) ||
-          (memorial.lastName && memorial.lastName.toLowerCase().includes(term)) ||
-          (memorial.epitaph && memorial.epitaph.toLowerCase().includes(term))
-        ) &&
-        (!filters.gender || memorial.gender === filters.gender) &&
-        (!filters.country || (memorial.country && memorial.country.toLowerCase().includes(filters.country.toLowerCase()))) &&
-        (!filters.city || (memorial.city && memorial.city.toLowerCase().includes(filters.city.toLowerCase()))) &&
-        (!filters.hasPhoto || !!memorial.profileImage) &&
-        (!filters.hasEpitaph || !!memorial.epitaph) &&
-        (!filters.dateFrom || (memorial.dateOfBirth && memorial.dateOfBirth >= filters.dateFrom)) &&
-        (!filters.dateTo || (memorial.dateOfDeath && memorial.dateOfDeath <= filters.dateTo))
-      );
-    })()
+  }, [loadMemorials]);
+  const filteredMemorials = memorials.filter((memorial) => {
+    const term = filters.searchTerm ? filters.searchTerm.toLowerCase() : '';
+    return (
+      (!term ||
+        (memorial.fullName && memorial.fullName.toLowerCase().includes(term)) ||
+        (memorial.lastName && memorial.lastName.toLowerCase().includes(term)) ||
+        (memorial.epitaph && memorial.epitaph.toLowerCase().includes(term))
+      ) &&
+      (!filters.gender || memorial.gender === filters.gender) &&
+      (!filters.country || (memorial.country && memorial.country.toLowerCase().includes(filters.country.toLowerCase()))) &&
+      (!filters.city || (memorial.city && memorial.city.toLowerCase().includes(filters.city.toLowerCase()))) &&
+      (!filters.hasPhoto || !!memorial.profileImage) &&
+      (!filters.hasEpitaph || !!memorial.epitaph) &&
+      (!filters.dateFrom || (memorial.dateOfBirth && memorial.dateOfBirth >= filters.dateFrom)) &&
+      (!filters.dateTo || (memorial.dateOfDeath && memorial.dateOfDeath <= filters.dateTo))
+    );
   });
 
   const sortedMemorials = [...filteredMemorials].sort((a, b) => {
@@ -133,14 +125,14 @@ const Memorials = () => {
           <div className="text-center py-12">
             <div className="text-gray-400 text-6xl mb-4">📖</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {searchTerm 
-                ? 'Мемориалы не найдены' 
+              {searchTerm
+                ? 'Мемориалы не найдены'
                 : 'Пока нет мемориалов'
               }
             </h3>
             <p className="text-gray-500 mb-4">
-              {searchTerm 
-                ? 'Попробуйте изменить поисковый запрос' 
+              {searchTerm
+                ? 'Попробуйте изменить поисковый запрос'
                 : 'Станьте первым, кто создаст мемориал'
               }
             </p>

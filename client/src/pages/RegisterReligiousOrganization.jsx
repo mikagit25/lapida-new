@@ -34,16 +34,22 @@ const RegisterReligiousOrganization = () => {
         confession: form.confession,
         description: form.description,
         contacts: {
-          phone: form.phone,
-          email: form.email,
-          website: form.website,
+          // Бэк ожидает массив телефонов с меткой
+          phones: form.phone ? [{ label: 'Основной', value: form.phone }] : [],
+          email: form.email || undefined,
+          website: form.website || undefined,
           address: form.address
-        }
+            ? {
+                street: form.address,
+              }
+            : undefined,
+        },
       };
       await religiousOrgService.create(data);
       setSuccess(true);
       setTimeout(() => navigate('/religious-organizations'), 1500);
     } catch (err) {
+      console.error('Ошибка создания религиозной организации:', err);
       setError('Ошибка создания организации');
     } finally {
       setLoading(false);

@@ -2,13 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-// TODO: заменить на реальный API для мемориалов
-const mockMemorials = [
-  { _id: 'm1', title: 'Иванов Иван Иванович', createdBy: 'user1', isPublic: true, isHidden: false },
-  { _id: 'm2', title: 'Петров Петр Петрович', createdBy: 'user2', isPublic: false, isHidden: false },
-];
-
-
 const AdminMemorialsManager = () => {
   const { t } = useTranslation();
   const [memorials, setMemorials] = useState([]);
@@ -24,13 +17,14 @@ const AdminMemorialsManager = () => {
         const response = await newMemorialService.getAll();
         setMemorials(response);
       } catch (err) {
-  setError(t('admin_memorials_error_loading'));
+        console.error('Ошибка загрузки мемориалов:', err);
+        setError(t('admin_memorials_error_loading'));
       } finally {
         setLoading(false);
       }
     }
     fetchMemorials();
-  }, []);
+  }, [t]);
 
   const handleHide = (id) => {
     setMemorials(ms => ms.map(m => m._id === id ? { ...m, isHidden: !m.isHidden } : m));
@@ -45,6 +39,7 @@ const AdminMemorialsManager = () => {
           await newMemorialService.remove(id);
           setMemorials(ms => ms.filter(m => m._id !== id));
         } catch (err) {
+          console.error('Ошибка удаления мемориала:', err);
           alert(t('admin_memorials_error_delete'));
         }
       };

@@ -44,9 +44,12 @@ const ReligiousOrgOrders = ({ orgId, isOwner }) => {
       .then(([serviceOrders, productOrders]) => {
         setOrders([...serviceOrders, ...productOrders]);
       })
-  .catch(() => setError(t('religiousOrgOrders.loadError')))
+      .catch((err) => {
+        console.error('Ошибка загрузки заказов релорганизации:', err);
+        setError(t('religiousOrgOrders.loadError'));
+      })
       .finally(() => setLoading(false));
-  }, [orgId]);
+  }, [orgId, t]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -79,7 +82,8 @@ const ReligiousOrgOrders = ({ orgId, isOwner }) => {
       }
       setForm(initialOrder);
     } catch (err) {
-  setError(t('religiousOrgOrders.saveError'));
+      console.error('Ошибка сохранения заказа релорганизации:', err);
+      setError(t('religiousOrgOrders.saveError'));
     } finally {
       setLoading(false);
     }
@@ -107,7 +111,8 @@ const ReligiousOrgOrders = ({ orgId, isOwner }) => {
         setEditId(null);
       }
     } catch (err) {
-  setError(t('religiousOrgOrders.deleteError'));
+      console.error('Ошибка удаления заказа релорганизации:', err);
+      setError(t('religiousOrgOrders.deleteError'));
     } finally {
       setLoading(false);
     }

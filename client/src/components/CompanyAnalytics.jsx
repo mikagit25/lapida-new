@@ -1,29 +1,43 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { API_BASE_URL } from '../config/api';
 
 const CompanyAnalytics = ({ companyId }) => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const lastFetchedId = useRef(null);
 
   useEffect(() => {
     async function fetchStats() {
       setLoading(true);
       setError('');
       try {
-        const res = await fetch(`${API_BASE_URL}/companies/${companyId}/analytics`);
-        const data = await res.json();
-        if (res.ok && data.stats) {
-          setStats(data.stats);
+        const res = await fetch(`${API_BASE_URL}/companies/${companyId}/analytics`, {
+          credentials: 'include',
+        });
+        const contentType = res.headers.get('content-type') || '';
+        const payload = contentType.includes('application/json')
+          ? await res.json()
+          : { message: await res.text() };
+
+        if (res.ok && payload.stats) {
+          setStats(payload.stats);
         } else {
-          setError(data.message || 'Ошибка загрузки статистики');
+          // Показываем текст ошибки даже если пришёл plain text (например, 429)
+          setError(payload.message || 'Ошибка загрузки статистики');
         }
-      } catch (e) {
+      } catch (err) {
+        console.error('Ошибка загрузки статистики', err);
         setError('Ошибка загрузки статистики');
       }
       setLoading(false);
     }
-    if (companyId) fetchStats();
+    if (companyId) {
+      // Защита от двойного вызова эффекта в React StrictMode
+      if (lastFetchedId.current === companyId) return;
+      lastFetchedId.current = companyId;
+      fetchStats();
+    }
   }, [companyId]);
 
   if (loading) return <div className="text-gray-500">Загрузка аналитики...</div>;

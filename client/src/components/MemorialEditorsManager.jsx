@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
 
@@ -27,41 +27,47 @@ export default function MemorialEditorsManager({ memorialId }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchEditors();
-    fetchUsers();
-  }, [memorialId]);
-
-  async function fetchEditors() {
+  const fetchEditors = useCallback(async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-  const res = await axios.get(`${API_BASE_URL}/memorial-editors/${memorialId}/editors`, {
+      const res = await axios.get(`${API_BASE_URL}/memorial-editors/${memorialId}/editors`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       setEditors(res.data.editors || []);
     } catch (err) {
+      console.error('Ошибка загрузки редакторов', err);
       setError('Ошибка загрузки редакторов');
     } finally {
       setLoading(false);
     }
-  }
+  }, [memorialId]);
 
-  async function fetchUsers() {
+  const fetchUsers = useCallback(async () => {
     try {
-  const res = await axios.get(`${API_BASE_URL}/users`);
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/users`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        withCredentials: true,
+      });
       setUsers(res.data.users || []);
     } catch (err) {
+      console.error('Ошибка загрузки пользователей', err);
       setUsers([]);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    fetchEditors();
+    fetchUsers();
+  }, [fetchEditors, fetchUsers]);
 
   async function addEditor() {
     if (!selectedUser || selectedSections.length === 0) return;
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-  await axios.post(`${API_BASE_URL}/memorial-editors/${memorialId}/editors`, {
+      await axios.post(`${API_BASE_URL}/memorial-editors/${memorialId}/editors`, {
         userId: selectedUser,
         sections: selectedSections,
         role: selectedRole
@@ -73,6 +79,7 @@ export default function MemorialEditorsManager({ memorialId }) {
       setSelectedRole('custom');
       fetchEditors();
     } catch (err) {
+      console.error('Ошибка добавления редактора', err);
       setError('Ошибка добавления редактора');
     } finally {
       setLoading(false);
@@ -83,11 +90,12 @@ export default function MemorialEditorsManager({ memorialId }) {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-  await axios.delete(`${API_BASE_URL}/memorial-editors/${memorialId}/editors/${editorUserId}`, {
+      await axios.delete(`${API_BASE_URL}/memorial-editors/${memorialId}/editors/${editorUserId}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       fetchEditors();
     } catch (err) {
+      console.error('Ошибка удаления редактора', err);
       setError('Ошибка удаления редактора');
     } finally {
       setLoading(false);

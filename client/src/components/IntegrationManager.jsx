@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import EmailIntegration from './EmailIntegration';
 import SmsIntegration from './SmsIntegration';
+import { apiFetch } from '../services/apiFetch';
 
 const IntegrationManager = () => {
   const [status, setStatus] = useState({});
@@ -14,12 +15,12 @@ const IntegrationManager = () => {
   const fetchStatus = async () => {
     setLoading(true);
     try {
-  const { apiFetch } = require('../services/apiFetch');
-  const res = await apiFetch('/api/integrations');
+      const res = await apiFetch('/api/integrations');
       const data = await res.json();
       setStatus(data.status || {});
       setError('');
     } catch (e) {
+      console.error('Ошибка загрузки статуса интеграций', e);
       setError('Ошибка загрузки статуса интеграций');
       setStatus({});
     } finally {

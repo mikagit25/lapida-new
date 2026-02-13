@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 
 const ContactProfileCRM = ({ contactData }) => {
   const [created, setCreated] = useState(false);
@@ -10,6 +11,7 @@ const ContactProfileCRM = ({ contactData }) => {
     try {
       setCreated(true);
     } catch (e) {
+      console.error('Ошибка создания пользователя', e);
       setError('Ошибка при создании пользователя');
     } finally {
       setLoading(false);
@@ -34,3 +36,5 @@ const ContactProfileCRM = ({ contactData }) => {
 };
 
 // CRM integration removed
+
+export default ContactProfileCRM;

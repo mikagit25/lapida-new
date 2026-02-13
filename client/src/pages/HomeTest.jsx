@@ -1,24 +1,32 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import heroBg from '../assets/home/hero-bg.jpg';
+import product1 from '../assets/home/product1.jpg';
+import product2 from '../assets/home/product2.jpg';
+import product3 from '../assets/home/product3.jpg';
+import product4 from '../assets/home/product4.jpg';
+import company1 from '../assets/home/company1.jpg';
+import company2 from '../assets/home/company2.jpg';
+import company3 from '../assets/home/company3.jpg';
 
 const Logo = () => (
   <div className="flex items-center space-x-2">
-    <img src={require('../assets/home/company1.jpg')} alt="Lapida" className="w-10 h-10 rounded-full object-cover" />
+    <img src={company1} alt="Lapida" className="w-10 h-10 rounded-full object-cover" />
     <span className="text-2xl font-bold text-blue-700">Lapida</span>
   </div>
 );
 
 const products = [
-  { id: 1, nameKey: 'home_product1_name', descKey: 'home_product1_desc', img: require('../assets/home/product1.jpg') },
-  { id: 2, nameKey: 'home_product2_name', descKey: 'home_product2_desc', img: require('../assets/home/product2.jpg') },
-  { id: 3, nameKey: 'home_product3_name', descKey: 'home_product3_desc', img: require('../assets/home/product3.jpg') },
-  { id: 4, nameKey: 'home_product4_name', descKey: 'home_product4_desc', img: require('../assets/home/product4.jpg') },
+  { id: 1, nameKey: 'home_product1_name', descKey: 'home_product1_desc', img: product1 },
+  { id: 2, nameKey: 'home_product2_name', descKey: 'home_product2_desc', img: product2 },
+  { id: 3, nameKey: 'home_product3_name', descKey: 'home_product3_desc', img: product3 },
+  { id: 4, nameKey: 'home_product4_name', descKey: 'home_product4_desc', img: product4 },
 ];
 
 const companies = [
-  { id: 1, nameKey: 'home_company1_name', descKey: 'home_company1_desc', img: require('../assets/home/company1.jpg') },
-  { id: 2, nameKey: 'home_company2_name', descKey: 'home_company2_desc', img: require('../assets/home/company2.jpg') },
-  { id: 3, nameKey: 'home_company3_name', descKey: 'home_company3_desc', img: require('../assets/home/company3.jpg') },
+  { id: 1, nameKey: 'home_company1_name', descKey: 'home_company1_desc', img: company1 },
+  { id: 2, nameKey: 'home_company2_name', descKey: 'home_company2_desc', img: company2 },
+  { id: 3, nameKey: 'home_company3_name', descKey: 'home_company3_desc', img: company3 },
 ];
 
 const reviews = [
@@ -33,7 +41,7 @@ const HomeTest = () => {
     <div className="relative min-h-screen bg-gray-50">
       {/* Фоновое изображение */}
       <div className="absolute inset-0 -z-10">
-        <img src={require('../assets/home/hero-bg.jpg')} alt="Фон" className="w-full h-full object-cover opacity-30" />
+        <img src={heroBg} alt="Фон" className="w-full h-full object-cover opacity-30" />
       </div>
       <header className="bg-white/80 shadow py-6 mb-8 sticky top-0 z-20 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
@@ -52,7 +60,7 @@ const HomeTest = () => {
             </div>
           </div>
           <div className="flex-1 flex justify-center">
-            <img src={require('../assets/home/product1.jpg')} alt="Мемориалы" className="w-80 h-80 object-cover rounded-2xl shadow-lg border-4 border-white" />
+            <img src={product1} alt="Мемориалы" className="w-80 h-80 object-cover rounded-2xl shadow-lg border-4 border-white" />
           </div>
         </section>
         {/* Блок товаров */}
@@ -139,4 +147,8 @@ const HomeTest = () => {
         &copy; {new Date().getFullYear()} Lapida. Все права защищены.
       </footer>
     </div>
+  );
+};
+
+export default HomeTest;
 

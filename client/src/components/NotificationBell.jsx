@@ -26,6 +26,7 @@ const NotificationBell = () => {
       const response = await notificationService.getAll({ limit: 10 });
       setNotifications(Array.isArray(response.notifications) ? response.notifications : []);
     } catch (error) {
+      console.error('Ошибка загрузки уведомлений', error);
       setNotifications([]);
     } finally {
       setLoading(false);
@@ -37,6 +38,7 @@ const NotificationBell = () => {
       const response = await notificationService.getUnreadCount();
       setUnreadCount(response.count || 0);
     } catch (error) {
+      console.error('Ошибка получения количества непрочитанных уведомлений', error);
       setUnreadCount(0);
     }
   };
@@ -46,7 +48,9 @@ const NotificationBell = () => {
       await notificationService.markAsRead(notificationId);
       setNotifications((prev) => prev.map((n) => n._id === notificationId ? { ...n, read: true } : n));
       setUnreadCount((prev) => Math.max(0, prev - 1));
-    } catch (error) {}
+    } catch (error) {
+      console.error('Ошибка отметки уведомления', error);
+    }
   };
 
   const markAllAsRead = async () => {
@@ -54,7 +58,9 @@ const NotificationBell = () => {
       await notificationService.markAllAsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       setUnreadCount(0);
-    } catch (error) {}
+    } catch (error) {
+      console.error('Ошибка массовой отметки уведомлений', error);
+    }
   };
 
   const notificationsCount = Array.isArray(notifications) ? notifications.length : 0;

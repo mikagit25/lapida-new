@@ -18,6 +18,7 @@ const OrderButtonCRM = ({ productId, userId }) => {
       await createOrder(orderData);
       setSuccess(true);
     } catch (e) {
+      console.error('Ошибка при создании заказа', e);
       setError('Ошибка при создании заказа');
     } finally {
       setLoading(false);

@@ -13,7 +13,6 @@ const ChatBubble = ({ role, avatarUrl, children, isSpeaking }) => {
   // Цвета и стили по ролям
   const isAI = role === 'ai';
   const isUser = role === 'user';
-  const isSystem = role === 'system';
 
   return (
     <div className={`chat-bubble-row ${isUser ? 'justify-end' : 'justify-start'}`}>

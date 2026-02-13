@@ -2,16 +2,13 @@ import React, { useState } from 'react';
 import SearchFilters from '../components/SearchFilters';
 import SearchResults from '../components/SearchResults';
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../services/apiFetch';
 
 const SearchPage = () => {
   const [filters, setFilters] = useState({});
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
-
-  const handleFiltersChange = (newFilters) => {
-    setFilters(newFilters);
-  };
 
   const handleSearch = async () => {
     setLoading(true);
@@ -22,6 +19,7 @@ const SearchPage = () => {
       setResults(data.results || []);
       setQuery(filters.name || filters.query || '');
     } catch (e) {
+      console.error('Ошибка поиска:', e);
       setResults([]);
     } finally {
       setLoading(false);

@@ -11,6 +11,9 @@ function ReligiousOrgDocuments({ organizationId, isOwner }) {
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const initialDoc = { title: '', description: '', publishedAt: '', fileUrl: '' };
+  const [form, setForm] = useState(initialDoc);
+  const [editId, setEditId] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -35,10 +38,6 @@ function ReligiousOrgDocuments({ organizationId, isOwner }) {
     );
   }
 
-  const initialDoc = { title: '', description: '', publishedAt: '', fileUrl: '' };
-  const [form, setForm] = useState(initialDoc);
-  const [editId, setEditId] = useState(null);
-
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -59,6 +58,7 @@ function ReligiousOrgDocuments({ organizationId, isOwner }) {
       }
       setForm(initialDoc);
     } catch (err) {
+      console.error('Ошибка сохранения документа релорганизации:', err);
       setError(t('religiousOrgDocuments.saveError'));
     } finally {
       setLoading(false);
@@ -71,8 +71,12 @@ function ReligiousOrgDocuments({ organizationId, isOwner }) {
   };
 
   const handleDelete = (idx) => {
-    setDocs(docs.filter((_, i) => i !== idx));
-    if (editId === docs[idx]._id) setEditId(null);
+    try {
+      setDocs(docs.filter((_, i) => i !== idx));
+      if (editId === docs[idx]._id) setEditId(null);
+    } catch (err) {
+      console.error('Ошибка удаления документа релорганизации:', err);
+    }
   };
 
   return (

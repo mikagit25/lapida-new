@@ -32,6 +32,7 @@ const OrganizationScheduleEdit = ({ schedule = [], onSave }) => {
       await onSave(events);
       setSuccess(true);
     } catch (err) {
+      console.error('Ошибка сохранения расписания', err);
       setError('Ошибка сохранения');
     } finally {
       setSaving(false);

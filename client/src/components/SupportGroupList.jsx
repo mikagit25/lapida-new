@@ -17,6 +17,7 @@ const SupportGroupList = () => {
         setLoading(false);
       })
       .catch(err => {
+        console.error('Ошибка загрузки групп', err);
         setError('Ошибка загрузки групп');
         setLoading(false);
       });

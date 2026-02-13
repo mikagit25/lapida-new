@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 export default function DoveFab({ memorialId, onDoveAdded }) {
+  void memorialId;
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);

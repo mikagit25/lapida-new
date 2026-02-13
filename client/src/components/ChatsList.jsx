@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { messagesService } from '../services/api';
+import AsyncImage from './AsyncImage';
 
 const ChatsList = ({ onChatSelect, selectedChatId }) => {
   const [chats, setChats] = useState([]);
@@ -121,8 +122,8 @@ const ChatsList = ({ onChatSelect, selectedChatId }) => {
               {/* Аватар */}
               <div className="flex-shrink-0 relative">
                 {chat.participant?.avatar ? (
-                  <img 
-                    src={fixImageUrl(chat.participant.avatar)} 
+                  <AsyncImage
+                    url={chat.participant.avatar}
                     alt={chat.participant.name}
                     className="w-12 h-12 rounded-full object-cover"
                   />

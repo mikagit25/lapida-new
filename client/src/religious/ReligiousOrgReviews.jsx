@@ -27,9 +27,12 @@ const ReligiousOrgReviews = ({ orgId, isOwner }) => {
     setLoading(true);
     religiousReviewService.getByOrganization(orgId)
       .then(setReviews)
-      .catch(() => setError(t('religiousOrgReviews.loadError')))
+      .catch((err) => {
+        console.error('Ошибка загрузки отзывов релорганизации:', err);
+        setError(t('religiousOrgReviews.loadError'));
+      })
       .finally(() => setLoading(false));
-  }, [orgId]);
+  }, [orgId, t]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,7 +57,8 @@ const ReligiousOrgReviews = ({ orgId, isOwner }) => {
       }
       setForm(initialReview);
     } catch (err) {
-  setError(t('religiousOrgReviews.saveError'));
+      console.error('Ошибка сохранения отзыва релорганизации:', err);
+      setError(t('religiousOrgReviews.saveError'));
     } finally {
       setLoading(false);
     }
@@ -74,7 +78,8 @@ const ReligiousOrgReviews = ({ orgId, isOwner }) => {
       setReviews(reviews.filter((_, i) => i !== idx));
       if (editIndex === idx) setEditIndex(null);
     } catch (err) {
-  setError(t('religiousOrgReviews.deleteError'));
+      console.error('Ошибка удаления отзыва релорганизации:', err);
+      setError(t('religiousOrgReviews.deleteError'));
     } finally {
       setLoading(false);
     }

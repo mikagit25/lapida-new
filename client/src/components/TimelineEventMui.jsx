@@ -41,6 +41,7 @@ export default function TimelineEventMui({ memorialId }) {
         const data = await timelineService.getByMemorial(memorialId);
         setEvents(Array.isArray(data) ? data : (data.events || []));
       } catch (err) {
+        console.error('Ошибка загрузки событий', err);
         setEvents([]);
       }
       setLoading(false);
@@ -87,10 +88,11 @@ export default function TimelineEventMui({ memorialId }) {
       setOpen(false);
       setEditingEvent(null);
       setFormData(DEFAULT_EVENT);
-      // reload events
       const data = await timelineService.getByMemorial(memorialId);
       setEvents(Array.isArray(data) ? data : (data.events || []));
-    } catch (err) {}
+    } catch (err) {
+      console.error('Ошибка сохранения события', err);
+    }
   };
 
   const handleDelete = async (eventId) => {
@@ -98,7 +100,9 @@ export default function TimelineEventMui({ memorialId }) {
       await timelineService.remove(eventId);
       const data = await timelineService.getByMemorial(memorialId);
       setEvents(Array.isArray(data) ? data : (data.events || []));
-    } catch (err) {}
+    } catch (err) {
+      console.error('Ошибка удаления события', err);
+    }
   };
   if (loading) return <Typography>Загрузка событий...</Typography>;
 

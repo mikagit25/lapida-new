@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getProducts } from '../services/crmService';
+import AddToCartButton from './AddToCartButton';
 
 const ProductCardCRM = () => {
   const [products, setProducts] = useState([]);
@@ -13,6 +14,7 @@ const ProductCardCRM = () => {
         setLoading(false);
       })
       .catch(err => {
+        console.error('Ошибка загрузки товаров CRM', err);
         setError('Ошибка загрузки товаров');
         setLoading(false);
       });
@@ -36,7 +38,6 @@ const ProductCardCRM = () => {
       </div>
     </div>
   );
-import AddToCartButton from './AddToCartButton';
 };
 
 export default ProductCardCRM;

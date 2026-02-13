@@ -19,6 +19,7 @@ const TimelineManager = () => {
       setEvents(data.events || []);
       setError('');
     } catch (e) {
+      console.error('Ошибка загрузки событий', e);
       setError('Ошибка загрузки событий');
       setEvents([]);
     } finally {

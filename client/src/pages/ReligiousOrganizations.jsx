@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import religiousOrgService from '../services/religiousOrgService';
+import orgsService from '../services/orgsService';
 
 const ReligiousOrganizations = () => {
   const [orgs, setOrgs] = useState([]);
@@ -8,9 +8,9 @@ const ReligiousOrganizations = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    religiousOrgService.getAll()
-      .then(data => {
-        setOrgs(data);
+    orgsService.list({ limit: 50 })
+      .then(res => {
+        setOrgs(res.data || []);
         setLoading(false);
       })
       .catch(() => {
@@ -34,9 +34,9 @@ const ReligiousOrganizations = () => {
               <div>
                 <div className="font-semibold text-lg">{org.name}</div>
                 <div className="text-gray-500 text-sm">{org.confession} {org.type ? `· ${org.type}` : ''}</div>
-                <div className="text-gray-400 text-xs">{org.contacts?.address}</div>
+                <div className="text-gray-400 text-xs">{org.contacts?.address?.city}</div>
               </div>
-              <Link to={`/religious-organizations/${org._id}`} className="mt-2 md:mt-0 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Подробнее</Link>
+              <Link to={`/religious-organizations/${org.slug || org._id}`} className="mt-2 md:mt-0 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Подробнее</Link>
             </li>
           ))}
         </ul>

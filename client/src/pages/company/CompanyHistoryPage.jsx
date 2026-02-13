@@ -25,6 +25,7 @@ export default function CompanyHistoryPage() {
           setError(data.message || 'Компания не найдена');
         }
       } catch (e) {
+        console.error('Ошибка загрузки истории компании:', e);
         setError('Ошибка загрузки компании');
       }
       setLoading(false);

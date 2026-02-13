@@ -19,6 +19,10 @@ const GiftFab = ({ memorialId, onGiftAdded }) => {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleAddGift = async () => {
+    if (!user) {
+      alert('Только авторизованные пользователи могут отправлять подарки');
+      return;
+    }
     if (!selectedGift) return;
     setLoading(true);
     try {
@@ -36,6 +40,7 @@ const GiftFab = ({ memorialId, onGiftAdded }) => {
       setTimeout(() => setShowSuccess(false), 2000);
       if (onGiftAdded) onGiftAdded();
     } catch (e) {
+      console.error('Ошибка при добавлении подарка', e);
       alert('Ошибка при добавлении подарка');
     }
     setLoading(false);

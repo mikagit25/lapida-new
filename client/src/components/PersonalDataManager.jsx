@@ -1,3 +1,8 @@
+import React, { useState, useEffect } from 'react';
+import { userService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { fixImageUrl } from '../utils/imageUrl';
+
 // Асинхронный компонент для аватара/превью
 function AsyncAvatarImage({ url, alt, className }) {
   const [imgUrl, setImgUrl] = React.useState('');
@@ -16,10 +21,6 @@ function AsyncAvatarImage({ url, alt, className }) {
   if (!imgUrl) return null;
   return <img src={imgUrl} alt={alt} className={className} />;
 }
-import React, { useState, useEffect } from 'react';
-import { userService } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import { fixImageUrl } from '../utils/imageUrl';
 
 const PersonalDataManager = () => {
   const { user, updateProfile, updateUser } = useAuth();

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import TimelinePhotoModal from './TimelinePhotoModal';
 import GalleryImage from './GalleryImage';
-import { fixImageUrl } from '../utils/imageUrl';
 // ...existing code...
 
 const TimelineEvent = ({ 
@@ -15,6 +14,7 @@ const TimelineEvent = ({
   onEdit, 
   onDelete 
 }) => {
+  void index;
   const canEdit = isAuthenticated && user && (user.id === event.author || user.role === 'admin');
 
   const [selectedPhoto, setSelectedPhoto] = useState(null);

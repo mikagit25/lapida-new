@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import ProductCard from '../components/ProductCard';
 import { Link } from 'react-router-dom';
@@ -16,9 +16,25 @@ export default function Products() {
   const [companySlug, setCompanySlug] = useState('');
   const [companyId, setCompanyId] = useState('');
 
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const params = new URLSearchParams({ search, category, sort });
+      if (companyId) params.append('companyId', companyId);
+      const res = await apiFetch(`${API_BASE_URL}/products?${params.toString()}`);
+      const data = await res.json();
+      setProducts(data.products || []);
+    } catch (err) {
+      console.error('Ошибка загрузки каталога:', err);
+      setError('Ошибка загрузки каталога');
+    }
+    setLoading(false);
+  }, [category, companyId, search, sort]);
+
   useEffect(() => {
     fetchProducts();
-  }, [search, category, sort, companyId]);
+  }, [fetchProducts]);
 
   // Получить companyId по slug, если указан
   useEffect(() => {
@@ -31,21 +47,6 @@ export default function Products() {
       })
       .catch(() => setCompanyId(''));
   }, [companySlug]);
-
-  async function fetchProducts() {
-    setLoading(true);
-    setError('');
-    try {
-      const params = new URLSearchParams({ search, category, sort });
-      if (companyId) params.append('companyId', companyId);
-      const res = await apiFetch(`${API_BASE_URL}/products?${params.toString()}`);
-      const data = await res.json();
-      setProducts(data.products || []);
-    } catch (err) {
-      setError('Ошибка загрузки каталога');
-    }
-    setLoading(false);
-  }
 
   // Категории для фильтра
   const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean)));

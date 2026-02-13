@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ComplaintForm from './ComplaintForm';
 import ComplaintList from './ComplaintList';
+import { apiFetch } from '../services/apiFetch';
 
 const ComplaintManager = () => {
   const [complaints, setComplaints] = useState([]);
@@ -14,12 +15,12 @@ const ComplaintManager = () => {
   const fetchComplaints = async () => {
     setLoading(true);
     try {
-  const { apiFetch } = require('../services/apiFetch');
-  const res = await apiFetch('/api/complaints');
+      const res = await apiFetch('/api/complaints');
       const data = await res.json();
       setComplaints(data.complaints || []);
       setError('');
     } catch (e) {
+      console.error('Ошибка загрузки жалоб', e);
       setError('Ошибка загрузки жалоб');
       setComplaints([]);
     } finally {
@@ -30,7 +31,6 @@ const ComplaintManager = () => {
   const handleSubmit = async (complaint) => {
     setLoading(true);
     try {
-      const { apiFetch } = require('../services/apiFetch');
       const res = await apiFetch('/api/complaints', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -40,6 +40,7 @@ const ComplaintManager = () => {
         fetchComplaints();
       }
     } catch (e) {
+      console.error('Ошибка отправки жалобы', e);
       setError('Ошибка отправки жалобы');
     } finally {
       setLoading(false);

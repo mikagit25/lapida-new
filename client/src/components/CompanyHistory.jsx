@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -23,7 +22,8 @@ const CompanyHistory = ({ companyId, isOwner }) => {
         } else {
           setError(data.message || 'Ошибка загрузки истории');
         }
-      } catch (e) {
+      } catch (err) {
+        console.error('Ошибка загрузки истории', err);
         setError('Ошибка загрузки истории');
       }
       setLoading(false);

@@ -84,12 +84,14 @@ export default function CompanyDocumentsForm({ documents, setDocuments, onSave, 
         setUploadError('Ошибка загрузки файла');
       }
     } catch (err) {
+      console.error('Ошибка загрузки файла', err);
       setUploadError('Ошибка загрузки файла');
     }
     setUploading(false);
   };
 
   // Добавить документ (пустое поле)
+  // eslint-disable-next-line no-unused-vars
   const handleAddDocument = () => {
     setDocuments([...documents, '']);
   };
@@ -133,7 +135,7 @@ export default function CompanyDocumentsForm({ documents, setDocuments, onSave, 
       </button>
       {docsArr.map((doc, idx) => {
         // doc теперь объект { url, name, type }
-        const type = doc.type || getFileType(doc.url || doc);
+        // const type = doc.type || getFileType(doc.url || doc);
         return (
           <div key={idx} className="mb-4 border rounded p-3 flex items-center gap-2">
             <input

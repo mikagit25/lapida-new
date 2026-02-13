@@ -29,7 +29,7 @@ const ReligiousOrganizationPage = () => {
     { key: 'contacts', label: t('religiousOrg.tabs.contacts') },
     { key: 'reviews', label: t('religiousOrg.tabs.reviews') },
   ], [t]);
-  const { id } = useParams();
+  const { slug } = useParams();
   const [tab, setTab] = useState('profile');
   const [org, setOrg] = useState(null);
   const [user, setUser] = useState(null);
@@ -40,14 +40,16 @@ const ReligiousOrganizationPage = () => {
     try {
       const u = JSON.parse(localStorage.getItem('user'));
       setUser(u);
-    } catch {}
+    } catch (err) {
+      console.error('Ошибка чтения пользователя из localStorage:', err);
+    }
   }, []);
 
   React.useEffect(() => {
-    import('../services/religiousOrgService').then(({ default: religiousOrgService }) => {
-      religiousOrgService.getById(id)
+    import('../services/orgsService').then(({ default: orgsService }) => {
+      orgsService.getBySlug(slug)
         .then(data => {
-          setOrg(data);
+          setOrg(data.organization);
           setLoading(false);
         })
         .catch(() => {
@@ -55,7 +57,7 @@ const ReligiousOrganizationPage = () => {
           setLoading(false);
         });
     });
-  }, [id]);
+  }, [slug, t]);
 
   if (loading) return <div className="p-8">{t('common.loading')}</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
@@ -64,6 +66,16 @@ const ReligiousOrganizationPage = () => {
   // Проверка владельца
   const isOwner = user && org.owner && user._id === org.owner;
 
+  const formatAddress = (addr) => {
+    if (!addr) return '';
+    if (typeof addr === 'string') return addr;
+    if (typeof addr === 'object') {
+      const parts = [addr.street, addr.city, addr.region, addr.zipcode, addr.country].filter(Boolean);
+      return parts.join(', ');
+    }
+    return '';
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Шапка организации */}
@@ -71,7 +83,7 @@ const ReligiousOrganizationPage = () => {
         <div className="flex-1">
           <h1 className="text-3xl font-bold text-blue-900 mb-2">{org.name}</h1>
           <div className="text-lg text-gray-700 mb-4">{org.description}</div>
-          <div className="text-gray-500 text-sm">{org.contacts?.address}</div>
+          <div className="text-gray-500 text-sm">{formatAddress(org.contacts?.address)}</div>
           {/* Кнопка входа в кабинет только для владельца */}
           {isOwner && (
             <button
@@ -99,16 +111,16 @@ const ReligiousOrganizationPage = () => {
 
       {/* Контент вкладки */}
       <main className="p-8 max-w-5xl mx-auto">
-        {tab === 'profile' && <ReligiousOrgProfile organizationId={id} isOwner={isOwner} />}
-        {tab === 'gallery' && <ReligiousOrgGallery orgId={id} isOwner={isOwner} />}
-        {tab === 'schedule' && <ReligiousOrgSchedule orgId={id} isOwner={isOwner} />}
-        {tab === 'services' && <ReligiousOrgServices orgId={id} isOwner={isOwner} />}
-        {tab === 'products' && <ReligiousOrgProducts orgId={id} isOwner={isOwner} />}
-        {tab === 'news' && <ReligiousOrgNews organizationId={id} isOwner={isOwner} />}
-        {tab === 'team' && <ReligiousOrgTeam organizationId={id} isOwner={isOwner} />}
-        {tab === 'documents' && <ReligiousOrgDocuments organizationId={id} isOwner={isOwner} />}
-        {tab === 'contacts' && <ReligiousOrgContacts organizationId={id} isOwner={isOwner} />}
-        {tab === 'reviews' && <ReligiousOrgReviews organizationId={id} isOwner={isOwner} />}
+        {tab === 'profile' && <ReligiousOrgProfile organizationId={org._id} isOwner={isOwner} />}
+        {tab === 'gallery' && <ReligiousOrgGallery orgId={org._id} isOwner={isOwner} />}
+        {tab === 'schedule' && <ReligiousOrgSchedule orgId={org._id} isOwner={isOwner} />}
+        {tab === 'services' && <ReligiousOrgServices orgId={org._id} isOwner={isOwner} />}
+        {tab === 'products' && <ReligiousOrgProducts orgId={org._id} isOwner={isOwner} />}
+        {tab === 'news' && <ReligiousOrgNews organizationId={org._id} isOwner={isOwner} />}
+        {tab === 'team' && <ReligiousOrgTeam organizationId={org._id} isOwner={isOwner} />}
+        {tab === 'documents' && <ReligiousOrgDocuments organizationId={org._id} isOwner={isOwner} />}
+        {tab === 'contacts' && <ReligiousOrgContacts organizationId={org._id} isOwner={isOwner} />}
+        {tab === 'reviews' && <ReligiousOrgReviews organizationId={org._id} isOwner={isOwner} />}
       </main>
     </div>
   );

@@ -1,5 +1,8 @@
 const express = require('express');
 const router = express.Router();
+// Парсим JSON, так как роут подключён до глобальных парсеров в app.js
+router.use(express.json());
+router.use(express.urlencoded({ extended: true }));
 const { auth } = require('../middleware/auth');
 const Memorial = require('../models/Memorial');
 const User = require('../models/User');
@@ -7,21 +10,28 @@ const User = require('../models/User');
 // Добавить редактора с секциями
 router.post('/:id/editors', auth, async (req, res) => {
   try {
-    const { userId, sections, role } = req.body;
+    const { userId, sections = [], role = 'custom' } = req.body || {};
+    if (!userId) {
+      return res.status(400).json({ error: 'userId is required' });
+    }
     const memorial = await Memorial.findById(req.params.id);
     if (!memorial) return res.status(404).json({ error: 'Memorial not found' });
+    const ownerId = (memorial.createdBy || memorial.creator || '').toString();
     // Только создатель может делегировать
-    if (memorial.creator.toString() !== req.user._id.toString()) {
+    if (!ownerId || ownerId !== req.user._id.toString()) {
       return res.status(403).json({ error: 'No permission' });
     }
+    const editorsArray = Array.isArray(memorial.editors) ? memorial.editors : [];
     // Проверка на дублирование
-    if (memorial.editors.some(e => e.user.toString() === userId)) {
+    if (editorsArray.some(e => e.user.toString() === userId)) {
       return res.status(400).json({ error: 'User already an editor' });
     }
+    memorial.editors = editorsArray;
     memorial.editors.push({ user: userId, sections, role });
     await memorial.save();
     res.json({ success: true, editors: memorial.editors });
   } catch (err) {
+    console.error('Error adding memorial editor:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -47,14 +57,18 @@ router.get('/:id/editors', auth, async (req, res) => {
   try {
     const memorial = await Memorial.findById(req.params.id).populate('editors.user', 'name email');
     if (!memorial) return res.status(404).json({ error: 'Memorial not found' });
+    const editorsArray = Array.isArray(memorial.editors) ? memorial.editors : [];
     // Только создатель и редакторы могут видеть
-    const isEditor = memorial.editors.some(e => e.user._id.toString() === req.user._id.toString());
-    if (memorial.creator.toString() !== req.user._id.toString() && !isEditor) {
+    const createdBy = memorial.createdBy || memorial.creator; // поддержка разных полей
+    const creatorId = createdBy ? createdBy.toString() : null;
+    const isEditor = editorsArray.some(e => e.user && e.user._id && e.user._id.toString() === req.user._id.toString());
+    if (creatorId !== req.user._id.toString() && !isEditor) {
       return res.status(403).json({ error: 'No permission' });
     }
-    res.json({ editors: memorial.editors });
+    res.json({ editors: editorsArray });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Error fetching memorial editors:', err);
+    res.status(500).json({ error: 'Failed to load editors' });
   }
 });
 

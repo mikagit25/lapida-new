@@ -33,6 +33,7 @@ const OrganizationProductsEdit = ({ products = [], onSave }) => {
       await onSave(list);
       setSuccess(true);
     } catch (err) {
+      console.error('Ошибка сохранения товаров', err);
       setError('Ошибка сохранения');
     } finally {
       setSaving(false);

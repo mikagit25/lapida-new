@@ -1,10 +1,24 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { fixImageUrl } from '../utils/imageUrl';
 
 const ImageUpload = ({ currentImage, onImageChange, label = "Фото профиля" }) => {
   const [previewImage, setPreviewImage] = useState(currentImage || null);
+  const [resolvedPreview, setResolvedPreview] = useState(currentImage || null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (!previewImage) {
+      setResolvedPreview(null);
+      return () => { isMounted = false; };
+    }
+    (async () => {
+      const fixed = await fixImageUrl(previewImage);
+      if (isMounted) setResolvedPreview(fixed);
+    })();
+    return () => { isMounted = false; };
+  }, [previewImage]);
 
   const handleFileSelect = (file) => {
     if (file && file.type.startsWith('image/')) {
@@ -79,7 +93,7 @@ const ImageUpload = ({ currentImage, onImageChange, label = "Фото профи
         {previewImage ? (
           <div className="relative">
             <img
-              src={fixImageUrl(previewImage)}
+              src={resolvedPreview || previewImage || ''}
               alt="Preview"
               className="w-full h-48 object-cover rounded-lg"
             />

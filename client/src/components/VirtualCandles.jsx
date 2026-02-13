@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { virtualItemsService } from '../services/virtualItems';
@@ -12,6 +12,8 @@ const VirtualCandles = ({ memorialId, memorial, canEdit = false }) => {
   const [selectedCandle, setSelectedCandle] = useState(null);
   const [comment, setComment] = useState('');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  void memorial;
+  const isAuthenticated = Boolean(user);
 
   // Доступные свечи
   const availableCandles = [
@@ -72,29 +74,28 @@ const VirtualCandles = ({ memorialId, memorial, canEdit = false }) => {
   ];
 
   // Загрузка свечей
-  const fetchCandles = async () => {
+  const fetchCandles = useCallback(async () => {
     try {
       const candlesData = await virtualItemsService.getCandles(memorialId);
       setCandles(candlesData);
     } catch (error) {
       console.error('Ошибка при загрузке свечей:', error);
     }
-  };
+  }, [memorialId]);
 
   useEffect(() => {
     if (memorialId) {
       fetchCandles();
     }
-  }, [memorialId]);
-
-  // Отладка при изменении свечей
-  useEffect(() => {
-    // Этот useEffect нужен для правильной работы фильтрации активных свечей
-  }, [candles]);
+  }, [memorialId, fetchCandles]);
 
   // Обработчик выбора свечи
   const handleCandleSelect = (candle) => {
     setSelectedCandle(candle);
+    if (!isAuthenticated) {
+      alert('Войдите, чтобы зажечь свечу');
+      return;
+    }
     setShowGallery(false);
     setShowCommentModal(true);
   };

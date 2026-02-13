@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import { newMemorialService, commentService } from '../services/api';
 import Gallery from '../components/Gallery';
 import MemorialStats from '../components/MemorialStats';
 import MemorialSidebar from '../components/MemorialSidebar';
 import LifeTimeline from '../components/LifeTimeline';
-import TimelineEventMui from '../components/TimelineEventMui';
 import ShareBlock from '../components/ShareBlock';
-import CommentSection from '../components/CommentSection';
 import CollapsibleComments from '../components/CollapsibleComments';
 import EditableBiography from '../components/EditableBiography';
 import EditableEpitaph from '../components/EditableEpitaph';
@@ -20,53 +18,38 @@ import GiftFab from '../components/GiftFab';
 import PrayerFab from '../components/PrayerFab';
 import DoveFab from '../components/DoveFab';
 import NoteFab from '../components/NoteFab';
-import VirtualGifts from '../components/VirtualGifts';
-import VirtualPrayers from '../components/VirtualPrayers';
 import BackgroundImageManager from '../components/BackgroundImageManager';
-import HeaderBackgroundManager from '../components/HeaderBackgroundManager';
 import AvatarBackgroundManager from '../components/AvatarBackgroundManager';
-import { fixImageUrl } from '../utils/imageUrl';
 import MemorialEditorsManager from '../components/MemorialEditorsManager';
-import VirtualNotes from '../components/VirtualNotes';
-import VirtualDoves from '../components/VirtualDoves';
-import VirtualItemBlock from '../components/VirtualItemBlock';
 import VirtualItemsOnAvatar from '../components/VirtualItemsOnAvatar';
 import { virtualItemsService } from '../services/virtualItems';
 
 const MemorialView = () => {
   const { shareUrl, slug } = useParams();
-  const location = useLocation();
   const [memorial, setMemorial] = useState(null);
   const [comments, setComments] = useState([]);
-  const [virtualCandles, setVirtualCandles] = useState([]);
   const [virtualGifts, setVirtualGifts] = useState([]);
   const [virtualPrayers, setVirtualPrayers] = useState([]);
   const [virtualNotes, setVirtualNotes] = useState([]);
   const [virtualDoves, setVirtualDoves] = useState([]);
   // Загружаем новые виртуальные предметы для аватара
   // Универсальная функция загрузки всех виртуальных предметов
-  const loadAllVirtualItems = async (memId) => {
+  const loadAllVirtualItems = useCallback(async (memId) => {
     const id = memId || memorial?._id;
     if (!id) return;
     setVirtualGifts(await virtualItemsService.getItems('gift', id));
     setVirtualPrayers(await virtualItemsService.getItems('prayer', id));
     setVirtualNotes(await virtualItemsService.getItems('note', id));
     setVirtualDoves(await virtualItemsService.getItems('dove', id));
-  };
+  }, [memorial?._id]);
 
   useEffect(() => {
     loadAllVirtualItems();
-  }, [memorial?._id]);
+  }, [loadAllVirtualItems]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [timelineEvents, setTimelineEvents] = useState([]);
 
-  useEffect(() => {
-    loadMemorial();
-  loadTimelineEvents();
-  }, [shareUrl, slug]);
-
-  const loadMemorial = async () => {
+  const loadMemorial = useCallback(async () => {
     try {
       setLoading(true);
       let memorialData = null;
@@ -102,10 +85,11 @@ const MemorialView = () => {
       if (!memorialData) {
         throw new Error('Мемориал не найден');
       }
-      setMemorial(memorialData);
+      const normalizedMemorial = memorialData?.memorial || memorialData?.data || memorialData;
+      setMemorial(normalizedMemorial);
       // Загружаем комментарии
       try {
-        const commentsData = await commentService.getByMemorial(memorialData._id);
+        const commentsData = await commentService.getByMemorial(normalizedMemorial?._id);
         const commentsArray = commentsData.comments || commentsData;
         setComments(Array.isArray(commentsArray) ? commentsArray : []);
       } catch (commentsError) {
@@ -115,40 +99,17 @@ const MemorialView = () => {
           console.error('Ошибка загрузки комментариев:', commentsError);
         }
       }
-      // Загружаем события таймлайна
-      loadTimelineEvents(memorialData._id);
     } catch (error) {
       console.error('Error loading memorial:', error);
       setError('Мемориал не найден или недоступен');
     } finally {
       setLoading(false);
     }
-  };
+  }, [shareUrl, slug]);
 
-  // Загрузка событий таймлайна
-  const loadTimelineEvents = async (memorialIdParam) => {
-    try {
-      const id = memorialIdParam || memorial?._id;
-      if (!id) return;
-      const eventsData = await timelineService.getByMemorial(id);
-      setTimelineEvents(Array.isArray(eventsData) ? eventsData : (eventsData.events || []));
-    } catch (err) {
-      setTimelineEvents([]);
-    }
-  };
-  const handleMemorialUpdate = (updateFn) => {
-    console.log('MemorialView: handleMemorialUpdate called with:', updateFn);
-    if (typeof updateFn === 'function') {
-      setMemorial(updateFn);
-    } else {
-      setMemorial(updateFn);
-    }
-    // Убираем автоматическую перезагрузку, которая может сбрасывать изменения
-    // setTimeout(() => {
-    //   console.log('MemorialView: Перезагружаем мемориал через 500ms');
-    //   loadMemorial();
-    // }, 500);
-  };
+  useEffect(() => {
+    loadMemorial();
+  }, [loadMemorial]);
 
   // Безопасная функция обновления для EditableLocation
   const handleLocationUpdate = (updatedMemorialOrFn) => {
@@ -191,10 +152,6 @@ const MemorialView = () => {
 
   const handleNewComment = (newComment) => {
     setComments(prev => [newComment, ...prev]);
-  };
-
-  const handleAddCandle = (candle) => {
-    setVirtualCandles(prev => [...prev, candle]);
   };
 
   const handleImagesUpdate = async (newImages) => {

@@ -3,7 +3,7 @@ import { userService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const UserSettings = () => {
-  const { user, updateProfile } = useAuth();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');

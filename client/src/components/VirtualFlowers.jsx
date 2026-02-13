@@ -1,12 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { virtualItemsService } from '../services/virtualItems';
 import './VirtualFlowers.css';
 import './VirtualFlowers.css';
 
-const VirtualFlowers = ({ memorialId, memorial, canEdit = false }) => {
+const VirtualFlowers = ({ memorialId, canEdit = false }) => {
   const { user } = useAuth();
   const [flowers, setFlowers] = useState([]);
   const [showGallery, setShowGallery] = useState(false);
@@ -74,20 +74,20 @@ const VirtualFlowers = ({ memorialId, memorial, canEdit = false }) => {
   ];
 
   // Загрузка цветов
-  const fetchFlowers = async () => {
+  const fetchFlowers = useCallback(async () => {
     try {
       const flowersData = await virtualItemsService.getFlowers(memorialId);
       setFlowers(flowersData);
     } catch (error) {
       console.error('Ошибка при загрузке цветов:', error);
     }
-  };
+  }, [memorialId]);
 
   useEffect(() => {
     if (memorialId) {
       fetchFlowers();
     }
-  }, [memorialId]);
+  }, [memorialId, fetchFlowers]);
 
   // Обработчик выбора цветка
   const handleFlowerSelect = (flower) => {
@@ -100,6 +100,10 @@ const VirtualFlowers = ({ memorialId, memorial, canEdit = false }) => {
   const handleAddFlower = async () => {
     try {
       if (!selectedFlower || !comment.trim()) return;
+      if (!user?._id) {
+        alert('Пожалуйста, войдите в систему');
+        return;
+      }
       
       const authToken = localStorage.getItem('authToken');
       const token = localStorage.getItem('token');

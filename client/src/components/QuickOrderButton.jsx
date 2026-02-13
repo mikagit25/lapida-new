@@ -5,12 +5,12 @@ import { Button, Tooltip } from '@mui/material';
 const QuickOrderButton = ({ sku, name, phone = '+7 (999) 123-45-67' }) => {
   const [copied, setCopied] = React.useState(false);
   const handleCopy = () => {
-    navigator.clipboard.writeText(`${sku || ''} ${name || ''}`.trim());
+    navigator.clipboard.writeText(`${sku || ''} ${name || ''} ${phone || ''}`.trim());
     setCopied(true);
     setTimeout(() => setCopied(false), 1200);
   };
   return (
-    <Tooltip title={copied ? 'Данные скопированы!' : 'Скопировать для заказа по телефону'}>
+    <Tooltip title={copied ? 'Данные скопированы!' : `Скопировать для заказа по телефону ${phone}`}>
       <Button
         size="small"
         variant="contained"
@@ -18,7 +18,7 @@ const QuickOrderButton = ({ sku, name, phone = '+7 (999) 123-45-67' }) => {
         onClick={handleCopy}
         sx={{ ml: 1 }}
       >
-        {copied ? '✓' : `Заказать по телефону`}
+        {copied ? '✓' : `Заказать: ${phone}`}
       </Button>
     </Tooltip>
   );

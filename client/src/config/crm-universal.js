@@ -14,6 +14,7 @@ export async function findWorkingCrmUrl() {
                 return window.__cachedWorkingCrmUrl;
             }
         } catch (e) {
+            console.warn('Cached CRM URL недоступен:', e);
             window.__cachedWorkingCrmUrl = null;
         }
     }
@@ -38,6 +39,7 @@ export async function findWorkingCrmUrl() {
             }
         } catch (error) {
             console.log(`❌ Порт CRM ${port} недоступен`);
+            console.debug('Детали ошибки CRM порта:', error);
         }
     }
     console.log('⚠️ Рабочий CRM API не найден, используем стандартный URL');

@@ -30,6 +30,7 @@ const OrganizationCabinet = () => {
         setLoading(false);
       })
       .catch((err) => {
+        console.error('Ошибка загрузки организации:', err);
         setError('Организация не найдена');
         setLoading(false);
       });

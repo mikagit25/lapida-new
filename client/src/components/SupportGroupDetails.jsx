@@ -19,6 +19,7 @@ const SupportGroupDetails = ({ groupId, onBack }) => {
         setLoading(false);
       })
       .catch(err => {
+        console.error('Ошибка загрузки группы', err);
         setError('Ошибка загрузки группы');
         setLoading(false);
       });
@@ -42,6 +43,7 @@ const SupportGroupDetails = ({ groupId, onBack }) => {
       setNewDiscussion('');
       fetchGroup();
     } catch (err) {
+      console.error('Ошибка добавления обсуждения', err);
       alert('Ошибка добавления обсуждения');
     } finally {
       setAdding(false);
@@ -61,6 +63,7 @@ const SupportGroupDetails = ({ groupId, onBack }) => {
       setUserName('');
       fetchGroup();
     } catch (err) {
+      console.error('Ошибка вступления в группу', err);
       alert('Ошибка вступления в группу');
     } finally {
       setJoining(false);

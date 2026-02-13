@@ -9,6 +9,7 @@ const UserOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     if (!user?._id) return;
@@ -27,8 +28,6 @@ const UserOrders = () => {
 
   if (loading) return <div className="p-8">Загрузка заказов...</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
-
-  const [filter, setFilter] = useState('all');
   const filteredOrders = filter === 'all' ? orders : orders.filter(o => o.status === filter);
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded shadow">

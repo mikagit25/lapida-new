@@ -82,15 +82,6 @@ import AdminPagesManager from './pages/AdminPagesManager';
 import AdminCompaniesManager from './pages/AdminCompaniesManager';
 import AdminMemorialsManager from './pages/AdminMemorialsManager';
 import AdminReportsManager from './pages/AdminReportsManager';
-import TokensHome from './Token/TokensHome';
-import TokensBuy from './Token/TokensBuy';
-import TokensSwap from './Token/TokensSwap';
-import TokensStake from './Token/TokensStake';
-import TokensAnalytics from './Token/TokensAnalytics';
-import TokensDocs from './Token/TokensDocs';
-import TokensListing from './Token/TokensListing';
-import TokensPool from './Token/TokensPool';
-import TokensPoolMLPDLPD from './Token/TokensPoolMLPDLPD';
 import AdminCabinet from './pages/AdminCabinet';
 import AdminPage from './pages/AdminPage';
 import React, { useState, useEffect } from 'react';
@@ -201,7 +192,6 @@ const Navigation = () => {
               {/* <Link to="/users-catalog" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">{t('nav_users')}</Link> */}
               <Link to="/business" className="text-blue-700 hover:text-blue-900 px-3 py-2 rounded-md text-sm font-medium font-semibold">{t('nav_business')}</Link>
               <Link to="/products" className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">{t('nav_products')}</Link>
-              <Link to="/tokens" className="text-indigo-700 hover:text-indigo-900 px-3 py-2 rounded-md text-sm font-medium font-semibold">Токены</Link>
               {/* <Link to="/cart" className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium font-semibold">{t('nav_cart')}</Link> */}
             </div>
           </div>
@@ -261,16 +251,6 @@ const App = () => {
           <Navigation />
           <main className="pb-16 lg:pb-0">
             <Routes>
-              {/* Lapida Token Platform routes */}
-              <Route path="/tokens" element={<TokensHome />} />
-              <Route path="/tokens/buy" element={<TokensBuy />} />
-              <Route path="/tokens/swap" element={<TokensSwap />} />
-              <Route path="/tokens/stake" element={<TokensStake />} />
-              <Route path="/tokens/analytics" element={<TokensAnalytics />} />
-              <Route path="/tokens/docs" element={<TokensDocs />} />
-              <Route path="/tokens/listing" element={<TokensListing />} />
-              <Route path="/tokens/pool" element={<TokensPool />} />
-              <Route path="/tokens/pool-mlpd-lpd" element={<TokensPoolMLPDLPD />} />
               <Route path="/company/:companySlug/crm-integration" element={<CompanyCrmIntegrationPage />} />
               <Route path="/companies/:id/crm-integration" element={<CompanyCrmIntegrationPage />} />
               <Route path="/company/:companySlug/crm-orders" element={<CompanyCrmOrdersPage />} />
@@ -319,7 +299,7 @@ const App = () => {
               <Route path="/companies" element={<Companies />} />
               <Route path="/religious-organizations" element={<ReligiousOrganizations />} />
               <Route path="/register-religious-organization" element={<RegisterReligiousOrganization />} />
-              <Route path="/religious-organizations/:id" element={<ReligiousOrganizationPage />} />
+              <Route path="/religious-organizations/:slug" element={<ReligiousOrganizationPage />} />
               <Route path="/religious-org-cabinet/:id" element={<ReligiousOrgCabinet />} />
               <Route path="/companies/:id" element={<CompanyPage />} />
               <Route path="/companies/:id/cabinet" element={<CompanyCabinet />} />
@@ -390,7 +370,13 @@ const Memorials = () => {
     try {
       setLoading(true);
       const data = await newMemorialService.getAll();
-      setMemorials(data);
+      // Нормализуем ответ: API иногда возвращает объект
+      const list = Array.isArray(data)
+        ? data
+        : (data && Array.isArray(data.memorials))
+          ? data.memorials
+          : [];
+      setMemorials(list);
     } catch (error) {
       console.error('Error loading memorials:', error);
       setError('Ошибка при загрузке мемориалов');
@@ -399,9 +385,11 @@ const Memorials = () => {
     }
   };
 
-  const filteredMemorials = memorials.filter(memorial =>
-    memorial.fullName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredMemorials = Array.isArray(memorials)
+    ? memorials.filter(memorial =>
+        memorial?.fullName?.toLowerCase?.().includes(searchTerm.toLowerCase())
+      )
+    : [];
 
   const sortedMemorials = [...filteredMemorials].sort((a, b) => {
     switch (sortBy) {
@@ -486,7 +474,7 @@ const Memorials = () => {
                 </div>
                 {/* Если shareUrl уникален и не конфликтует, используем короткую ссылку */}
                 <Link
-                  to={memorial.shareUrl && /^[a-zA-Z0-9\-]+$/.test(memorial.shareUrl) ? `/${memorial.shareUrl}` : (memorial.customSlug ? `/memorial/${memorial.customSlug}` : `/memorial/${memorial.shareUrl}`)}
+                  to={memorial.shareUrl && /^[a-zA-Z0-9-]+$/.test(memorial.shareUrl) ? `/${memorial.shareUrl}` : (memorial.customSlug ? `/memorial/${memorial.customSlug}` : `/memorial/${memorial.shareUrl}`)}
                   className="w-full bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 inline-block"
                 >Посетить мемориал</Link>
               </div>
@@ -500,9 +488,7 @@ const Memorials = () => {
 
 // ...existing code...
 
-// Настройки Web3Modal
-
-const projectId = 'demo'; // Замените на свой projectId из https://cloud.walletconnect.com/
+// Настройки Web3Modal (отключаем, если нет projectId)
 const chains = [
   {
     id: 56,
@@ -513,14 +499,21 @@ const chains = [
   }
 ];
 
-const wagmiConfig = createConfig({
-  chains,
-  transports: {
-    56: http('https://bsc-dataseed.binance.org/')
-  }
-});
-
 function AppWrapper() {
+  const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID;
+
+  // Без projectId не инициализируем Web3Modal, чтобы избежать ошибок
+  if (!projectId) {
+    return <App />;
+  }
+
+  const wagmiConfig = createConfig({
+    chains,
+    transports: {
+      56: http('https://bsc-dataseed.binance.org/')
+    }
+  });
+
   return (
     <WagmiProvider config={wagmiConfig}>
       <App />

@@ -48,6 +48,7 @@ const RegisterCompany = () => {
         setError(data.error || 'Ошибка регистрации');
       }
     } catch (e) {
+      console.error('Ошибка регистрации компании:', e);
       setError('Ошибка регистрации');
     } finally {
       setLoading(false);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { friendsService } from '../services/api';
+import { fixImageUrl } from '../utils/imageUrl';
 
 const FriendsList = () => {
   const [friends, setFriends] = useState([]);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { API_BASE_URL } from '../config/api';
 import { apiFetch } from '../services/apiFetch';
 import QRCode from 'react-qr-code';
@@ -23,26 +23,10 @@ const ProductPage = () => {
   };
   const { slug } = useParams();
   const [product, setProduct] = useState(null);
-  const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [orderSuccess, setOrderSuccess] = useState(false);
 
-  useEffect(() => {
-    fetchProduct();
-  }, [slug]);
-
-  // Сохранять просмотренный товар в localStorage
-  useEffect(() => {
-    if (!product || !product._id) return;
-    let viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
-    viewed = viewed.filter(id => id !== product._id); // убрать дубликаты
-    viewed.unshift(product._id);
-    if (viewed.length > 30) viewed = viewed.slice(0, 30); // максимум 30 товаров
-    localStorage.setItem('viewedProducts', JSON.stringify(viewed));
-  }, [product]);
-
-  const fetchProduct = async () => {
+  const fetchProduct = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -54,11 +38,26 @@ const ProductPage = () => {
         setError('Товар не найден');
       }
     } catch (e) {
+      console.error('Ошибка загрузки товара:', e);
       setError('Ошибка загрузки товара');
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug]);
+
+  useEffect(() => {
+    fetchProduct();
+  }, [slug, fetchProduct]);
+
+  // Сохранять просмотренный товар в localStorage
+  useEffect(() => {
+    if (!product || !product._id) return;
+    let viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
+    viewed = viewed.filter(id => id !== product._id); // убрать дубликаты
+    viewed.unshift(product._id);
+    if (viewed.length > 30) viewed = viewed.slice(0, 30); // максимум 30 товаров
+    localStorage.setItem('viewedProducts', JSON.stringify(viewed));
+  }, [product]);
 
   // Универсальная логика заказа: добавить товар в корзину и перейти к оформлению
   const handleOrder = () => {
@@ -131,7 +130,6 @@ const ProductPage = () => {
               <button onClick={handleOrder} className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 font-semibold mt-2 w-fit">
                 Заказать
               </button>
-              {orderSuccess && <div className="mt-2 text-green-600">Заявка отправлена!</div>}
             </div>
           </div>
           {/* Описание ниже фото и названия */}

@@ -32,6 +32,7 @@ const OrganizationNewsEdit = ({ news = [], onSave }) => {
       await onSave(list);
       setSuccess(true);
     } catch (err) {
+      console.error('Ошибка сохранения новостей', err);
       setError('Ошибка сохранения');
     } finally {
       setSaving(false);

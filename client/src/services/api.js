@@ -2,6 +2,29 @@ import { API_BASE_URL } from '../config/api-universal';
 import axios from 'axios';
 
 let apiInstance = null;
+let csrfToken = null;
+let csrfPromise = null;
+
+// Получаем и кэшируем CSRF-токен; при ошибке сбрасываем, чтобы можно было попробовать снова
+async function ensureCsrfToken(force = false) {
+  if (csrfToken && !force) return csrfToken;
+  if (!csrfPromise) {
+    csrfPromise = axios
+      .get(`${API_BASE_URL}/csrf-token`, { withCredentials: true })
+      .then(res => {
+        csrfToken = res.data.csrfToken || res.data.token;
+        return csrfToken;
+      })
+      .catch(err => {
+        csrfToken = null;
+        throw err;
+      })
+      .finally(() => {
+        csrfPromise = null;
+      });
+  }
+  return csrfPromise;
+}
 
 export function getApi() {
   if (apiInstance) return apiInstance;
@@ -10,14 +33,54 @@ export function getApi() {
     withCredentials: true, // Всегда отправлять cookie (token) на сервер
     // Можно добавить другие настройки по необходимости
   });
-  // Интерцептор для автоматической передачи токена
-  apiInstance.interceptors.request.use(config => {
+  // Интерцептор для автоматической передачи токена и CSRF
+  apiInstance.interceptors.request.use(async config => {
     const token = localStorage.getItem('authToken');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
+
+    try {
+      await ensureCsrfToken();
+      if (csrfToken) {
+        config.headers['X-CSRF-Token'] = csrfToken;
+      }
+    } catch (e) {
+      console.warn('Не удалось получить CSRF токен', e?.message);
+    }
     return config;
   }, error => Promise.reject(error));
+
+  // Перехват ответов: если получили 403 из-за CSRF, запрашиваем новый токен и пробуем ещё раз
+  apiInstance.interceptors.response.use(
+    response => response,
+    async error => {
+      const status = error.response?.status;
+      const message = (error.response?.data?.message || '').toLowerCase();
+      const isCsrf = status === 403 && message.includes('csrf');
+
+      if (isCsrf && !error.config?.__csrfRetry) {
+        try {
+          await ensureCsrfToken(true);
+          if (csrfToken) {
+            const retryConfig = {
+              ...error.config,
+              __csrfRetry: true,
+              headers: {
+                ...(error.config.headers || {}),
+                'X-CSRF-Token': csrfToken,
+              },
+            };
+            return apiInstance.request(retryConfig);
+          }
+        } catch (e) {
+          console.warn('Повторное получение CSRF токена не удалось', e?.message);
+        }
+      }
+
+      return Promise.reject(error);
+    }
+  );
   return apiInstance;
 }
 
@@ -228,53 +291,57 @@ const memorialService = {
 
 // Новые сервисы для обновленного API
 const newMemorialService = {
+  _unwrapMemorial: (data) => data?.memorial || data?.data?.memorial || data?.data || data,
+
   // Получение всех публичных мемориалов
   getAll: async (params = {}) => {
     const api = await getApi();
     const response = await api.get('/memorials', { params });
-    return response.data.memorials || response.data; // Возвращаем массив мемориалов
+    const payload = response.data;
+    return payload.memorials || payload.data || payload;
   },
 
   // Получение мемориала по shareUrl
   getByShareUrl: async (shareUrl) => {
     const api = await getApi();
     const response = await api.get(`/memorials/share/${shareUrl}`);
-    return response.data;
+    return newMemorialService._unwrapMemorial(response.data);
   },
 
   // Получение мемориала по customSlug
   getBySlug: async (slug) => {
     const api = await getApi();
     const response = await api.get(`/memorials/slug/${slug}`);
-    return response.data;
+    return newMemorialService._unwrapMemorial(response.data);
   },
 
   // Получение мемориала по _id (fallback)
   getById: async (id) => {
     const api = await getApi();
     const response = await api.get(`/memorials/${id}`);
-    return response.data;
+    return newMemorialService._unwrapMemorial(response.data);
   },
 
   // Получение мемориалов пользователя
   getMy: async (params = {}) => {
     const api = await getApi();
     const response = await api.get('/memorials/my', { params });
-    return response.data;
+    const payload = response.data;
+    return payload.memorials || payload.data || payload;
   },
 
   // Создание мемориала
   create: async (memorialData) => {
     const api = await getApi();
     const response = await api.post('/memorials', memorialData);
-    return response.data;
+    return newMemorialService._unwrapMemorial(response.data);
   },
 
   // Обновление мемориала
   update: async (id, memorialData) => {
     const api = await getApi();
     const response = await api.put(`/memorials/${id}`, memorialData);
-    return response.data;
+    return newMemorialService._unwrapMemorial(response.data);
   },
 
   // Удаление мемориала
@@ -288,14 +355,14 @@ const newMemorialService = {
   updateGallery: async (id, galleryImages) => {
     const api = await getApi();
     const response = await api.patch(`/memorials/${id}/gallery`, { galleryImages });
-    return response.data;
+    return newMemorialService._unwrapMemorial(response.data);
   },
 
   // Смена главной фотографии мемориала
   setProfileImage: async (id, profileImage) => {
-  const api = await getApi();
-  const response = await api.patch(`/memorials/${id}/profile-image`, { imageUrl: profileImage });
-  return response.data;
+    const api = await getApi();
+    const response = await api.patch(`/memorials/${id}/profile-image`, { imageUrl: profileImage });
+    return newMemorialService._unwrapMemorial(response.data);
   },
 };
 
@@ -599,18 +666,21 @@ const notificationService = {
 
   // Отметка всех уведомлений как прочитанных
   markAllAsRead: async () => {
+    const api = await getApi();
     const response = await api.patch('/notifications/mark-all-read');
     return response.data;
   },
 
   // Удаление уведомления
   remove: async (notificationId) => {
+    const api = await getApi();
     const response = await api.delete(`/notifications/${notificationId}`);
     return response.data;
   },
 
   // Очистка всех уведомлений
   clearAll: async () => {
+    const api = await getApi();
     const response = await api.delete('/notifications/clear-all');
     return response.data;
   }
@@ -629,54 +699,63 @@ const friendsService = {
 
   // Получение списка друзей
   getFriends: async (userId = 'me', params = {}) => {
+    const api = await getApi();
     const response = await api.get(`/users/${userId}/friends`, { params });
     return response.data;
   },
 
   // Получение заявок в друзья
   getFriendRequests: async (type = 'received') => {
+    const api = await getApi();
     const response = await api.get(`/friends/requests/${type}`);
     return response.data;
   },
 
   // Отправка заявки в друзья
   sendFriendRequest: async (userId) => {
+    const api = await getApi();
     const response = await api.post(`/friends/request/${userId}`);
     return response.data;
   },
 
   // Одобрение заявки в друзья
   acceptFriendRequest: async (requestId) => {
+    const api = await getApi();
     const response = await api.patch(`/friends/requests/${requestId}/accept`);
     return response.data;
   },
 
   // Отклонение заявки в друзья
   rejectFriendRequest: async (requestId) => {
+    const api = await getApi();
     const response = await api.patch(`/friends/requests/${requestId}/reject`);
     return response.data;
   },
 
   // Удаление из друзей
   removeFriend: async (userId) => {
+    const api = await getApi();
     const response = await api.delete(`/friends/${userId}`);
     return response.data;
   },
 
   // Блокировка пользователя
   blockUser: async (userId) => {
+    const api = await getApi();
     const response = await api.post(`/users/${userId}/block`);
     return response.data;
   },
 
   // Разблокировка пользователя
   unblockUser: async (userId) => {
+    const api = await getApi();
     const response = await api.delete(`/users/${userId}/block`);
     return response.data;
   },
 
   // Получение заблокированных пользователей
   getBlockedUsers: async () => {
+    const api = await getApi();
     const response = await api.get('/users/blocked');
     return response.data;
   }
@@ -686,36 +765,42 @@ const friendsService = {
 const messagesService = {
   // Получить список чатов пользователя
   getChats: async () => {
+    const api = await getApi();
     const response = await api.get('/messages/chats');
     return response.data;
   },
   
   // Получить сообщения в чате
   getMessages: async (chatId, page = 1, limit = 50) => {
+    const api = await getApi();
     const response = await api.get(`/messages/chat/${chatId}?page=${page}&limit=${limit}`);
     return response.data;
   },
   
   // Отправить сообщение
   sendMessage: async (recipientId, content, attachments = []) => {
+    const api = await getApi();
     const response = await api.post('/messages/send', { recipientId, content, attachments });
     return response.data;
   },
   
   // Отметить сообщения как прочитанные
   markAsRead: async (chatId) => {
+    const api = await getApi();
     const response = await api.post(`/messages/chat/${chatId}/read`);
     return response.data;
   },
   
   // Удалить сообщение
   deleteMessage: async (messageId) => {
+    const api = await getApi();
     const response = await api.delete(`/messages/${messageId}`);
     return response.data;
   },
   
   // Поиск в сообщениях
   searchMessages: async (query, chatId = null) => {
+    const api = await getApi();
     const response = await api.get('/messages/search', { params: { query, chatId } });
     return response.data;
   },

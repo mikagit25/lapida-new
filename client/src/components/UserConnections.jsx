@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
 
@@ -11,11 +11,7 @@ function UserConnections() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchConnections();
-  }, [tab]);
-
-  async function fetchConnections() {
+  const fetchConnections = useCallback(async () => {
     setLoading(true);
     setError('');
     const token = localStorage.getItem('token');
@@ -28,11 +24,16 @@ function UserConnections() {
         setRelatives(res.data.relatives || []);
       }
     } catch (err) {
+      console.error('Ошибка загрузки связей', err);
       setError('Ошибка загрузки связей');
     } finally {
       setLoading(false);
     }
-  }
+  }, [tab]);
+
+  useEffect(() => {
+    fetchConnections();
+  }, [fetchConnections]);
 
   async function fetchUsers() {
     setLoading(true);
@@ -41,6 +42,7 @@ function UserConnections() {
   const res = await axios.get(`${API_BASE_URL}/users`);
       setUsers(res.data.users || []);
     } catch (err) {
+      console.error('Ошибка загрузки пользователей', err);
       setUsers([]);
     } finally {
       setLoading(false);
@@ -55,6 +57,7 @@ function UserConnections() {
   await axios.post(`${API_BASE_URL}/user-connections/${type}/${userId}`, {}, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
       fetchConnections();
     } catch (err) {
+      console.error('Ошибка добавления связи', err);
       setError('Ошибка добавления');
     } finally {
       setLoading(false);
@@ -69,6 +72,7 @@ function UserConnections() {
   await axios.delete(`${API_BASE_URL}/user-connections/${type}/${userId}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
       fetchConnections();
     } catch (err) {
+      console.error('Ошибка удаления связи', err);
       setError('Ошибка удаления');
     } finally {
       setLoading(false);

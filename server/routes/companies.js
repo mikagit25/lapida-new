@@ -3,6 +3,7 @@ const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const mongoose = require('mongoose'); // used for analytics aggregation
 const Company = require('../models/Company');
 const { auth } = require('../middleware/auth');
 const Product = require('../models/Product');
@@ -856,7 +857,7 @@ router.post('/', auth, async (req, res) => {
   try {
     const { name, address, inn, description } = req.body;
     if (!name || !address || !inn) {
-      return res.status(400).json({ message: 'Заполните все обязательные поля' });
+      return res.status(400).json({ error: 'Заполните все обязательные поля' });
     }
     // Генерация customSlug (транслит + уникальный хвост)
     function translit(str) {
@@ -892,7 +893,7 @@ router.post('/', auth, async (req, res) => {
     res.status(201).json({ company });
   } catch (error) {
     console.error('Ошибка создания компании:', error);
-    res.status(500).json({ message: 'Ошибка сервера при создании компании' });
+    res.status(500).json({ error: 'Ошибка сервера при создании компании' });
   }
 });
 

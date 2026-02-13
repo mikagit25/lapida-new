@@ -1,15 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-// TODO: заменить на реальный API для страниц
-const mockPages = [
-  { id: 'home', path: '/', title: 'Главная', isHidden: false },
-  { id: 'cabinet', path: '/cabinet', title: 'Личный кабинет', isHidden: false },
-  { id: 'profile', path: '/profile', title: 'Профиль', isHidden: false },
-  { id: 'company-cabinet', path: '/company-cabinet/:id', title: 'Кабинет компании', isHidden: false },
-  { id: 'memorial', path: '/memorial/:id', title: 'Мемориал', isHidden: false },
-];
-
 const AdminPagesManager = () => {
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +15,7 @@ const AdminPagesManager = () => {
         const response = await pageService.getAll();
         setPages(Array.isArray(response) ? response : response.pages || []);
       } catch (err) {
+        console.error('Ошибка загрузки страниц:', err);
         setError('Ошибка загрузки страниц');
       } finally {
         setLoading(false);

@@ -21,6 +21,7 @@ const CompanyRecommendations = ({ companyId, category }) => {
           setError(data.message || 'Ошибка загрузки рекомендаций');
         }
       } catch (e) {
+        console.error('Ошибка загрузки рекомендаций', e);
         setError('Ошибка загрузки рекомендаций');
       }
       setLoading(false);

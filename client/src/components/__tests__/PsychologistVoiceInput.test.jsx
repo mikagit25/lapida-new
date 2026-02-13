@@ -1,3 +1,5 @@
+/* eslint-env jest */
+/* global describe, it, expect */
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import PsychologistVoiceInput from '../PsychologistVoiceInput';

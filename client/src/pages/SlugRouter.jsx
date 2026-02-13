@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { API_BASE_URL } from '../config/api';
-import { apiFetch } from '../services/apiFetch';
 import { useParams } from 'react-router-dom';
 import MemorialView from './MemorialView';
-import CompanyProfile from './CompanyProfile';
 import { newMemorialService } from '../services/api';
 
 export default function SlugRouter() {
@@ -11,15 +8,6 @@ export default function SlugRouter() {
   const [type, setType] = useState(null);
   const [loading, setLoading] = useState(true);
   const [memorial, setMemorial] = useState(null);
-  const [company, setCompany] = useState(null);
-  // Получаем userData из localStorage
-  const userData = (() => {
-    try {
-      return JSON.parse(localStorage.getItem('user'));
-    } catch {
-      return null;
-    }
-  })();
 
   useEffect(() => {
     let active = true;
@@ -38,7 +26,9 @@ export default function SlugRouter() {
             return;
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('Ошибка поиска мемориала по slug:', e);
+      }
       if (active) {
         setType('notfound');
         setLoading(false);

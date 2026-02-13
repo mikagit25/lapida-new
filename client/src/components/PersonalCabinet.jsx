@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 // import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { userService, memorialService, newMemorialService, notificationService } from '../services/api';
+import { userService, memorialService } from '../services/api';
 import { getUserDisplayName } from '../utils/userUtils';
 import PersonalCabinetStats from './PersonalCabinetStats';
 import NotificationsList from './NotificationsList';
 import PersonalCabinetMemorials from './PersonalCabinetMemorials';
 import PersonalCabinetNotifications from './PersonalCabinetNotifications';
 import PersonalCabinetActivity from './PersonalCabinetActivity';
-import { fixImageUrl } from '../utils/imageUrl';
 import GoToCompanyCabinetButton from './GoToCompanyCabinetButton';
 import CompanyCabinetQuickActions from './CompanyCabinetQuickActions';
 import { Link } from 'react-router-dom';
@@ -30,7 +29,6 @@ const PersonalCabinet = () => {
   });
   const [recentMemorials, setRecentMemorials] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
-  const [notifications, setNotifications] = useState([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -71,11 +69,6 @@ const PersonalCabinet = () => {
       });
 
       // Загружаем уведомления (пока заглушка)
-      const notificationsData = await notificationService.getAll({ limit: 5 }).catch(err => {
-        console.log('Notifications error:', err);
-        return [];
-      });
-
       setStats({
         memorialsCreated: userStats.memorialsCreated || 0,
         flowersLeft: userStats.flowersLeft || 0,
@@ -85,7 +78,6 @@ const PersonalCabinet = () => {
 
       setRecentMemorials(memorialsData.memorials || []);
       setRecentActivity(activityData.comments || []);
-      setNotifications(Array.isArray(notificationsData) ? notificationsData : notificationsData.notifications || []);
 
     } catch (error) {
       console.error('Error fetching personal cabinet data:', error);
@@ -340,7 +332,6 @@ const PersonalCabinet = () => {
             <PersonalCabinetMemorials
               recentMemorials={recentMemorials}
               formatDate={formatDate}
-              fixImageUrl={fixImageUrl}
             />
 
             {/* Избранные товары */}

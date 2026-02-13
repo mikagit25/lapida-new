@@ -27,7 +27,7 @@ const HeaderBackgroundManager = ({
     }
     loadProfileImageUrl();
     return () => { isMounted = false; };
-  }, [memorial && memorial.profileImage]);
+  }, [memorial]);
 
   // Проверяем права пользователя на редактирование
   const hasEditPermission = () => {
@@ -98,11 +98,6 @@ const HeaderBackgroundManager = ({
   };
       
 
-  const [backgroundBaseUrl, setBackgroundBaseUrl] = useState('');
-  React.useEffect(() => {
-  // setBackgroundBaseUrl(API_BASE_URL); // Используйте только API_BASE_URL или другую актуальную логику
-  }, []);
-
   // Асинхронно получаем backgroundImageUrl
   const [backgroundImageUrl, setBackgroundImageUrl] = useState('');
   useEffect(() => {
@@ -117,7 +112,7 @@ const HeaderBackgroundManager = ({
     }
     loadBackgroundImageUrl();
     return () => { isMounted = false; };
-  }, [memorial && memorial.headerBackground]);
+  }, [memorial]);
   const editPermission = hasEditPermission();
 
   const backgroundStyle = memorial.headerBackground ? {

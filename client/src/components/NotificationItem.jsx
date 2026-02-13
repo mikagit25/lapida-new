@@ -78,6 +78,7 @@ const NotificationItem = ({ notification, onMarkAsRead, onDelete }) => {
         locale: ru 
       });
     } catch (error) {
+      console.error('Ошибка форматирования даты уведомления', error);
       return 'недавно';
     }
   };

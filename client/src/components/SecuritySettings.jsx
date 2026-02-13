@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { userService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { fixImageUrl } from '../utils/imageUrl';
 
 const SecuritySettings = () => {
-  const { user } = useAuth();
+  useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');

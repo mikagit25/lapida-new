@@ -34,7 +34,8 @@ function AddNewsForm({ companyId, onAdd }) {
       } else {
         setError(data.message || 'Ошибка добавления');
       }
-    } catch (e) {
+    } catch (err) {
+      console.error('Error adding news:', err);
       setError('Ошибка добавления');
     } finally {
       setLoading(false);

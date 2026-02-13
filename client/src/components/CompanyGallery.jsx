@@ -41,7 +41,8 @@ export default function CompanyGallery({ images, companyId, isOwner }) {
     try {
       const updated = await deleteCompanyPhoto(companyId, imgUrl);
       setGalleryImages(updated);
-    } catch (e) {
+    } catch (err) {
+      console.error('Ошибка удаления фото галереи', err);
       alert('Ошибка удаления');
     } finally {
       setDeleting(false);
@@ -65,6 +66,7 @@ export default function CompanyGallery({ images, companyId, isOwner }) {
       const data = await res.json();
       setGalleryImages(data.gallery || []);
     } catch (err) {
+      console.error('Ошибка загрузки фото галереи', err);
       alert('Ошибка загрузки');
     } finally {
       setUploading(false);

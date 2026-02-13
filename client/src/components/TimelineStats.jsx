@@ -1,6 +1,6 @@
 import React from 'react';
 
-const TimelineStats = ({ stats, getEventTypeLabel, eventTypes }) => {
+const TimelineStats = ({ stats, eventTypes }) => {
   if (!stats) return null;
 
   return (

@@ -18,7 +18,7 @@ const MemorialCreate = () => {
     profileImage: null,
     cemetery: '',
     customSlug: '',
-    isPublic: true
+    isPrivate: false
   });
 
   const handleChange = (e) => {
@@ -64,7 +64,7 @@ const MemorialCreate = () => {
         epitaph: formData.epitaph,
         profileImage: profileImagePath,
         customSlug: formData.customSlug,
-        isPublic: true,
+        isPrivate: formData.isPrivate,
         location: {
           cemetery: formData.cemetery
         }
@@ -74,7 +74,8 @@ const MemorialCreate = () => {
       navigate(memorial.customSlug ? `/${memorial.customSlug}` : `/memorial/${memorial.shareUrl}`);
     } catch (error) {
       console.error('Ошибка создания мемориала:', error);
-      alert('Ошибка при создании мемориала');
+      const message = error.response?.data?.message || 'Ошибка при создании мемориала';
+      alert(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -197,7 +198,7 @@ const MemorialCreate = () => {
                   value={formData.customSlug}
                   onChange={handleChange}
                   placeholder="ivan-petrov"
-                  pattern="^[a-z0-9-]+$"
+                  pattern="^[a-z0-9\-]+$"
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-r-md focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>

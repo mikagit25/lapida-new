@@ -12,14 +12,14 @@ const AdminCabinet = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (user?.role === 'admin') {
-      userService.getAllUsers()
-        .then(res => setUsers(res.users || []))
-  .catch(() => setError(t('admin_cabinet_error_loading')))
-        .finally(() => setLoading(false));
-    }
-  }, [user]);
+    useEffect(() => {
+      if (user?.role === 'admin') {
+        userService.getAllUsers()
+          .then(res => setUsers(res.users || []))
+          .catch(() => setError(t('admin_cabinet_error_loading')))
+          .finally(() => setLoading(false));
+      }
+    }, [user, t]);
 
   if (!user || user.role !== 'admin') {
   return <div className="p-8 text-red-600">{t('admin_cabinet_no_access')}</div>;

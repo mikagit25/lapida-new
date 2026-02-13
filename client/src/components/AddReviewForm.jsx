@@ -32,7 +32,8 @@ function AddReviewForm({ companyId, onAdd }) {
       } else {
         setError(data.message || 'Ошибка добавления');
       }
-    } catch (e) {
+    } catch (err) {
+      console.error('Error adding review:', err);
       setError('Ошибка добавления');
     } finally {
       setLoading(false);

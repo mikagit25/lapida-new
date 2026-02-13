@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Search.css';
+import { fixImageUrl } from '../utils/imageUrl';
 
 const SearchResults = ({ results, query, onClose }) => {
   const navigate = useNavigate();

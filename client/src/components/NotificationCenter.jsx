@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { notificationService } from '../services/api';
 import NotificationItem from './NotificationItem';
 import NotificationBadge from './NotificationBadge';
@@ -8,14 +8,48 @@ const NotificationCenter = ({ className = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [filter, setFilter] = useState('all'); // all, unread, read
-  const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const dropdownRef = useRef(null);
   const badgeRef = useRef(null);
+  const pageRef = useRef(1);
+  const isLoadingRef = useRef(false);
+
+  const fetchNotifications = useCallback(async (reset = false) => {
+    if (isLoadingRef.current) return;
+    
+    isLoadingRef.current = true;
+    setIsLoading(true);
+    try {
+      const currentPage = reset ? 1 : pageRef.current;
+      const params = {
+        page: currentPage,
+        limit: 10,
+        filter: filter !== 'all' ? filter : undefined
+      };
+
+      const response = await notificationService.getAll(params);
+      const newNotifications = response.notifications || [];
+
+      if (reset) {
+        setNotifications(newNotifications);
+        pageRef.current = 2;
+      } else {
+        setNotifications(prev => [...prev, ...newNotifications]);
+        pageRef.current = currentPage + 1;
+      }
+
+      setHasMore(newNotifications.length === 10);
+    } catch (error) {
+      console.error('Ошибка загрузки уведомлений:', error);
+    } finally {
+      isLoadingRef.current = false;
+      setIsLoading(false);
+    }
+  }, [filter]);
 
   useEffect(() => {
     fetchNotifications(true);
-  }, [filter]);
+  }, [filter, fetchNotifications]);
 
   useEffect(() => {
     // Закрытие при клике вне компонента
@@ -28,37 +62,6 @@ const NotificationCenter = ({ className = '' }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const fetchNotifications = async (reset = false) => {
-    if (isLoading) return;
-    
-    setIsLoading(true);
-    try {
-      const currentPage = reset ? 1 : page;
-      const params = {
-        page: currentPage,
-        limit: 10,
-        filter: filter !== 'all' ? filter : undefined
-      };
-
-      const response = await notificationService.getAll(params);
-      const newNotifications = response.notifications || [];
-
-      if (reset) {
-        setNotifications(newNotifications);
-        setPage(2);
-      } else {
-        setNotifications(prev => [...prev, ...newNotifications]);
-        setPage(prev => prev + 1);
-      }
-
-      setHasMore(newNotifications.length === 10);
-    } catch (error) {
-      console.error('Ошибка загрузки уведомлений:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleMarkAsRead = async (notificationId) => {
     try {

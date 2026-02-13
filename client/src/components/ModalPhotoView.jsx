@@ -1,5 +1,5 @@
 import React from 'react';
-import { useFullImageSrc } from './GravePhotoGallery';
+import { useFullImageSrc } from '../hooks/useFullImageSrc';
 
 const ModalPhotoView = ({ photo, description, onClose, onPrev, onNext }) => {
   const src = useFullImageSrc(photo);

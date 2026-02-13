@@ -53,24 +53,25 @@ const generateToken = (userId) => {
 // Регистрация
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Все поля обязательны для заполнения' });
+    const { name, username, fullName, email, password } = req.body;
+    const resolvedName = name || fullName || username;
+    if (!resolvedName || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Все поля обязательны для заполнения' });
     }
     if (password.length < 6) {
-      return res.status(400).json({ message: 'Пароль должен содержать минимум 6 символов' });
+      return res.status(400).json({ success: false, message: 'Пароль должен содержать минимум 6 символов' });
     }
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Пользователь с таким email уже существует' });
+      return res.status(400).json({ success: false, message: 'Пользователь с таким email уже существует' });
     }
-    const user = new User({ name, email, password });
+    const user = new User({ name: resolvedName, email, password });
     await user.save();
     const token = generateToken(user._id);
-    res.status(201).json({ message: 'Пользователь успешно зарегистрирован', token });
+    res.status(201).json({ success: true, message: 'Пользователь успешно зарегистрирован', token, user: user.toJSON() });
   } catch (error) {
     console.error('Ошибка регистрации:', error);
-    res.status(500).json({ message: 'Ошибка сервера при регистрации' });
+    res.status(500).json({ success: false, message: 'Ошибка сервера при регистрации' });
   }
 });
 
@@ -89,17 +90,13 @@ router.post('/login', async (req, res) => {
     // Поиск пользователя
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ 
-        message: 'Неверный email или пароль' 
-      });
+      return res.status(401).json({ success: false, message: 'Неверный email или пароль' });
     }
 
     // Проверка пароля
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(400).json({ 
-        message: 'Неверный email или пароль' 
-      });
+      return res.status(401).json({ success: false, message: 'Неверный email или пароль' });
     }
 
     // Генерация токена
@@ -114,6 +111,7 @@ router.post('/login', async (req, res) => {
     });
 
     res.json({
+      success: true,
       message: 'Авторизация успешна',
       token,
       user: {
@@ -132,6 +130,7 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error('Ошибка авторизации:', error);
     res.status(500).json({ 
+      success: false,
       message: 'Ошибка сервера при авторизации' 
     });
   }

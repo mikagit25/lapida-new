@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config/api';
+import { fixImageUrl } from '../utils/imageUrl';
 
 const HeaderBackgroundManager = ({ 
   memorial,

@@ -1,4 +1,4 @@
-продолжай.// Модель заказа на товар религиозной организации
+// Модель заказа на товар религиозной организации
 const mongoose = require('mongoose');
 
 const ReligiousProductOrderSchema = new mongoose.Schema({

@@ -26,6 +26,7 @@ const OrganizationProfileEdit = ({ org, onSave }) => {
       await onSave(form);
       setSuccess(true);
     } catch (err) {
+      console.error('Ошибка сохранения профиля организации', err);
       setError('Ошибка сохранения');
     } finally {
       setSaving(false);

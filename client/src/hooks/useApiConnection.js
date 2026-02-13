@@ -33,29 +33,16 @@ export function useApiConnection() {
                     setIsSearching(false);
                     return;
                 }
-            } catch (error) {
+            } catch (err) {
                 console.log('❌ Базовый API URL недоступен, ищем альтернативы...');
+                console.debug('[useApiConnection] health check error:', err);
             }
 
-            try {
-                // Если базовый не работает, ищем альтернативы
-                // const workingUrl = API_BASE_URL; // Используйте только API_BASE_URL или другую актуальную логику
-                
-                if (mounted) {
-                    if (workingUrl !== API_BASE_URL) {
-                        console.log('🔄 Переключение на работающий API:', workingUrl);
-                        setApiUrl(workingUrl);
-                    }
-                    setIsConnected(true);
-                    setIsSearching(false);
-                }
-            } catch (error) {
-                if (mounted) {
-                    console.error('❌ Не удалось найти работающий API сервер:', error);
-                    setError('Сервер недоступен. Проверьте, запущен ли backend.');
-                    setIsConnected(false);
-                    setIsSearching(false);
-                }
+            if (mounted) {
+                // Пока используем только базовый URL; расширяем позже при наличии списка альтернатив
+                setIsConnected(false);
+                setIsSearching(false);
+                setError('Сервер недоступен. Проверьте, запущен ли backend.');
             }
         }
 
@@ -80,11 +67,12 @@ export function useApiConnection() {
                 } else {
                     throw new Error('Health check failed');
                 }
-            } catch (error) {
+            } catch (err) {
                 if (isConnected) {
                     setIsConnected(false);
                     setError('Потеряно соединение с сервером');
                     console.log('❌ Потеряно соединение с API');
+                    console.debug('[useApiConnection] interval health error:', err);
                 }
             }
         }, 30000); // Проверяем каждые 30 секунд

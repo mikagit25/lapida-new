@@ -1,11 +1,17 @@
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { apiFetch } from '../services/apiFetch';
+
+const getCompanyOrders = async (crmId) => {
+  const res = await apiFetch(`/api/crm/orders/${crmId}`);
+  return res.json();
+};
 
 const CrmCompanyOrders = () => {
   const { id } = useParams();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [crmId, setCrmId] = useState('');
 
   useEffect(() => {
     // Получаем crmId компании по id сайта
@@ -14,7 +20,6 @@ const CrmCompanyOrders = () => {
       .then(data => {
         console.log('Ответ API компании:', data);
         if (data.company && data.company.crmId) {
-          setCrmId(data.company.crmId);
           return getCompanyOrders(data.company.crmId);
         } else {
           console.error('CRM-ID компании не найден! company:', data.company);

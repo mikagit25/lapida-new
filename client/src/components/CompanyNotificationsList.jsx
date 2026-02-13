@@ -14,6 +14,9 @@ const CompanyNotificationsList = ({ companyId }) => {
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
 
+  // auth context might be used later for role-based filters
+  void user;
+
   useEffect(() => {
     if (!companyId) return;
     setLoading(true);
@@ -25,7 +28,10 @@ const CompanyNotificationsList = ({ companyId }) => {
         setPages(data.pages || 1);
         setError('');
       })
-      .catch(() => setError('Ошибка загрузки уведомлений'))
+      .catch((err) => {
+        console.error('Ошибка загрузки уведомлений компании', err);
+        setError('Ошибка загрузки уведомлений');
+      })
       .finally(() => setLoading(false));
   }, [companyId, page, limit]);
 
@@ -38,7 +44,9 @@ const CompanyNotificationsList = ({ companyId }) => {
       if (res.ok) {
         setNotifications(notifications => notifications.map(n => n._id === id ? { ...n, read: true } : n));
       }
-    } catch {}
+    } catch (err) {
+      console.error('Ошибка отметки уведомления как прочитанного', err);
+    }
   };
 
   if (loading) return <div className="p-4">Загрузка уведомлений...</div>;
@@ -54,7 +62,9 @@ const CompanyNotificationsList = ({ companyId }) => {
       if (res.ok) {
         setNotifications(notifications => notifications.map(n => ({ ...n, read: true })));
       }
-    } catch {}
+    } catch (err) {
+      console.error('Ошибка массовой отметки уведомлений', err);
+    }
   };
   return (
     <div className="max-w-xl mx-auto p-4 bg-white rounded shadow">
@@ -72,6 +82,7 @@ const CompanyNotificationsList = ({ companyId }) => {
       </div>
       {/* Пагинация */}
       <div className="mb-4 flex gap-2 items-center justify-end">
+        <span className="text-sm text-gray-500">Всего: {total}</span>
         <button
           className="px-2 py-1 border rounded disabled:opacity-50"
           disabled={page <= 1}

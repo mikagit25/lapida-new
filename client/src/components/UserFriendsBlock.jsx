@@ -31,14 +31,14 @@ const UserFriendsBlock = ({ user, onToggle, isOwner }) => {
         <div className="mt-4 flex space-x-2">
           <button
             onClick={handleAddFriend}
-            disabled={addingFriend || addedFriend}
+            disabled={addingFriend || addedFriend || isAlreadyFriend}
             className="bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-2 rounded text-sm font-medium disabled:opacity-50"
           >
             {addedFriend ? 'Уже в друзьях' : addingFriend ? 'Добавление...' : 'Добавить в друзья'}
           </button>
           <button
             onClick={handleAddRelative}
-            disabled={addingRelative || addedRelative}
+            disabled={addingRelative || addedRelative || isAlreadyRelative}
             className="bg-green-50 text-green-700 hover:bg-green-100 px-3 py-2 rounded text-sm font-medium disabled:opacity-50"
           >
             {addedRelative ? 'Уже в родственниках' : addingRelative ? 'Добавление...' : 'Добавить в родственники'}
@@ -65,6 +65,7 @@ const UserFriendsBlock = ({ user, onToggle, isOwner }) => {
                       await api.post(`/user-connections/friends/${user._id}`);
                       setAddedFriend(true);
                     } catch (err) {
+                      console.error('Ошибка при добавлении в друзья', err);
                       setError('Ошибка при добавлении в друзья');
                     } finally {
                       setAddingFriend(false);
@@ -78,6 +79,7 @@ const UserFriendsBlock = ({ user, onToggle, isOwner }) => {
                       await api.post(`/user-connections/relatives/${user._id}`);
                       setAddedRelative(true);
                     } catch (err) {
+                      console.error('Ошибка при добавлении в родственники', err);
                       setError('Ошибка при добавлении в родственники');
                     } finally {
                       setAddingRelative(false);

@@ -26,6 +26,7 @@ const OrganizationGalleryEdit = ({ photos = [], onSave }) => {
       await onSave(gallery);
       setSuccess(true);
     } catch (err) {
+      console.error('Ошибка сохранения галереи', err);
       setError('Ошибка сохранения');
     } finally {
       setSaving(false);

@@ -33,7 +33,8 @@ export default function CustomSlugEditor({ companyId, initialSlug, isOwner, onSl
       const res = await fetch(`/api/companies/check-slug?slug=${value}`);
       const data = await res.json();
       setStatus(data.available ? 'available' : 'taken');
-    } catch {
+    } catch (err) {
+      console.error('Failed to check slug availability', err);
       setStatus('error');
     }
   };
@@ -82,6 +83,7 @@ export default function CustomSlugEditor({ companyId, initialSlug, isOwner, onSl
         setError(data.message || 'Ошибка сохранения');
       }
     } catch (e) {
+      console.error('Ошибка сохранения slug', e);
       setError('Ошибка сохранения');
     }
     setLoading(false);

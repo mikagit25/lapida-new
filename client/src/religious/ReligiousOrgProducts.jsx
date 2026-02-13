@@ -23,9 +23,12 @@ const ReligiousOrgProducts = ({ orgId, isOwner }) => {
     setLoading(true);
     religiousProductService.getByOrganization(orgId)
       .then(setProducts)
-  .catch(() => setError(t('religiousOrgProducts.loadError')))
+      .catch((err) => {
+        console.error('Ошибка загрузки товаров релорганизации:', err);
+        setError(t('religiousOrgProducts.loadError'));
+      })
       .finally(() => setLoading(false));
-  }, [orgId]);
+    }, [orgId, t]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -49,7 +52,8 @@ const ReligiousOrgProducts = ({ orgId, isOwner }) => {
       }
       setForm(initialProduct);
     } catch (err) {
-  setError(t('religiousOrgProducts.saveError'));
+      console.error('Ошибка сохранения товара релорганизации:', err);
+      setError(t('religiousOrgProducts.saveError'));
     } finally {
       setLoading(false);
     }
@@ -73,7 +77,8 @@ const ReligiousOrgProducts = ({ orgId, isOwner }) => {
         setEditId(null);
       }
     } catch (err) {
-  setError(t('religiousOrgProducts.deleteError'));
+      console.error('Ошибка удаления товара релорганизации:', err);
+      setError(t('religiousOrgProducts.deleteError'));
     } finally {
       setLoading(false);
     }

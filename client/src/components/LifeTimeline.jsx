@@ -1,10 +1,10 @@
 import { apiFetch } from '../services/apiFetch';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import TimelineEvent from './TimelineEvent';
 import EventModal from './EventModal';
 import TimelineStats from './TimelineStats';
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL, getApiBaseUrl } from '../config/api';
 
 const LifeTimeline = ({ memorialId }) => {
   const [events, setEvents] = useState([]);
@@ -33,12 +33,7 @@ const LifeTimeline = ({ memorialId }) => {
     { value: 'other', label: 'Другое', icon: '📅' }
   ];
 
-  useEffect(() => {
-    loadEvents();
-    loadStats();
-  }, [memorialId, filter, selectedYear]);
-
-  const loadEvents = async () => {
+  const loadEvents = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -46,8 +41,7 @@ const LifeTimeline = ({ memorialId }) => {
         ...(filter !== 'all' && { eventType: filter }),
         ...(selectedYear !== 'all' && { year: selectedYear })
       });
-
-  const response = await apiFetch(`${API_BASE_URL}/timeline/timeline?${params}`);
+      const response = await apiFetch(`${API_BASE_URL}/timeline/timeline?${params}`);
       
       if (response.ok) {
         const data = await response.json();
@@ -65,11 +59,11 @@ const LifeTimeline = ({ memorialId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, memorialId, selectedYear]);
 
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
-  const response = await apiFetch(`${API_BASE_URL}/timeline/timeline/stats?memorialId=${memorialId}`);
+      const response = await apiFetch(`${API_BASE_URL}/timeline/timeline/stats?memorialId=${memorialId}`);
       if (response.ok) {
         const data = await response.json();
         setStats(data);
@@ -77,7 +71,12 @@ const LifeTimeline = ({ memorialId }) => {
     } catch (error) {
       console.error('Ошибка загрузки статистики:', error);
     }
-  };
+  }, [memorialId]);
+
+  useEffect(() => {
+    loadEvents();
+    loadStats();
+  }, [loadEvents, loadStats]);
 
   const getEventIcon = (eventType) => {
     const type = eventTypes.find(t => t.value === eventType);

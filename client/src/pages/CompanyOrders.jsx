@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config/api';
 import { apiFetch } from '../services/apiFetch';
 
 const CompanyOrders = ({ companyId }) => {
-  const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     if (!companyId) return;
@@ -42,8 +41,6 @@ const CompanyOrders = ({ companyId }) => {
 
   if (loading) return <div className="p-8">Загрузка заказов...</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
-
-  const [filter, setFilter] = useState('all');
   const filteredOrders = filter === 'all' ? orders : orders.filter(o => o.status === filter);
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded shadow">

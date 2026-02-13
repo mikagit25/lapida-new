@@ -1,8 +1,15 @@
+import React, { useEffect, useState } from 'react';
 import { apiFetch } from '../services/apiFetch';
+import { useAuth } from '../context/AuthContext';
+import { getApiBaseUrl } from '../config/api';
+import GalleryImage from './GalleryImage';
+import ModalPhotoView from './ModalPhotoView';
+import { fixImageUrl } from '../utils/imageUrl';
+
 // Универсальный компонент для асинхронного получения и рендера изображения
 function AsyncImage({ image, alt, className, ...props }) {
-  const [imgUrl, setImgUrl] = React.useState('');
-  React.useEffect(() => {
+  const [imgUrl, setImgUrl] = useState('');
+  useEffect(() => {
     let isMounted = true;
     (async () => {
       const url = await fixImageUrl(typeof image === 'string' ? image : image.url);
@@ -13,48 +20,16 @@ function AsyncImage({ image, alt, className, ...props }) {
   if (!imgUrl) return null;
   return <img src={imgUrl} alt={alt} className={className} {...props} />;
 }
-import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { API_BASE_URL } from '../config/api';
-import GalleryImage from './GalleryImage';
-import ModalPhotoView from './ModalPhotoView';
-// ...existing code...
-
-// Вспомогательный хук для получения src полноразмерного фото
-export function useFullImageSrc(photo) {
-  const [src, setSrc] = useState('');
-  useEffect(() => {
-    let isMounted = true;
-    async function resolveSrc() {
-      if (typeof photo?.url === 'string') {
-        if (photo.url.startsWith('/upload/')) {
-          const cleanBase = API_BASE_URL.replace(/\/api$/, '');
-          if (isMounted) setSrc(cleanBase + photo.url);
-        } else {
-          if (isMounted) setSrc(photo.url);
-        }
-      } else {
-        if (isMounted) setSrc('');
-      }
-    }
-    resolveSrc();
-    return () => { isMounted = false; };
-  }, [photo]);
-  return src;
-}
-
-import { fixImageUrl } from '../utils/imageUrl';
 
 const GravePhotoGallery = ({ memorial, onUpdate }) => {
   const { user } = useAuth();
-  // Защита: если нет location, не рендерим компонент
-  if (!memorial.location) return null;
-  const gravePhotos = memorial.location.gravePhotos || [];
+  const hasLocation = Boolean(memorial?.location);
+  const gravePhotos = hasLocation ? memorial.location.gravePhotos || [] : [];
   const [isUploading, setIsUploading] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(null);
   const [description, setDescription] = useState('');
   // useEffect для навигации по фото в модальном окне
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedPhotoIndex !== null && gravePhotos.length > 0) {
       const handleKeyDown = (e) => {
         if (e.key === 'Escape') setSelectedPhotoIndex(null);
@@ -79,18 +54,6 @@ const GravePhotoGallery = ({ memorial, onUpdate }) => {
   );
 
   // ...existing code...
-
-  // Сохраняем массив готовых URL
-  const [resolvedUrls, setResolvedUrls] = useState([]);
-
-  React.useEffect(() => {
-    let isMounted = true;
-    Promise.all(gravePhotos.map(photo => fixImageUrl(photo.url)))
-      .then(urls => {
-        if (isMounted) setResolvedUrls(urls);
-      });
-    return () => { isMounted = false; };
-  }, [gravePhotos]);
 
   // Функция загрузки фото
   const handlePhotoUpload = async (file) => {
@@ -122,8 +85,8 @@ const GravePhotoGallery = ({ memorial, onUpdate }) => {
         throw new Error('Токен авторизации не найден');
       }
 
-      const API_BASE_URL = await getApiBaseUrl();
-      const response = await apiFetch(`${API_BASE_URL}/memorials/${memorial._id}/grave-photo`, {
+      const baseUrl = await getApiBaseUrl();
+      const response = await apiFetch(`${baseUrl}/memorials/${memorial._id}/grave-photo`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -182,8 +145,8 @@ const GravePhotoGallery = ({ memorial, onUpdate }) => {
         throw new Error('Токен авторизации не найден');
       }
 
-      const API_BASE_URL = await getApiBaseUrl();
-      const response = await apiFetch(`${API_BASE_URL}/memorials/${memorial._id}/grave-photo/${photoIndex}`, {
+      const baseUrl = await getApiBaseUrl();
+      const response = await apiFetch(`${baseUrl}/memorials/${memorial._id}/grave-photo/${photoIndex}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -222,6 +185,10 @@ const GravePhotoGallery = ({ memorial, onUpdate }) => {
       alert(`Ошибка удаления фото: ${error.message}`);
     }
   };
+
+  if (!hasLocation) {
+    return null;
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">

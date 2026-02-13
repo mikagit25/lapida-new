@@ -28,6 +28,7 @@ const Companies = () => {
       const data = await res.json();
       setCompanies(data.companies || []);
     } catch (e) {
+      console.error('Ошибка загрузки компаний:', e);
       setError('Ошибка загрузки компаний');
     } finally {
       setLoading(false);

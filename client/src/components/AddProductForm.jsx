@@ -24,7 +24,7 @@ function AddProductForm({ companyId, onAdd }) {
       let res, data;
       if (files.length > 0) {
         const formData = new FormData();
-        files.forEach((file, idx) => formData.append('images', file));
+        files.forEach((file) => formData.append('images', file));
         Object.entries(form).forEach(([key, value]) => formData.append(key, value));
         res = await fetch(`/api/companies/${companyId}/products`, {
           method: 'POST',
@@ -52,7 +52,8 @@ function AddProductForm({ companyId, onAdd }) {
       } else {
         setError(data.message || 'Ошибка добавления');
       }
-    } catch (e) {
+    } catch (err) {
+      console.error('Error adding product:', err);
       setError('Ошибка добавления');
     } finally {
       setLoading(false);

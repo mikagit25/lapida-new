@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 export default function NoteFab({ memorialId, onNoteAdded }) {
+  void memorialId;
   const [showModal, setShowModal] = useState(false);
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);

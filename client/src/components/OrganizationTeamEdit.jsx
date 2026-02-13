@@ -32,6 +32,7 @@ const OrganizationTeamEdit = ({ team = [], onSave }) => {
       await onSave(list);
       setSuccess(true);
     } catch (err) {
+      console.error('Ошибка сохранения команды', err);
       setError('Ошибка сохранения');
     } finally {
       setSaving(false);

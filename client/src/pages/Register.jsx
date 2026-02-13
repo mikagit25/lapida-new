@@ -77,7 +77,7 @@ const Register = () => {
     setIsSubmitting(true);
 
     try {
-      const { confirmPassword, ...registerData } = formData;
+      const { confirmPassword: _ignoredConfirm, ...registerData } = formData;
       await register(registerData);
       navigate('/'); // Перенаправляем на главную после успешной регистрации
     } catch (err) {
@@ -86,12 +86,6 @@ const Register = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  // Обработчик клика по кнопке Google OAuth
-  const handleGoogleOAuth = () => {
-    // Здесь будет логика для запуска OAuth через Google
-  window.location.href = `${API_BASE_URL}/auth/google`;
   };
 
   return (

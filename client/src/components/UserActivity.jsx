@@ -1,6 +1,7 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { userService } from '../services/api';
+import AsyncImage from './AsyncImage';
 
 const UserActivity = () => {
   const [comments, setComments] = useState([]);
@@ -127,8 +128,8 @@ const UserActivity = () => {
 
                       {comment.photo && (
                         <div className="mt-2">
-                          <img
-                            src={fixImageUrl(comment.photo)}
+                          <AsyncImage
+                            url={comment.photo}
                             alt="Фото к комментарию"
                             className="w-32 h-32 object-cover rounded-md border border-gray-200"
                           />
@@ -149,8 +150,8 @@ const UserActivity = () => {
 
                     {comment.memorial?.photo && (
                       <div className="ml-4 flex-shrink-0">
-                        <img
-                          src={fixImageUrl(comment.memorial.photo)}
+                        <AsyncImage
+                          url={comment.memorial.photo}
                           alt={`${comment.memorial.firstName} ${comment.memorial.lastName}`}
                           className="w-16 h-16 object-cover rounded-md border border-gray-200"
                         />

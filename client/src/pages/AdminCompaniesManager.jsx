@@ -2,13 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-// TODO: заменить на реальный API для компаний
-const mockCompanies = [
-  { _id: '1', name: 'ООО "Ромашка"', inn: '1234567890', owner: 'Иванов И.И.', isHidden: false },
-  { _id: '2', name: 'ЗАО "Лютик"', inn: '0987654321', owner: 'Петров П.П.', isHidden: false },
-];
-
-
 const AdminCompaniesManager = () => {
   const { t } = useTranslation();
   const [companies, setCompanies] = useState([]);
@@ -24,13 +17,14 @@ const AdminCompaniesManager = () => {
         const response = await companyService.getAll();
         setCompanies(Array.isArray(response) ? response : response.companies || []);
       } catch (err) {
-  setError(t('admin_companies_error_loading'));
+        console.error('Ошибка загрузки компаний:', err);
+        setError(t('admin_companies_error_loading'));
       } finally {
         setLoading(false);
       }
     }
     fetchCompanies();
-  }, []);
+  }, [t]);
 
   const handleHide = (id) => {
     setCompanies(cs => cs.map(c => c._id === id ? { ...c, isHidden: !c.isHidden } : c));

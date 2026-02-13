@@ -11,6 +11,9 @@ function ReligiousOrgNews({ organizationId, isOwner }) {
   const [selectedNews, setSelectedNews] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const initialNews = { title: '', text: '', publishedAt: '', images: [] };
+  const [form, setForm] = useState(initialNews);
+  const [editId, setEditId] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -42,10 +45,6 @@ function ReligiousOrgNews({ organizationId, isOwner }) {
     );
   }
 
-  const initialNews = { title: '', text: '', publishedAt: '', images: [] };
-  const [form, setForm] = useState(initialNews);
-  const [editId, setEditId] = useState(null);
-
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -66,6 +65,7 @@ function ReligiousOrgNews({ organizationId, isOwner }) {
       }
       setForm(initialNews);
     } catch (err) {
+      console.error('Ошибка сохранения новости релорганизации:', err);
       setError(t('religiousOrgNews.saveError'));
     } finally {
       setLoading(false);
@@ -78,8 +78,12 @@ function ReligiousOrgNews({ organizationId, isOwner }) {
   };
 
   const handleDelete = (idx) => {
-    setNews(news.filter((_, i) => i !== idx));
-    if (editId === news[idx]._id) setEditId(null);
+    try {
+      setNews(news.filter((_, i) => i !== idx));
+      if (editId === news[idx]._id) setEditId(null);
+    } catch (err) {
+      console.error('Ошибка удаления новости релорганизации:', err);
+    }
   };
 
   return (

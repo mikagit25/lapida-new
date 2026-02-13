@@ -24,6 +24,10 @@ const VirtualDoves = ({ memorialId, canEdit = false }) => {
   };
 
   const handleAddDove = async () => {
+    if (!user) {
+      alert('Войдите, чтобы отпустить голубя');
+      return;
+    }
     if (!message.trim()) return;
     setLoading(true);
     try {
@@ -37,6 +41,7 @@ const VirtualDoves = ({ memorialId, canEdit = false }) => {
       setShowForm(false);
       loadDoves();
     } catch (e) {
+      console.error('Ошибка при добавлении голубя', e);
       alert('Ошибка при добавлении голубя');
     }
     setLoading(false);

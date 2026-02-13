@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DonationForm from './DonationForm';
 import DonationList from './DonationList';
+import { apiFetch } from '../services/apiFetch';
 
 const PaymentManager = () => {
   const [donations, setDonations] = useState([]);
@@ -14,12 +15,12 @@ const PaymentManager = () => {
   const fetchDonations = async () => {
     setLoading(true);
     try {
-  const { apiFetch } = require('../services/apiFetch');
-  const res = await apiFetch('/api/payments');
+      const res = await apiFetch('/api/payments');
       const data = await res.json();
       setDonations(data.donations || []);
       setError('');
     } catch (e) {
+      console.error('Ошибка загрузки донатов', e);
       setError('Ошибка загрузки донатов');
       setDonations([]);
     } finally {
@@ -30,7 +31,6 @@ const PaymentManager = () => {
   const handleDonate = async (amount) => {
     setLoading(true);
     try {
-      const { apiFetch } = require('../services/apiFetch');
       const res = await apiFetch('/api/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -38,6 +38,7 @@ const PaymentManager = () => {
       });
       if (res.ok) fetchDonations();
     } catch (e) {
+      console.error('Ошибка отправки доната', e);
       setError('Ошибка отправки доната');
     } finally {
       setLoading(false);

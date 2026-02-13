@@ -25,6 +25,7 @@ export default function DeleteCompanyButton({ companyId, onDeleted }) {
         setError(data.message || 'Ошибка удаления');
       }
     } catch (e) {
+      console.error('Ошибка удаления компании', e);
       setError('Ошибка удаления');
     }
     setLoading(false);

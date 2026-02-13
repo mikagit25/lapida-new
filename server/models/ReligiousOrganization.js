@@ -3,43 +3,53 @@
 const mongoose = require('mongoose');
 
 const ReligiousOrganizationSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  type: { type: String, required: true }, // церковь, приход, община и др.
-  confession: { type: String }, // православие, католицизм, ислам и др.
-  description: { type: String },
+  name: { type: String, required: true, trim: true },
+  slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  confession: { type: String, trim: true },
+  tags: [{ type: String, trim: true }],
+  description: { type: String, trim: true },
   contacts: {
-    phone: String,
-    email: String,
-    website: String,
-    address: String
+    phones: [{ label: { type: String, trim: true }, value: { type: String, trim: true } }],
+    email: { type: String, trim: true },
+    website: { type: String, trim: true },
+    messengers: {
+      whatsapp: { type: String, trim: true },
+      telegram: { type: String, trim: true },
+      viber: { type: String, trim: true }
+    },
+    address: {
+      city: { type: String, trim: true },
+      region: { type: String, trim: true },
+      street: { type: String, trim: true },
+      zipcode: { type: String, trim: true },
+      country: { type: String, trim: true },
+      location: {
+        lat: { type: Number },
+        lng: { type: Number }
+      }
+    }
   },
-  logo: String, // url
-  background: String, // url for background image
-  photos: [String], // массив url
-  documents: [String], // массив url
-  services: [{
-    name: String,
-    description: String,
-    price: Number,
-    available: Boolean
-  }],
-  products: [{
-    name: String,
-    description: String,
-    price: Number,
-    image: String,
-    available: Boolean
-  }],
-  schedule: [{
-    date: Date,
-    title: String,
-    description: String
-  }],
+  serviceAreas: [{ city: String, region: String, radiusKm: Number, zipcodes: [String] }],
+  media: {
+    logo: String,
+    cover: String,
+    gallery: [String]
+  },
+  documents: [{ name: String, url: String }],
+  rating: {
+    avg: { type: Number, default: 0 },
+    count: { type: Number, default: 0 }
+  },
+  responseTimeMinutes: { type: Number, default: null },
+  is24x7: { type: Boolean, default: false },
+  hasEmergency: { type: Boolean, default: false },
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   admins: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  isPublic: { type: Boolean, default: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+  isVerified: { type: Boolean, default: false },
+  isPublic: { type: Boolean, default: true }
+}, { timestamps: true });
+
+ReligiousOrganizationSchema.index({ 'contacts.address.city': 1 });
+ReligiousOrganizationSchema.index({ confession: 1 });
 
 module.exports = mongoose.model('ReligiousOrganization', ReligiousOrganizationSchema);

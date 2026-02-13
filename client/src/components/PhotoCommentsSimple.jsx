@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { photoCommentSimpleService } from '../services/api';
 
 const PhotoCommentsSimple = ({ memorialId, photoUrl }) => {
@@ -8,13 +8,7 @@ const PhotoCommentsSimple = ({ memorialId, photoUrl }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (memorialId && photoUrl) {
-      loadComments();
-    }
-  }, [memorialId, photoUrl]);
-
-  const loadComments = async () => {
+  const loadComments = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -26,7 +20,13 @@ const PhotoCommentsSimple = ({ memorialId, photoUrl }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [memorialId, photoUrl]);
+
+  useEffect(() => {
+    if (memorialId && photoUrl) {
+      loadComments();
+    }
+  }, [memorialId, photoUrl, loadComments]);
 
   const handleAddComment = async (e) => {
     e.preventDefault();

@@ -5,7 +5,7 @@ import { apiFetch } from '../services/apiFetch';
 
 // Страница оформления заказа
 const Checkout = () => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [name, setName] = useState(user?.name || '');
   const [phone, setPhone] = useState(user?.phone || '');
@@ -52,6 +52,7 @@ const Checkout = () => {
       setError(data.message || 'Ошибка оформления заказа');
     }
     } catch (e) {
+      console.error('Ошибка оформления заказа:', e);
       setError('Ошибка оформления заказа');
     }
   };

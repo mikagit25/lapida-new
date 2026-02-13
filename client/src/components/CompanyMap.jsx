@@ -23,7 +23,8 @@ export default function CompanyMap({ address, lat, lng, setAddress, setLat, setL
       } else {
         setMapError('Адрес не найден');
       }
-    } catch (e) {
+    } catch (err) {
+      console.error('Ошибка поиска адреса', err);
       setMapError('Ошибка поиска адреса');
     }
   };

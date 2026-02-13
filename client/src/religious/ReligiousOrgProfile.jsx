@@ -68,7 +68,7 @@ const ReligiousOrgProfile = ({ organizationId, isOwner = false }) => {
         .catch(() => setError(t('religiousOrgProfile.loadError')))
         .finally(() => setLoading(false));
     }
-  }, [orgId]);
+  }, [orgId, t]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -97,7 +97,8 @@ const ReligiousOrgProfile = ({ organizationId, isOwner = false }) => {
       setProfile(data);
       setEditMode(false);
     } catch (err) {
-  setError(t('religiousOrgProfile.saveError'));
+      console.error('Ошибка сохранения профиля релорганизации:', err);
+      setError(t('religiousOrgProfile.saveError'));
     } finally {
       setLoading(false);
     }
@@ -179,6 +180,7 @@ const ReligiousOrgProfile = ({ organizationId, isOwner = false }) => {
                   setOrgId(null);
                   alert(t('religiousOrgProfile.deleted'));
                 } catch (err) {
+                  console.error('Ошибка удаления профиля релорганизации:', err);
                   setError(t('religiousOrgProfile.deleteError'));
                 } finally {
                   setDeleteLoading(false);

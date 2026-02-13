@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { messagesService } from '../services/api';
+import AsyncImage from './AsyncImage';
 
 const ChatWindow = ({ chat, onClose }) => {
   const [messages, setMessages] = useState([]);
@@ -9,18 +10,7 @@ const ChatWindow = ({ chat, onClose }) => {
   const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    if (chat?.id) {
-      loadMessages();
-      markAsRead();
-    }
-  }, [chat?.id]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     try {
       setLoading(true);
       const response = await messagesService.getMessages(chat.id);
@@ -31,15 +21,26 @@ const ChatWindow = ({ chat, onClose }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [chat?.id]);
 
-  const markAsRead = async () => {
+  const markAsRead = useCallback(async () => {
     try {
       await messagesService.markAsRead(chat.id);
     } catch (err) {
       console.error('Error marking as read:', err);
     }
-  };
+  }, [chat?.id]);
+
+  useEffect(() => {
+    if (chat?.id) {
+      loadMessages();
+      markAsRead();
+    }
+  }, [chat?.id, loadMessages, markAsRead]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -97,8 +98,8 @@ const ChatWindow = ({ chat, onClose }) => {
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <div className="flex items-center space-x-3">
           {chat.participant?.avatar ? (
-            <img 
-              src={fixImageUrl(chat.participant.avatar)} 
+            <AsyncImage
+              url={chat.participant.avatar}
               alt={chat.participant.name}
               className="w-10 h-10 rounded-full object-cover"
             />

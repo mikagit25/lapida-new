@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-// TODO: заменить на реальный API для жалоб
-const mockReports = [
-  { _id: 'r1', type: 'Мемориал', targetId: 'm1', reason: 'Неприемлемый контент', status: 'open' },
-  { _id: 'r2', type: 'Пользователь', targetId: 'u2', reason: 'Спам', status: 'closed' },
-];
-
 const AdminReportsManager = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,6 +15,7 @@ const AdminReportsManager = () => {
         const response = await reportService.getAll();
         setReports(response);
       } catch (err) {
+        console.error('Ошибка загрузки жалоб:', err);
         setError('Ошибка загрузки жалоб');
       } finally {
         setLoading(false);

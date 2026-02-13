@@ -26,6 +26,7 @@ const OrganizationDocumentsEdit = ({ documents = [], onSave }) => {
       await onSave(list);
       setSuccess(true);
     } catch (err) {
+      console.error('Ошибка сохранения документов', err);
       setError('Ошибка сохранения');
     } finally {
       setSaving(false);

@@ -50,6 +50,7 @@ const UserGallery = ({ canEdit, currentProfileImage, onProfileImageChange }) => 
       const response = await uploadService.uploadUserGallery(formData);
       setImages(response.images);
     } catch (e) {
+      console.error('Ошибка загрузки изображений', e);
       alert('Ошибка загрузки');
     } finally {
       setUploading(false);
@@ -63,6 +64,7 @@ const UserGallery = ({ canEdit, currentProfileImage, onProfileImageChange }) => 
       if (onProfileImageChange) onProfileImageChange(imageUrl);
       alert('Главное фото успешно обновлено!');
     } catch (e) {
+      console.error('Ошибка при смене главного фото', e);
       alert('Ошибка при смене главного фото');
     }
   };

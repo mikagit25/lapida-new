@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { userService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const ActivityHistory = () => {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [activities, setActivities] = useState([]);
@@ -15,11 +15,7 @@ const ActivityHistory = () => {
   });
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    loadActivities();
-  }, [filters]);
-
-  const loadActivities = async () => {
+  const loadActivities = useCallback(async () => {
     setLoading(true);
     setError('');
 
@@ -33,7 +29,11 @@ const ActivityHistory = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
+
+  useEffect(() => {
+    loadActivities();
+  }, [loadActivities]);
 
   const getActivityIcon = (type) => {
     const icons = {

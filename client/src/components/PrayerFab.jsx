@@ -10,6 +10,10 @@ const PrayerFab = ({ memorialId, onPrayerAdded }) => {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleAddPrayer = async () => {
+    if (!user) {
+      alert('Только авторизованные пользователи могут оставлять молитвы');
+      return;
+    }
     setLoading(true);
     try {
       await virtualItemsService.addItem('prayer', memorialId, {
@@ -24,6 +28,7 @@ const PrayerFab = ({ memorialId, onPrayerAdded }) => {
       setTimeout(() => setShowSuccess(false), 2000);
       if (onPrayerAdded) onPrayerAdded();
     } catch (e) {
+      console.error('Ошибка при добавлении молитвы', e);
       alert('Ошибка при добавлении молитвы');
     }
     setLoading(false);

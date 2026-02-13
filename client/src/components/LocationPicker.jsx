@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -66,7 +66,8 @@ const LocationPicker = ({
         handleLocationSelect(latitude, longitude, 'gps');
         setIsGPSLoading(false);
       },
-      (error) => {
+      (err) => {
+        console.error('Не удалось определить местоположение', err);
         setError('Не удалось определить местоположение');
         setIsGPSLoading(false);
       },
@@ -95,7 +96,8 @@ const LocationPicker = ({
       } else {
         setError('Адрес не найден');
       }
-    } catch (error) {
+    } catch (err) {
+      console.error('Ошибка поиска адреса', err);
       setError('Ошибка поиска адреса');
     }
   };

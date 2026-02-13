@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { commentService } from '../services/api';
 
 const EpitaphSection = ({ memorial, onUpdate, canEdit = false }) => {
+  void onUpdate;
   const [epitaphComments, setEpitaphComments] = useState([]);
   const [showComments, setShowComments] = useState(false);
   const [isAddingComment, setIsAddingComment] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    loadEpitaphComments();
-  }, [memorial._id]);
-
-  const loadEpitaphComments = async () => {
+  const loadEpitaphComments = useCallback(async () => {
     try {
       setLoading(true);
       console.log('Загружаю комментарии для мемориала:', memorial._id);
@@ -27,7 +24,11 @@ const EpitaphSection = ({ memorial, onUpdate, canEdit = false }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [memorial._id]);
+
+  useEffect(() => {
+    loadEpitaphComments();
+  }, [loadEpitaphComments]);
 
   const handleAddComment = async (e) => {
     if (e) {

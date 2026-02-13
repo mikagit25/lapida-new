@@ -20,9 +20,12 @@ const ReligiousOrgSchedule = ({ orgId, isOwner }) => {
     setLoading(true);
     religiousScheduleService.getByOrganization(orgId)
       .then(setEvents)
-  .catch(() => setError(t('religiousOrgSchedule.loadError')))
+      .catch((err) => {
+        console.error('Ошибка загрузки расписания релорганизации:', err);
+        setError(t('religiousOrgSchedule.loadError'));
+      })
       .finally(() => setLoading(false));
-  }, [orgId]);
+  }, [orgId, t]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -44,7 +47,8 @@ const ReligiousOrgSchedule = ({ orgId, isOwner }) => {
       }
       setForm(initialEvent);
     } catch (err) {
-  setError(t('religiousOrgSchedule.saveError'));
+      console.error('Ошибка сохранения события релорганизации:', err);
+      setError(t('religiousOrgSchedule.saveError'));
     } finally {
       setLoading(false);
     }
@@ -60,6 +64,7 @@ const ReligiousOrgSchedule = ({ orgId, isOwner }) => {
       setEvents(events.filter(ev => ev._id !== id));
       if (editId === id) setEditId(null);
     } catch (err) {
+      console.error('Ошибка удаления события релорганизации:', err);
       setError(t('religiousOrgSchedule.deleteError'));
     } finally {
       setLoading(false);

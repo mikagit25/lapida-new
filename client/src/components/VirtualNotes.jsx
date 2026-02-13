@@ -25,6 +25,10 @@ const VirtualNotes = ({ memorialId, canEdit = false }) => {
 
   const handleAddNote = async () => {
     if (!message.trim()) return;
+    if (!user?._id) {
+      alert('Пожалуйста, войдите в систему');
+      return;
+    }
     setLoading(true);
     try {
       await virtualItemsService.addItem('note', memorialId, {
@@ -34,6 +38,7 @@ const VirtualNotes = ({ memorialId, canEdit = false }) => {
       setShowForm(false);
       loadNotes();
     } catch (e) {
+      console.error('Ошибка при добавлении записки:', e);
       alert('Ошибка при добавлении записки');
     }
     setLoading(false);

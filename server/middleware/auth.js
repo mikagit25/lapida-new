@@ -41,14 +41,21 @@ const adminAuth = async (req, res, next) => {
 
 const optionalAuth = async (req, res, next) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+    let token = null;
+    const headerToken = req.header('Authorization');
+    const cookieToken = req.cookies?.token;
+
+    if (headerToken && headerToken.startsWith('Bearer ')) {
+      token = headerToken.replace('Bearer ', '');
+    } else if (cookieToken) {
+      token = cookieToken;
+    }
+
     if (token) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await User.findById(decoded.userId);
-      req.user = user;
+      if (user) req.user = user;
     }
-    
     next();
   } catch (error) {
     // Игнорируем ошибки для опционального auth

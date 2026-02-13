@@ -23,9 +23,12 @@ const ReligiousOrgServices = ({ orgId, isOwner }) => {
     setLoading(true);
     religiousServiceService.getByOrganization(orgId)
       .then(setServices)
-  .catch(() => setError(t('religiousOrgServices.loadError')))
+      .catch((err) => {
+        console.error('Ошибка загрузки услуг релорганизации:', err);
+        setError(t('religiousOrgServices.loadError'));
+      })
       .finally(() => setLoading(false));
-  }, [orgId]);
+  }, [orgId, t]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -35,7 +38,7 @@ const ReligiousOrgServices = ({ orgId, isOwner }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-  setError('');
+    setError('');
     try {
       let newService;
       if (editId) {
@@ -49,7 +52,8 @@ const ReligiousOrgServices = ({ orgId, isOwner }) => {
       }
       setForm(initialService);
     } catch (err) {
-  setError(t('religiousOrgServices.saveError'));
+      console.error('Ошибка сохранения услуги релорганизации:', err);
+      setError(t('religiousOrgServices.saveError'));
     } finally {
       setLoading(false);
     }
@@ -68,7 +72,8 @@ const ReligiousOrgServices = ({ orgId, isOwner }) => {
     try {
       await religiousServiceService.remove(id);
       setServices(services.filter((s, i) => i !== idx));
-    } catch {
+    } catch (err) {
+      console.error('Ошибка удаления услуги релорганизации:', err);
       setError(t('religiousOrgServices.deleteError'));
     } finally {
       setLoading(false);

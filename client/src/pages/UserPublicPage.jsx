@@ -25,7 +25,7 @@ const UserPublicPage = () => {
     memorials: true,
     stats: true,
   });
-  const [isOwner, setIsOwner] = useState(false);
+  const isOwner = false;
 
   useEffect(() => {
     if (!id || id === 'undefined') {
@@ -61,7 +61,7 @@ const UserPublicPage = () => {
         setError(t('user_public_load_error'));
         setUser(null);
       });
-  }, [id]);
+  }, [id, t]);
 
   const handleToggleBlock = (block) => {
     setVisibleBlocks((prev) => ({ ...prev, [block]: !prev[block] }));

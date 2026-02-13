@@ -23,7 +23,9 @@ export default function GenealogyImportExport({ members, onImport }) {
         if (Array.isArray(imported)) {
           onImport(imported);
         }
-      } catch {}
+      } catch (err) {
+        console.error('Failed to import genealogy JSON', err);
+      }
     };
     reader.readAsText(file);
   };

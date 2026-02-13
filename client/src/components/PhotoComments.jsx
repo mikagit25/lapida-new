@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const PhotoComments = ({ memorialId, photoUrl, isVisible, onClose }) => {
@@ -17,19 +17,7 @@ const PhotoComments = ({ memorialId, photoUrl, isVisible, onClose }) => {
     user
   });
 
-  useEffect(() => {
-    if (isVisible) {
-      console.log('Loading comments for:', { memorialId, photoUrl });
-      if (!memorialId || !photoUrl) {
-        setError('Не передан memorialId или photoUrl');
-        setComments([]);
-        return;
-      }
-      loadComments();
-    }
-  }, [isVisible, photoUrl, memorialId]);
-
-  const loadComments = async () => {
+  const loadComments = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(
@@ -48,7 +36,19 @@ const PhotoComments = ({ memorialId, photoUrl, isVisible, onClose }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [memorialId, photoUrl]);
+
+  useEffect(() => {
+    if (isVisible) {
+      console.log('Loading comments for:', { memorialId, photoUrl });
+      if (!memorialId || !photoUrl) {
+        setError('Не передан memorialId или photoUrl');
+        setComments([]);
+        return;
+      }
+      loadComments();
+    }
+  }, [isVisible, photoUrl, memorialId, loadComments]);
 
   const handleSubmitComment = async (e) => {
     e.preventDefault();

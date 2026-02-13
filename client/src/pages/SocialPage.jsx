@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import LikeButton from '../components/LikeButton';
 import CommentBox from '../components/CommentBox';
 import CommentList from '../components/CommentList';
+import { apiFetch } from '../services/apiFetch';
 
 const SocialPage = () => {
   const [comments, setComments] = useState([]);
@@ -16,13 +17,13 @@ const SocialPage = () => {
   const fetchSocial = async () => {
     setLoading(true);
     try {
-  const { apiFetch } = require('../services/apiFetch');
-  const res = await apiFetch('/api/social');
+      const res = await apiFetch('/api/social');
       const data = await res.json();
       setComments(data.comments || []);
       setLikes(data.likes || 0);
       setError('');
     } catch (e) {
+        console.error('Ошибка загрузки social:', e);
       setError('Ошибка загрузки данных');
       setComments([]);
       setLikes(0);
@@ -34,7 +35,6 @@ const SocialPage = () => {
   const handleComment = async (text) => {
     setLoading(true);
     try {
-      const { apiFetch } = require('../services/apiFetch');
       const res = await apiFetch('/api/social/comment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -42,6 +42,7 @@ const SocialPage = () => {
       });
       if (res.ok) fetchSocial();
     } catch (e) {
+        console.error('Ошибка отправки комментария:', e);
       setError('Ошибка отправки комментария');
     } finally {
       setLoading(false);
@@ -51,10 +52,10 @@ const SocialPage = () => {
   const handleLike = async () => {
     setLoading(true);
     try {
-  const { apiFetch } = require('../services/apiFetch');
-  const res = await apiFetch('/api/social/like', { method: 'POST' });
+      const res = await apiFetch('/api/social/like', { method: 'POST' });
       if (res.ok) fetchSocial();
     } catch (e) {
+        console.error('Ошибка лайка:', e);
       setError('Ошибка лайка');
     } finally {
       setLoading(false);

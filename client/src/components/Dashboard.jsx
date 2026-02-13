@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { userService, memorialService, newMemorialService, notificationService } from '../services/api';
+import { userService, notificationService } from '../services/api';
 import DashboardStats from './DashboardStats';
+import { fixImageUrl } from '../utils/imageUrl';
 
 const Dashboard = () => {
   const { user, isAuthenticated } = useAuth();

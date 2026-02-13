@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 
 const CompanyProfileCRM = ({ companyData }) => {
   const [created, setCreated] = useState(false);
@@ -10,6 +11,7 @@ const CompanyProfileCRM = ({ companyData }) => {
     try {
       setCreated(true);
     } catch (e) {
+      console.error('Ошибка создания компании', e);
       setError('Ошибка при создании компании');
     } finally {
       setLoading(false);
@@ -34,3 +36,5 @@ const CompanyProfileCRM = ({ companyData }) => {
 };
 
 // CRM integration removed
+
+export default CompanyProfileCRM;

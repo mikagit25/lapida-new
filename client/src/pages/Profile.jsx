@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { authService, userService } from '../services/api';
+import { userService } from '../services/api';
 import { fixImageUrl } from '../utils/imageUrl';
 
 // Асинхронный компонент для фото профиля
@@ -37,40 +37,16 @@ import DemoFeaturesBlock from '../components/DemoFeaturesBlock';
 const Profile = () => {
   const { t } = useTranslation();
 
-  const { user, updateProfile } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState({
     memorialsCreated: 0,
     flowersLeft: 0,
     commentsLeft: 0
   });
-  const [companies, setCompanies] = useState([]);
-  const [profileLoading, setProfileLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchProfileAndCompanies() {
-      setProfileLoading(true);
-      try {
-        console.log('Profile.jsx: Запрос к /api/users/me...');
-        const res = await userService.getMe();
-        console.log('Profile.jsx: Ответ от /api/users/me:', res);
-        if (res && Array.isArray(res.companies)) {
-          setCompanies(res.companies);
-        } else {
-          setCompanies([]);
-        }
-      } catch (err) {
-        console.error('Profile.jsx: Ошибка запроса /api/users/me:', err);
-        setCompanies([]);
-      } finally {
-        setProfileLoading(false);
-      }
-    }
     fetchStats();
-    fetchProfileAndCompanies();
   }, []);
 
   const fetchStats = async () => {
@@ -154,18 +130,6 @@ const Profile = () => {
           </div>
 
           <div className="p-6">
-            {error && (
-              <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-700">{error}</p>
-              </div>
-            )}
-
-            {success && (
-              <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-green-700">{success}</p>
-              </div>
-            )}
-
             {/* Контент табов */}
             {activeTab === 'overview' && (
               <div className="space-y-6">

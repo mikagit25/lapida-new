@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { uploadService, newMemorialService } from '../services/api';
+import { uploadService, newMemorialService, getApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import PhotoCommentsSimple from './PhotoCommentsSimple';
 import AsyncImage from './AsyncImage';
 import { fixImageUrl } from '../utils/imageUrl';
 
@@ -25,7 +24,6 @@ function ImageWithAsyncUrl({ image, alt, className }) {
 
 const Gallery = ({ memorialId, images, onImagesUpdate, canEdit = false, currentProfileImage, onProfileImageChange, userMode = false }) => {
   const [galleryImages, setGalleryImages] = useState(images && images.length > 0 ? images : []);
-  const [recoveredImages, setRecoveredImages] = useState([]);
   // Удаление фото из галереи
   const handleDeleteImage = async (imgUrl) => {
     if (!window.confirm('Удалить это фото?')) return;
@@ -41,24 +39,11 @@ const Gallery = ({ memorialId, images, onImagesUpdate, canEdit = false, currentP
         const response = await uploadService.removeUserGallery(imgUrl);
         updatedImages = response.images || [];
       } else {
-        // Для мемориала
-        let token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
-        if (!token && document.cookie) {
-          const match = document.cookie.match(/(?:^|; )token=([^;]*)/);
-          if (match) token = match[1];
-        }
-        const res = await fetch(`/api/memorials/${memorialId}/gallery`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {})
-          },
-          body: JSON.stringify({ photoUrl: imgUrl })
-        });
-        const result = await res.json();
-        console.log('Удаление файла результат:', result);
-        if (!res.ok) throw new Error(result.message || 'Ошибка удаления');
-        updatedImages = galleryImages.filter(img => (typeof img === 'string' ? img : img.url) !== imgUrl);
+        // Для мемориала через общий axios, чтобы шёл CSRF
+        const api = await getApi();
+        const res = await api.delete(`/memorials/${memorialId}/gallery`, { data: { photoUrl: imgUrl } });
+        const result = res.data;
+        updatedImages = result.galleryImages || result.images || galleryImages.filter(img => (typeof img === 'string' ? img : img.url) !== imgUrl);
       }
       if (onImagesUpdate) onImagesUpdate(updatedImages);
       setGalleryImages(updatedImages);
@@ -73,8 +58,6 @@ const Gallery = ({ memorialId, images, onImagesUpdate, canEdit = false, currentP
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
-  const [showComments, setShowComments] = useState(false);
-  const [commentsPhotoUrl, setCommentsPhotoUrl] = useState('');
 
   React.useEffect(() => {
   setGalleryImages(images && images.length > 0 ? images : []);
@@ -137,35 +120,20 @@ const Gallery = ({ memorialId, images, onImagesUpdate, canEdit = false, currentP
         setGalleryImages(response.images || []);
       } else if (memorialId) {
         // Для мемориала
-        let token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
-        if (!token && document.cookie) {
-          const match = document.cookie.match(/(?:^|; )token=([^;]*)/);
-          if (match) token = match[1];
-        }
         const formData = new FormData();
         Array.from(files).forEach(file => {
           formData.append('photos', file);
         });
-        const res = await fetch(`/api/memorials/${memorialId}/gallery`, {
-          method: 'POST',
-          body: formData,
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        const api = await getApi();
+        const res = await api.post(`/memorials/${memorialId}/gallery`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
-        if (!res.ok) {
-          let errText = '';
-          try {
-            errText = await res.text();
-          } catch (e) {
-            errText = '(no response text)';
-          }
-          alert(`Ошибка загрузки (${res.status}):\n${errText}`);
-          throw new Error('Upload failed: ' + res.status);
-        }
-        response = await res.json();
+        response = res.data;
         if (onImagesUpdate) onImagesUpdate(response.galleryImages || response.images || response.fileUrls);
         setGalleryImages(response.galleryImages || response.images || response.fileUrls || []);
       }
     } catch (e) {
+      console.error('Ошибка загрузки галереи', e);
       alert('Ошибка загрузки');
     } finally {
       setUploading(false);
@@ -191,15 +159,6 @@ const Gallery = ({ memorialId, images, onImagesUpdate, canEdit = false, currentP
       alert('Ошибка при смене главного фото');
     }
   };
-  const openComments = (photoUrl) => {
-    setCommentsPhotoUrl(photoUrl);
-    setShowComments(true);
-  };
-  const closeComments = () => {
-    setShowComments(false);
-    setCommentsPhotoUrl('');
-  };
-
   React.useEffect(() => {
     if (selectedImage) {
       document.addEventListener('keydown', handleKeyDown);
@@ -211,7 +170,8 @@ const Gallery = ({ memorialId, images, onImagesUpdate, canEdit = false, currentP
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'unset';
-  };
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedImage, lightboxIndex]);
 
   if (!galleryImages || galleryImages.length === 0) {
@@ -362,28 +322,6 @@ const Gallery = ({ memorialId, images, onImagesUpdate, canEdit = false, currentP
 
 
 
-      {/* Комментарии к фото */}
-      {/* Новый минималистичный блок комментариев к фото */}
-      {showComments && commentsPhotoUrl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
-          <div className="absolute inset-0 cursor-pointer" onClick={closeComments} />
-          <div className="relative max-w-md w-full mx-auto bg-white rounded-lg shadow-lg p-6 z-10">
-            <button
-              onClick={closeComments}
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"
-              title="Закрыть"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <PhotoCommentsSimple
-              memorialId={memorialId}
-              photoUrl={commentsPhotoUrl}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { getMemorialUrl } from '../utils/memorialUrl';
-  import MemorialAvatar from './MemorialAvatar';
+import MemorialAvatar from './MemorialAvatar';
 
-function PersonalCabinetMemorials({ recentMemorials, formatDate, fixImageUrl }) {
+function PersonalCabinetMemorials({ recentMemorials, formatDate }) {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-4">

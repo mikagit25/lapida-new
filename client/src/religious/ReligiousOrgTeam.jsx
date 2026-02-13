@@ -11,6 +11,9 @@ function ReligiousOrgTeam({ organizationId, isOwner }) {
   const [selectedMember, setSelectedMember] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const initialMember = { name: '', position: '', description: '', contacts: '', photo: '' };
+  const [form, setForm] = useState(initialMember);
+  const [editId, setEditId] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -41,10 +44,6 @@ function ReligiousOrgTeam({ organizationId, isOwner }) {
     );
   }
 
-  const initialMember = { name: '', position: '', description: '', contacts: '', photo: '' };
-  const [form, setForm] = useState(initialMember);
-  const [editId, setEditId] = useState(null);
-
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -65,6 +64,7 @@ function ReligiousOrgTeam({ organizationId, isOwner }) {
       }
       setForm(initialMember);
     } catch (err) {
+      console.error('Ошибка сохранения участника команды релорганизации:', err);
       setError(t('religiousOrgTeam.saveError'));
     } finally {
       setLoading(false);

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { getApiBaseUrl } from '../config/api';
 
 const CompanyBackgroundImageManager = ({ company, onUpdate, canEdit = false }) => {
   const [isUploading, setIsUploading] = useState(false);

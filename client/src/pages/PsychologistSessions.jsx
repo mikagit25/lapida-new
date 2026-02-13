@@ -21,6 +21,7 @@ const PsychologistSessions = () => {
         setLoading(false);
       })
       .catch(e => {
+        console.error('Ошибка загрузки сессий психолога:', e);
         setError(t('sessions_load_error'));
         setLoading(false);
       });

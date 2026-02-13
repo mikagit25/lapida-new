@@ -25,6 +25,10 @@ const VirtualPrayers = ({ memorialId, canEdit = false }) => {
 
   const handleAddPrayer = async () => {
     if (!message.trim()) return;
+    if (!user?._id) {
+      alert('Пожалуйста, войдите в систему');
+      return;
+    }
     setLoading(true);
     try {
       await virtualItemsService.addItem('prayer', memorialId, {
@@ -34,6 +38,7 @@ const VirtualPrayers = ({ memorialId, canEdit = false }) => {
       setShowForm(false);
       loadPrayers();
     } catch (e) {
+      console.error('Ошибка при добавлении молитвы:', e);
       alert('Ошибка при добавлении молитвы');
     }
     setLoading(false);

@@ -19,6 +19,7 @@ const GenealogyManager = () => {
       setTreeData(data.tree || null);
       setError('');
     } catch (e) {
+      console.error('Ошибка загрузки генеалогии', e);
       setError('Ошибка загрузки генеалогии');
       setTreeData(null);
     } finally {

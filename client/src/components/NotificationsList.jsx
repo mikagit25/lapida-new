@@ -25,7 +25,10 @@ const NotificationsList = () => {
         setPages(data.pages || 1);
         setError('');
       })
-      .catch(() => setError('Ошибка загрузки уведомлений'))
+      .catch((err) => {
+        console.error('Ошибка загрузки уведомлений пользователя', err);
+        setError('Ошибка загрузки уведомлений');
+      })
       .finally(() => setLoading(false));
   }, [user, page, limit]);
 
@@ -42,7 +45,9 @@ const NotificationsList = () => {
       if (res.ok) {
         setNotifications(notifications => notifications.map(n => ({ ...n, read: true })));
       }
-    } catch {}
+    } catch (err) {
+      console.error('Ошибка массовой отметки уведомлений пользователя', err);
+    }
   };
   const markAsRead = async (notifId) => {
     try {
@@ -53,7 +58,9 @@ const NotificationsList = () => {
       if (res.ok) {
         setNotifications(notifications => notifications.map(notif => notif._id === notifId ? { ...notif, read: true } : notif));
       }
-    } catch {}
+    } catch (err) {
+      console.error('Ошибка отметки уведомления пользователя', err);
+    }
   };
   return (
     <div className="max-w-xl mx-auto p-4 bg-white rounded shadow">
@@ -71,6 +78,7 @@ const NotificationsList = () => {
       </div>
       {/* Пагинация */}
       <div className="mb-4 flex gap-2 items-center justify-end">
+        <span className="text-sm text-gray-500">Всего: {total}</span>
         <button
           className="px-2 py-1 border rounded disabled:opacity-50"
           disabled={page <= 1}

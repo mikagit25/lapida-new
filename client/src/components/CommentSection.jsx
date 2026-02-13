@@ -3,7 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { commentService } from '../services/api';
 
 const CommentSection = ({ memorialId, comments, onNewComment }) => {
-  const { isAuthenticated, user } = useAuth();
+  // user not used but kept for future display needs
+  const { isAuthenticated, user: _user } = useAuth();
   const [newComment, setNewComment] = useState('');
   const [authorName, setAuthorName] = useState('');
   const [loading, setLoading] = useState(false);

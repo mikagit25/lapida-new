@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -16,27 +15,28 @@ const CompanyPortfolio = () => {
   const [form, setForm] = useState({ title: '', description: '', date: '', image: null });
   const [uploadError, setUploadError] = useState('');
 
-  useEffect(() => {
-    async function fetchPortfolio() {
-      setLoading(true);
-      setError('');
-      try {
-        const res = await fetch(`${API_BASE_URL}/companies/by-slug/${companySlug}`);
-        const data = await res.json();
-        if (res.ok && data.company) {
-          setPortfolio(data.company.portfolio || []);
-          setIsOwner(user && data.company.owner && user._id === data.company.owner.toString());
-        } else {
-          setError(data.message || 'Ошибка загрузки портфолио');
-        }
-      } catch (e) {
-        setError('Ошибка загрузки портфолио');
+  const fetchPortfolio = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch(`${API_BASE_URL}/companies/by-slug/${companySlug}`);
+      const data = await res.json();
+      if (res.ok && data.company) {
+        setPortfolio(data.company.portfolio || []);
+        setIsOwner(user && data.company.owner && user._id === data.company.owner.toString());
+      } else {
+        setError(data.message || 'Ошибка загрузки портфолио');
       }
-      setLoading(false);
+    } catch (e) {
+      console.error('Ошибка загрузки портфолио:', e);
+      setError('Ошибка загрузки портфолио');
     }
-    fetchPortfolio();
-    // eslint-disable-next-line
+    setLoading(false);
   }, [companySlug, user]);
+
+  useEffect(() => {
+    fetchPortfolio();
+  }, [fetchPortfolio]);
 
   const handleInputChange = e => {
     const { name, value, files } = e.target;

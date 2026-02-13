@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fixImageUrl } from '../utils/imageUrl';
+import AsyncImage from './AsyncImage';
 import Search from './Search';
 
 const MobileNavigation = () => {
@@ -106,8 +106,8 @@ const MobileNavigation = () => {
           <div className="absolute bottom-16 right-4 bg-white rounded-lg shadow-xl p-4 min-w-[200px]">
             <div className="flex items-center space-x-3 pb-4 border-b border-gray-200">
               {user.photo && (
-                <img
-                  src={fixImageUrl(user.photo)}
+                <AsyncImage
+                  url={user.photo}
                   alt="Фото профиля"
                   className="w-10 h-10 rounded-full object-cover"
                 />

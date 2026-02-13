@@ -1,6 +1,7 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getApi } from '../services/api';
+import { fixImageUrl } from '../utils/imageUrl';
 
 const UserMemorials = () => {
   const [memorials, setMemorials] = useState([]);
@@ -9,12 +10,7 @@ const UserMemorials = () => {
   const [filter, setFilter] = useState('all'); // all, public, private, draft
   const [sortBy, setSortBy] = useState('newest'); // newest, oldest, views, comments
 
-  useEffect(() => {
-    fetchMemorials();
-    // eslint-disable-next-line
-  }, [filter, sortBy]);
-
-  const fetchMemorials = async () => {
+  const fetchMemorials = useCallback(async () => {
     try {
       setLoading(true);
       const api = await getApi();
@@ -26,14 +22,18 @@ const UserMemorials = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchMemorials();
+  }, [fetchMemorials]);
 
   const handleStatusChange = async (memorialId, action) => {
     try {
-      // Публикация/скрытие мемориала
+      const api = await getApi();
       const isPublic = action === 'publish';
-      await memorialService.updateStatus(memorialId, isPublic);
-      await fetchMemorials(); // Перезагружаем список
+      await api.patch(`/memorials/${memorialId}/status`, { isPublic });
+      await fetchMemorials();
     } catch (error) {
       console.error('Error updating status:', error);
       setError('Ошибка при изменении статуса');
@@ -46,8 +46,9 @@ const UserMemorials = () => {
     }
 
     try {
-      await memorialService.removeMemorial(memorialId);
-      await fetchMemorials(); // Перезагружаем список
+      const api = await getApi();
+      await api.delete(`/memorials/${memorialId}`);
+      await fetchMemorials();
     } catch (error) {
       console.error('Error deleting memorial:', error);
       setError('Ошибка при удалении мемориала');

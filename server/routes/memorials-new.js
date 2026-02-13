@@ -127,10 +127,13 @@ router.get('/', async (req, res) => {
     const total = await Memorial.countDocuments(query);
     
     res.json({
-      memorials,
-      currentPage: page,
-      totalPages: Math.ceil(total / limit),
-      totalMemorials: total
+      success: true,
+      data: memorials,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total
+      }
     });
   } catch (error) {
     res.status(500).json({ message: 'Ошибка при получении мемориалов', error: error.message });
@@ -151,7 +154,7 @@ router.get('/share/:shareUrl', async (req, res) => {
     // Увеличить счетчик просмотров
     await memorial.incrementViews();
     
-    res.json(memorial);
+    res.json({ success: true, memorial });
   } catch (error) {
     res.status(500).json({ message: 'Ошибка при получении мемориала', error: error.message });
   }
@@ -171,7 +174,43 @@ router.get('/slug/:slug', async (req, res) => {
     // Увеличить счетчик просмотров
     await memorial.incrementViews();
     
-    res.json(memorial);
+    res.json({ success: true, memorial });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка при получении мемориала', error: error.message });
+  }
+});
+
+// Универсальный GET по идентификатору: сначала пытаемся как ObjectId, иначе как shareUrl/customSlug
+router.get('/:identifier', async (req, res) => {
+  try {
+    const { identifier } = req.params;
+    const isObjectId = identifier.match(/^[0-9a-fA-F]{24}$/);
+
+    let memorial = null;
+    if (isObjectId) {
+      memorial = await Memorial.findById(identifier)
+        .populate('createdBy', 'name')
+        .populate('allowedUsers', 'name email');
+    }
+
+    // Если не нашли по _id, пробуем по shareUrl, затем по customSlug
+    if (!memorial) {
+      memorial = await Memorial.findOne({ shareUrl: identifier })
+        .populate('createdBy', 'name')
+        .populate('allowedUsers', 'name email');
+    }
+    if (!memorial) {
+      memorial = await Memorial.findOne({ customSlug: identifier })
+        .populate('createdBy', 'name')
+        .populate('allowedUsers', 'name email');
+    }
+
+    if (!memorial) {
+      return res.status(404).json({ message: 'Мемориал не найден' });
+    }
+
+    await memorial.incrementViews();
+      res.json({ success: true, memorial });
   } catch (error) {
     res.status(500).json({ message: 'Ошибка при получении мемориала', error: error.message });
   }
@@ -229,6 +268,7 @@ router.post('/', authMiddleware, async (req, res) => {
       biography,
       epitaph,
       profileImage,
+      customSlug,
       location,
       timeline = [],
       isPrivate = false
@@ -236,14 +276,10 @@ router.post('/', authMiddleware, async (req, res) => {
     // galleryImages всегда пустой массив при создании
     const galleryImages = Array.isArray(req.body.galleryImages) ? req.body.galleryImages : [];
     // Валидация обязательных полей
-    if (!firstName || !lastName || !birthDate || !deathDate || !location?.cemetery) {
+    if (!firstName || !lastName || !birthDate || !deathDate) {
       return res.status(400).json({ 
-        message: 'Обязательные поля: firstName, lastName, birthDate, deathDate, location.cemetery',
-        missing: {
-          firstName: !firstName,
-          deathDate: !deathDate,
-          cemetery: !location?.cemetery
-        }
+        success: false,
+        message: 'Обязательные поля: firstName, lastName, birthDate, deathDate'
       });
     }
     const memorial = new Memorial({
@@ -254,7 +290,8 @@ router.post('/', authMiddleware, async (req, res) => {
       biography,
       epitaph,
       profileImage,
-      location,
+      customSlug, // сохраняем пользовательский slug, чтобы pre-save выровнял shareUrl
+      location: location && Object.keys(location).length ? location : { cemetery: 'Unknown' },
       galleryImages,
       timeline,
       isPrivate: typeof isPrivate === 'boolean' ? isPrivate : false,
@@ -264,7 +301,7 @@ router.post('/', authMiddleware, async (req, res) => {
     await memorial.save();
     await memorial.populate('createdBy', 'name email');
     
-    res.status(201).json(memorial);
+    res.status(201).json({ success: true, memorial });
   } catch (error) {
     console.error('Error creating memorial:', error);
     res.status(400).json({ message: 'Ошибка при создании мемориала', error: error.message });
@@ -295,7 +332,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
     await memorial.save();
     await memorial.populate('createdBy', 'name email');
     
-    res.json(memorial);
+    res.json({ success: true, memorial });
   } catch (error) {
     res.status(400).json({ message: 'Ошибка при обновлении мемориала', error: error.message });
   }
@@ -321,7 +358,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     // Удалить мемориал
     await Memorial.findByIdAndDelete(req.params.id);
     
-    res.json({ message: 'Мемориал успешно удален' });
+    res.json({ success: true, message: 'Мемориал успешно удален' });
   } catch (error) {
     res.status(500).json({ message: 'Ошибка при удалении мемориала', error: error.message });
   }
@@ -376,6 +413,103 @@ const uploadHeader = multer({
     } else {
       cb(new Error('Разрешены только изображения'), false);
     }
+  }
+});
+
+// Фон за аватаром: получить (без авторизации)
+router.get('/:id/avatar-background', async (req, res) => {
+  try {
+    const sendTransparent = () => {
+      const transparentPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9YlJ9WkAAAAASUVORK5CYII=', 'base64');
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'no-cache');
+      return res.end(transparentPng);
+    };
+
+    const memorial = await Memorial.findById(req.params.id);
+    if (!memorial) {
+      return sendTransparent();
+    }
+
+    if (!memorial.avatarBackground) {
+      return sendTransparent();
+    }
+
+    if (memorial.avatarBackground.startsWith('http')) {
+      return res.redirect(memorial.avatarBackground);
+    }
+
+    const filePath = path.join(__dirname, '../upload/headers', path.basename(memorial.avatarBackground));
+    if (!fs.existsSync(filePath)) {
+      return sendTransparent();
+    }
+
+    return res.sendFile(filePath);
+  } catch (error) {
+    console.error('Ошибка получения фона аватара:', error);
+    res.status(500).json({ message: 'Ошибка сервера при получении фона аватара' });
+  }
+});
+
+// Фон за аватаром: загрузка/обновление
+router.put('/:id/avatar-background', authMiddleware, uploadHeader.single('avatarBackground'), async (req, res) => {
+  try {
+    const memorial = await Memorial.findById(req.params.id);
+    if (!memorial) {
+      return res.status(404).json({ message: 'Мемориал не найден' });
+    }
+
+    if (!checkEditPermission(memorial, req.user._id)) {
+      return res.status(403).json({ message: 'Нет прав на редактирование этого мемориала' });
+    }
+
+    if (memorial.avatarBackground) {
+      const oldPath = path.join(__dirname, '../upload/headers', path.basename(memorial.avatarBackground));
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath);
+      }
+    }
+
+    const avatarBackgroundUrl = `/upload/headers/${req.file.filename}`;
+    memorial.avatarBackground = avatarBackgroundUrl;
+    await memorial.save();
+
+    res.json({
+      message: 'Фон аватара обновлен успешно',
+      avatarBackground: avatarBackgroundUrl
+    });
+  } catch (error) {
+    console.error('ОШИБКА при обновлении фона аватара:', error);
+    res.status(500).json({ message: 'Ошибка сервера при обновлении фона аватара' });
+  }
+});
+
+// Фон за аватаром: удаление
+router.delete('/:id/avatar-background', authMiddleware, async (req, res) => {
+  try {
+    const memorial = await Memorial.findById(req.params.id);
+    if (!memorial) {
+      return res.status(404).json({ message: 'Мемориал не найден' });
+    }
+
+    if (!checkEditPermission(memorial, req.user._id)) {
+      return res.status(403).json({ message: 'Нет прав на редактирование этого мемориала' });
+    }
+
+    if (memorial.avatarBackground) {
+      const filePath = path.join(__dirname, '../upload/headers', path.basename(memorial.avatarBackground));
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    memorial.avatarBackground = null;
+    await memorial.save();
+
+    res.json({ message: 'Фон аватара удален успешно' });
+  } catch (error) {
+    console.error('Ошибка удаления фона аватара:', error);
+    res.status(500).json({ message: 'Ошибка сервера при удалении фона аватара' });
   }
 });
 
@@ -667,16 +801,16 @@ router.put('/:id/page-background', authMiddleware, uploadPageBackground.single('
       return res.status(404).json({ message: 'Мемориал не найден' });
     }
 
-    // Удаляем старый файл, если он есть
+    // Удаляем старый файл, если он есть (храним путь в формате /upload/page-backgrounds/<file>)
     if (memorial.pageBackground) {
-      const oldFilePath = path.join(__dirname, '..', memorial.pageBackground);
-      if (fs.existsSync(oldFilePath)) {
-        fs.unlinkSync(oldFilePath);
+      const oldFsPath = path.join(__dirname, '..', memorial.pageBackground.replace(/^\/+/, ''));
+      if (fs.existsSync(oldFsPath)) {
+        fs.unlinkSync(oldFsPath);
       }
     }
 
-    // Сохраняем путь к новому файлу
-    const relativePath = `/upload/${req.file.filename}`;
+    // Сохраняем корректный относительный путь к новому файлу
+    const relativePath = path.posix.join('/upload/page-backgrounds', req.file.filename);
     memorial.pageBackground = relativePath;
     await memorial.save();
 
@@ -700,7 +834,7 @@ router.delete('/:id/page-background', authMiddleware, async (req, res) => {
 
     // Удаляем файл с диска
     if (memorial.pageBackground) {
-      const filePath = path.join(__dirname, '..', memorial.pageBackground);
+      const filePath = path.join(__dirname, '..', memorial.pageBackground.replace(/^\/+/, ''));
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
@@ -740,17 +874,30 @@ router.patch('/:id/gallery', authMiddleware, async (req, res) => {
 // Обновить главную фотографию мемориала (требует авторизации)
 router.patch('/:id/profile-image', authMiddleware, async (req, res) => {
   try {
-    const { profileImage } = req.body;
-    const memorial = await require('../models/Memorial').findById(req.params.id);
+    const { profileImage, imageUrl } = req.body;
+    const newImageUrl = profileImage || imageUrl;
+
+    if (!newImageUrl) {
+      return res.status(400).json({ message: 'Не передан URL изображения' });
+    }
+
+    const memorial = await Memorial.findById(req.params.id);
     if (!memorial) {
       return res.status(404).json({ message: 'Мемориал не найден' });
     }
-    if (memorial.createdBy.toString() !== req.user.id) {
+
+    // Разрешаем изменять владельцу или редакторам
+    if (!checkEditPermission(memorial, req.user._id)) {
       return res.status(403).json({ message: 'Нет прав на редактирование главной фотографии' });
     }
-    memorial.profileImage = profileImage;
+
+    memorial.profileImage = newImageUrl;
     await memorial.save();
-    res.json(memorial);
+
+    res.json({
+      message: 'Главное фото обновлено',
+      profileImage: memorial.profileImage
+    });
   } catch (error) {
     res.status(500).json({ message: 'Ошибка при обновлении главной фотографии', error: error.message });
   }

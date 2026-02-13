@@ -24,7 +24,7 @@ const ReligiousOrgGallery = ({ orgId, isOwner }) => {
       .then(setGalleries)
   .catch(() => setError(t('religiousOrgGallery.loadError')))
       .finally(() => setLoading(false));
-  }, [orgId]);
+  }, [orgId, t]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -53,7 +53,8 @@ const ReligiousOrgGallery = ({ orgId, isOwner }) => {
       setForm(initialAlbum);
       setPhotoFiles([]);
     } catch (err) {
-  setError(t('religiousOrgGallery.saveError'));
+      console.error('Ошибка сохранения галереи релорганизации:', err);
+      setError(t('religiousOrgGallery.saveError'));
     } finally {
       setLoading(false);
     }
@@ -72,7 +73,8 @@ const ReligiousOrgGallery = ({ orgId, isOwner }) => {
       setGalleries(galleries.filter(g => g._id !== id));
       if (editId === id) setEditId(null);
     } catch (err) {
-  setError(t('religiousOrgGallery.deleteError'));
+      console.error('Ошибка удаления альбома релорганизации:', err);
+      setError(t('religiousOrgGallery.deleteError'));
     } finally {
       setLoading(false);
     }

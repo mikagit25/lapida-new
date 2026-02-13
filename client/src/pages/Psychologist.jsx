@@ -84,19 +84,11 @@ import ExportChatEmailModal from '../components/ExportChatEmailModal';
 const MAX_MESSAGES = 10;
 
 
-const initialMessages = [
-  {
-    role: 'system',
-    content: '' // will be set in useEffect
-  }
-];
-
-
 import { useAuth } from '../context/AuthContext';
 
 const Psychologist = () => {
   const { t, i18n } = useTranslation();
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const [helpOpen, setHelpOpen] = useState(false);
   // Фокус на поле ввода после закрытия модального окна экстренной помощи
   useEffect(() => {
@@ -117,7 +109,9 @@ const Psychologist = () => {
           return data;
         }
       }
-    } catch {}
+    } catch (err) {
+      console.error('Ошибка чтения истории психолога из localStorage:', err);
+    }
     return [{ role: 'system', content: t('psychologist_system_message', { lng: lang }) }];
   });
   const [input, setInput] = useState('');
@@ -130,7 +124,6 @@ const Psychologist = () => {
 
   // Для бесплатных пользователей лимит, для платных — нет
   const userMessagesCount = messages.filter(m => m.role === 'user').length;
-  const effectiveLimit = paid ? Infinity : MAX_MESSAGES;
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -145,7 +138,7 @@ const Psychologist = () => {
       const withTs = messages.map(m => m.ts ? m : { ...m, ts: Date.now() });
       localStorage.setItem(LOCAL_KEY, JSON.stringify({ data: withTs, ts: Date.now() }));
     }
-  }, [messages, paid]);
+  }, [messages, paid, user, userMessagesCount]);
 
   // Автофокус на поле ввода при монтировании и смене языка
   useEffect(() => {
@@ -198,6 +191,7 @@ const Psychologist = () => {
       const data = await res.json();
       setMessages([...newMessages, { role: 'ai', content: data.reply || (lang === 'ru' ? 'Спасибо за ваш отклик. Я всегда готов выслушать.' : 'Thank you for your response. I am always here to listen.'), ts: Date.now() }]);
     } catch (e) {
+      console.error('Ошибка чата психолога:', e);
       setMessages([...newMessages, { role: 'ai', content: lang === 'ru' ? 'Извините, сервис временно недоступен.' : 'Sorry, the service is temporarily unavailable.', ts: Date.now() }]);
     }
     setLoading(false);
@@ -268,7 +262,7 @@ const Psychologist = () => {
     messages.forEach(m => {
       const time = m.ts ? new Date(m.ts).toLocaleString() : '';
       const who = m.role === 'user' ? 'Пользователь' : m.role === 'ai' ? 'AI' : 'Система';
-      html += `<div class=\"msg\"><span class=\"ts\">[${time}]</span><span class=\"role\">${who}:</span><br/><pre>${(m.content||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre></div>`;
+      html += `<div class="msg"><span class="ts">[${time}]</span><span class="role">${who}:</span><br/><pre>${(m.content||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre></div>`;
     });
     html += '</body></html>';
     const win = window.open('', '_blank');
